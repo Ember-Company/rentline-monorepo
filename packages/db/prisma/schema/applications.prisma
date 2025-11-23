@@ -1,0 +1,19 @@
+model Application {
+  id          String   @id @default(uuid())
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  userId      String   // applicant (tenant)
+  user        User     @relation("ApplicationApplicant", fields: [userId], references: [id], onDelete: Cascade)
+  status      String   @default("pending") // pending, approved, rejected
+  submittedAt DateTime @default(now())
+  reviewedBy  String?
+  reviewer    User?    @relation("ApplicationReviewer", fields: [reviewedBy], references: [id])
+  reviewedAt  DateTime?
+
+  @@index([unitId])
+  @@index([userId])
+  @@index([status])
+  @@index([reviewedBy])
+  @@map("application")
+}
+

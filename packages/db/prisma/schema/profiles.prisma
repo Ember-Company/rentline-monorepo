@@ -1,0 +1,17 @@
+model UserProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User?    @relation
+  emergencyContactName String?
+  emergencyContactPhone String?
+  preferences         String?  // JSON string
+  avatarUrl           String?
+  governmentIdNumber  String?
+  governmentIdType    String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@map("user_profile")
+}
+

@@ -1,28 +1,61 @@
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id                String       @id
+  name              String
+  email             String
+  emailVerified     Boolean      @default(false)
+  image             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  role              String?      @default("user")
+  banned            Boolean      @default(false)
+  banReason         String?
+  banExpires        DateTime?
+  phone             String?
+  dateOfBirth       DateTime?
+  address           String?
+  city              String?
+  state             String?
+  postalCode        String?
+  country           String?
+  preferredLanguage String?
+  profileId         String?      @unique
+  profile           UserProfile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  userType          String?      // tenant, landlord, admin, accountant
+  hasOnboarded      Boolean      @default(false)
+  sessions          Session[]
+  accounts          Account[]
+  members           Member[]
+  invitations       Invitation[]
+  // Property management relations
+  propertiesAsLandlord Property[] @relation("PropertyLandlord")
+  applications         Application[] @relation("ApplicationApplicant")
+  applicationsReviewed Application[] @relation("ApplicationReviewer")
+  leasesAsTenant       Lease[] @relation("LeaseTenant")
+  maintenanceRequests  MaintenanceRequest[] @relation("MaintenanceRequester")
+  maintenanceAssigned  MaintenanceRequest[] @relation("MaintenanceAssignee")
+  expensesPaid         Expense[] @relation("ExpensePaidBy")
+  documents            Document[] @relation("DocumentUser")
+  documentsUploaded    Document[] @relation("DocumentUploader")
+  communicationsFrom   Communication[] @relation("CommunicationFrom")
+  communicationsTo     Communication[] @relation("CommunicationTo")
 
   @@unique([email])
+  @@index([userType])
   @@map("user")
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  impersonatedBy       String?
 
   @@unique([token])
   @@index([userId])
@@ -60,3 +93,77 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+model Organization {
+  id            String       @id
+  name          String
+  slug          String
+  logo          String?
+  createdAt     DateTime     @default(now())
+  metadata      String?
+  address       String?
+  city          String?
+  state         String?
+  postalCode    String?
+  country       String?
+  phone         String?
+  email         String?
+  website       String?
+  taxId         String?
+  licenseNumber String?
+  type          String?      // agency, landlord, property_manager, etc.
+  // CNPJ fields (Brazil)
+  cnpj          String?
+  razaoSocial   String?
+  nomeFantasia  String?
+  dataAbertura  DateTime?
+  cnae          String?
+  porte         String?
+  inscricaoEstadual String?
+  inscricaoMunicipal String?
+  // End CNPJ fields
+  settingsId    String?      @unique
+  settings      OrganizationSettings? @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+  members       Member[]
+  invitations   Invitation[]
+  agencyDetails AgencyDetails?
+  properties    Property[]
+  subscriptions Subscription[]
+
+  @@unique([slug])
+  @@index([type])
+  @@index([cnpj])
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+

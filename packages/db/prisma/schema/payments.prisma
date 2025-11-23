@@ -1,0 +1,73 @@
+model PaymentMethod {
+  id   String @id @default(uuid())
+  name String // Stripe, Pix, BankTransfer
+  type String
+  // Relations
+  leases   Lease[]
+  payments Payment[]
+
+  @@unique([name])
+  @@map("payment_method")
+}
+
+model PaymentPlan {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal
+  currencyId  String
+  currency    Currency @relation(fields: [currencyId], references: [id])
+  stripePlanId String?
+  pixPlanId   String?
+  createdAt   DateTime @default(now())
+  // Relations
+  subscriptions Subscription[]
+
+  @@index([currencyId])
+  @@map("payment_plan")
+}
+
+model Subscription {
+  id            String      @id @default(uuid())
+  agencyId      String
+  organization  Organization @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  paymentPlanId String
+  paymentPlan   PaymentPlan @relation(fields: [paymentPlanId], references: [id], onDelete: Cascade)
+  startDate     DateTime
+  endDate       DateTime?
+  status        String      @default("active") // active, canceled, expired
+
+  @@index([agencyId])
+  @@index([paymentPlanId])
+  @@index([status])
+  @@map("subscription")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  leaseId         String
+  lease           Lease         @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  amount          Decimal
+  currencyId      String
+  currency        Currency      @relation(fields: [currencyId], references: [id])
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  transactionId  String?       // from Stripe/Pix/etc.
+  status          String        @default("pending") // pending, completed, failed
+  date            DateTime      @default(now())
+  type            String        // rent, deposit, fee, refund
+  reference       String?
+  invoiceId       String?
+  invoice         Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  createdAt       DateTime      @default(now())
+
+  @@index([leaseId])
+  @@index([currencyId])
+  @@index([status])
+  @@index([date])
+  @@index([type])
+  @@index([invoiceId])
+  @@index([paymentMethodId])
+  @@map("payment")
+}
+

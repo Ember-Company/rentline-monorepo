@@ -1,0 +1,28 @@
+model Document {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation("DocumentUser", fields: [userId], references: [id], onDelete: SetNull)
+  leaseId     String?
+  lease       Lease?   @relation(fields: [leaseId], references: [id], onDelete: SetNull)
+  expenseId   String?   @unique
+  expense     Expense?  @relation("ExpenseReceipt")
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  unitId      String?
+  unit        Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  type        String   // lease_agreement, receipt, id_proof, etc.
+  url         String
+  uploadedBy  String
+  uploader    User     @relation("DocumentUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  uploadedAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([leaseId])
+  @@index([expenseId])
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([type])
+  @@index([uploadedBy])
+  @@map("document")
+}
+

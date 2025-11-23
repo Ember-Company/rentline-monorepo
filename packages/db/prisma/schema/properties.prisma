@@ -1,0 +1,24 @@
+model Property {
+  id            String   @id @default(uuid())
+  agencyId      String?
+  landlordId    String
+  landlord      User     @relation("PropertyLandlord", fields: [landlordId], references: [id], onDelete: Cascade)
+  name          String
+  address       String
+  type          String   // building, office, etc.
+  description   String?
+  organizationId String
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // Relations
+  units         Unit[]
+  expenses      Expense[]
+  documents     Document[]
+
+  @@index([landlordId])
+  @@index([organizationId])
+  @@index([type])
+  @@map("property")
+}
+

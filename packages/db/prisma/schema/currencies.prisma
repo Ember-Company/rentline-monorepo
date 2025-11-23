@@ -1,0 +1,17 @@
+model Currency {
+  id        String   @id // USD, BRL, etc.
+  name      String
+  symbol    String
+  // Relations
+  units              Unit[]
+  leases             Lease[]
+  payments           Payment[]
+  expenses           Expense[]
+  invoices           Invoice[]
+  paymentPlans       PaymentPlan[]
+  organizationSettings OrganizationSettings[]
+
+  @@unique([id])
+  @@map("currency")
+}
+

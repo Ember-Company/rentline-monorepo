@@ -4,9 +4,8 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
 import Loader from "./loader";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Button, Card, CardHeader, Input } from "@heroui/react";
 
 export default function SignUpForm({
 	onSwitchToSignIn,
@@ -31,7 +30,7 @@ export default function SignUpForm({
 				},
 				{
 					onSuccess: () => {
-						navigate("/dashboard");
+						navigate("/onboarding/organization");
 						toast.success("Sign up successful");
 					},
 					onError: (error) => {
@@ -54,8 +53,10 @@ export default function SignUpForm({
 	}
 
 	return (
-		<div className="mx-auto w-full mt-10 max-w-md p-6">
-			<h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
+		<Card className="mx-auto w-full mt-10 max-w-md p-6">
+			<CardHeader>
+				<h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
+			</CardHeader>
 
 			<form
 				onSubmit={(e) => {
@@ -75,7 +76,7 @@ export default function SignUpForm({
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onValueChange={(e) => field.handleChange(e)}
 								/>
 								{field.state.meta.errors.map((error) => (
 									<p key={error?.message} className="text-red-500">
@@ -121,7 +122,7 @@ export default function SignUpForm({
 									type="password"
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onValueChange={(e) => field.handleChange(e)}
 								/>
 								{field.state.meta.errors.map((error) => (
 									<p key={error?.message} className="text-red-500">
@@ -148,13 +149,13 @@ export default function SignUpForm({
 
 			<div className="mt-4 text-center">
 				<Button
-					variant="link"
-					onClick={onSwitchToSignIn}
+					variant="light"
+					onPress={onSwitchToSignIn}
 					className="text-indigo-600 hover:text-indigo-800"
 				>
 					Already have an account? Sign In
 				</Button>
 			</div>
-		</div>
+		</Card>
 	);
 }

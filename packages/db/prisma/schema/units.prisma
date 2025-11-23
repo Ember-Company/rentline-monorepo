@@ -1,0 +1,28 @@
+model Unit {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unitNumber  String
+  type        String   // apartment, office, misc
+  bedrooms    Int?
+  bathrooms   Decimal?
+  area        Decimal? // e.g. sqft or m2
+  status      String   @default("available") // available, occupied, maintenance
+  rentAmount  Decimal?
+  currencyId  String?
+  currency    Currency? @relation(fields: [currencyId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Relations
+  applications        Application[]
+  leases              Lease[]
+  maintenanceRequests MaintenanceRequest[]
+  expenses            Expense[]
+  documents           Document[]
+
+  @@index([propertyId])
+  @@index([status])
+  @@index([currencyId])
+  @@map("unit")
+}
+

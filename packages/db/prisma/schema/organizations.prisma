@@ -1,0 +1,37 @@
+model AgencyDetails {
+  id              String       @id @default(uuid())
+  organizationId  String       @unique
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  licenseNumber   String?
+  licenseExpiry   DateTime?
+  taxId           String?
+  regulatoryBody  String?
+  contactPerson   String?
+  contactEmail    String?
+  contactPhone    String?
+  address         String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@map("agency_details")
+}
+
+model OrganizationSettings {
+  id                      String       @id @default(uuid())
+  organizationId          String       @unique
+  organization            Organization? @relation
+  timezone                String?      @default("UTC")
+  locale                  String?      @default("en")
+  currencyId              String?
+  currency                Currency?    @relation(fields: [currencyId], references: [id])
+  notificationsEnabled    Boolean      @default(true)
+  maintenanceAutoAssign   Boolean      @default(false)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([currencyId])
+  @@map("organization_settings")
+}
+

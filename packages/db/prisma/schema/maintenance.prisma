@@ -1,0 +1,26 @@
+model MaintenanceRequest {
+  id          String   @id @default(uuid())
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  leaseId     String?
+  lease       Lease?   @relation(fields: [leaseId], references: [id], onDelete: SetNull)
+  requestedBy String   // user.id
+  requester   User     @relation("MaintenanceRequester", fields: [requestedBy], references: [id], onDelete: Cascade)
+  assignedTo String?
+  assignee    User?    @relation("MaintenanceAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  title       String
+  description String?
+  status      String   @default("open") // open, in_progress, closed
+  priority    String   @default("medium") // low, medium, high, urgent
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([unitId])
+  @@index([leaseId])
+  @@index([requestedBy])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([priority])
+  @@map("maintenance_request")
+}
+

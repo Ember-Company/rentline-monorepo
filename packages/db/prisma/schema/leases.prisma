@@ -1,0 +1,58 @@
+model Lease {
+  id                      String   @id @default(uuid())
+  unitId                  String
+  unit                    Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  tenantId                String   // user.id
+  tenant                  User     @relation("LeaseTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  startDate               DateTime
+  endDate                 DateTime?
+  rentAmount              Decimal
+  depositAmount           Decimal?
+  currencyId              String
+  currency                Currency @relation(fields: [currencyId], references: [id])
+  terms                   String?
+  status                  String   @default("pending") // active, terminated, pending
+  lateFeePercentage       Decimal?
+  gracePeriodDays         Int?
+  preferredPaymentMethodId String?
+  preferredPaymentMethod  PaymentMethod? @relation(fields: [preferredPaymentMethodId], references: [id])
+  notificationChannel     String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  // Relations
+  maintenanceRequests     MaintenanceRequest[]
+  payments                Payment[]
+  invoices                Invoice[]
+  documents               Document[]
+
+  @@index([unitId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([currencyId])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("lease")
+}
+
+model Invoice {
+  id              String   @id @default(uuid())
+  leaseId         String
+  lease           Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  dueDate         DateTime
+  amount          Decimal
+  currencyId      String
+  currency        Currency @relation(fields: [currencyId], references: [id])
+  status          String   @default("pending") // pending, paid, overdue, cancelled
+  createdAt       DateTime @default(now())
+  reminderSentAt DateTime?
+  pixQrCodeUrl    String?
+  // Relations
+  payments        Payment[]
+
+  @@index([leaseId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([currencyId])
+  @@map("invoice")
+}
+

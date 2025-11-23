@@ -1,0 +1,18 @@
+model Communication {
+  id        String   @id @default(uuid())
+  fromUserId String
+  fromUser  User     @relation("CommunicationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId  String
+  toUser    User     @relation("CommunicationTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  channel   String   // email, sms, in_app, whatsapp
+  message   String
+  sentAt    DateTime @default(now())
+  readAt    DateTime?
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([channel])
+  @@index([sentAt])
+  @@map("communication")
+}
+
