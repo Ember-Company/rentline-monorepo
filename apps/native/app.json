@@ -1,0 +1,17 @@
+{
+	"expo": {
+		"scheme": "rentline",
+		"userInterfaceStyle": "automatic",
+		"orientation": "default",
+		"web": {
+			"bundler": "metro"
+		},
+		"name": "rentline",
+		"slug": "rentline",
+		"plugins": ["expo-font"],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		}
+	}
+}
