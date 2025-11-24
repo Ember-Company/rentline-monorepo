@@ -4,6 +4,8 @@ model Lease {
   unit                    Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
   tenantId                String   // user.id
   tenant                  User     @relation("LeaseTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantContactId         String?  // contact.id (alternative to user)
+  tenantContact           Contact? @relation("LeaseTenantContact", fields: [tenantContactId], references: [id], onDelete: SetNull)
   startDate               DateTime
   endDate                 DateTime?
   rentAmount              Decimal
@@ -27,6 +29,7 @@ model Lease {
 
   @@index([unitId])
   @@index([tenantId])
+  @@index([tenantContactId])
   @@index([status])
   @@index([currencyId])
   @@index([startDate])

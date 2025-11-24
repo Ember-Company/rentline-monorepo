@@ -12,6 +12,7 @@ import {
 	MoreHorizontal,
 	Menu,
 	X,
+	Contact,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@heroui/react";
@@ -24,6 +25,7 @@ const navItems = [
 	{ to: "/dashboard/maintenance", label: "Maintenance", icon: Wrench },
 	{ to: "/dashboard/finances", label: "Finances", icon: DollarSign },
 	{ to: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+	{ to: "/dashboard/contacts", label: "Contacts", icon: Contact },
 	{ to: "/dashboard/others", label: "Others", icon: MoreHorizontal },
 	{ to: "/dashboard/help", label: "Help and Support", icon: HelpCircle },
 	{ to: "/dashboard/settings", label: "Settings", icon: Settings },

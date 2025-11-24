@@ -129,6 +129,7 @@ model Organization {
   agencyDetails AgencyDetails?
   properties    Property[]
   subscriptions Subscription[]
+  contacts      Contact[]
 
   @@unique([slug])
   @@index([type])

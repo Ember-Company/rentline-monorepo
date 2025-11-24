@@ -1,0 +1,55 @@
+model Contact {
+  id            String   @id @default(uuid())
+  organizationId String
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type          String   // tenant, agent, owner
+  // Common fields
+  firstName     String?
+  lastName      String?
+  email         String?
+  phone         String?
+  mobile        String?
+  dateOfBirth   DateTime?
+  notes         String?
+  // Company fields (when type is company)
+  companyName   String?
+  taxId         String?
+  registrationNumber String?
+  // Address fields
+  address       String?
+  city          String?
+  state         String?
+  postalCode    String?
+  country       String?
+  // Additional fields
+  avatarUrl     String?
+  status        String   @default("active") // active, inactive
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // Relations
+  properties    PropertyContact[]
+  leases        Lease[] @relation("LeaseTenantContact")
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([status])
+  @@index([email])
+  @@map("contact")
+}
+
+model PropertyContact {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  role        String?  // primary, secondary, emergency
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([propertyId, contactId])
+  @@index([propertyId])
+  @@index([contactId])
+  @@map("property_contact")
+}
+

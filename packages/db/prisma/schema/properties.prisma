@@ -15,6 +15,7 @@ model Property {
   units         Unit[]
   expenses      Expense[]
   documents     Document[]
+  contacts      PropertyContact[]
 
   @@index([landlordId])
   @@index([organizationId])
