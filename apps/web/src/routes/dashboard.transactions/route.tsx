@@ -1,33 +1,33 @@
-import type { Route } from "./+types/route";
 import {
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Button,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
 	Input,
 	Select,
 	SelectItem,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
-import { DollarSign, Plus, Search, Edit, Trash2, Download } from "lucide-react";
-import { PageHeader } from "@/components/dashboard/page-header";
+import { useForm } from "@tanstack/react-form";
+import { DollarSign, Download, Edit, Plus, Search, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import z from "zod";
 import { CrudModal } from "@/components/dashboard/crud-modal";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { Label } from "@/components/ui/label";
 import {
 	recentTransactions,
 	type Transaction,
 } from "@/lib/mock-data/transactions";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
-import { useState } from "react";
-import { useForm } from "@tanstack/react-form";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import z from "zod";
+import type { Route } from "./+types/route";
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -155,13 +155,13 @@ export default function TransactionsPage() {
 					<>
 						<Button
 							variant="bordered"
-							startContent={<Download className="w-4 h-4" />}
+							startContent={<Download className="h-4 w-4" />}
 						>
 							Export
 						</Button>
 						<Button
 							color="primary"
-							startContent={<Plus className="w-4 h-4" />}
+							startContent={<Plus className="h-4 w-4" />}
 							onPress={handleCreate}
 						>
 							Record Transaction
@@ -171,10 +171,10 @@ export default function TransactionsPage() {
 			/>
 
 			<Card className="border border-gray-200 shadow-sm">
-				<CardHeader className="flex justify-between items-center">
+				<CardHeader className="flex items-center justify-between">
 					<div>
-						<h2 className="text-xl font-semibold">All Transactions</h2>
-						<p className="text-sm text-gray-600">
+						<h2 className="font-semibold text-xl">All Transactions</h2>
+						<p className="text-gray-600 text-sm">
 							{filteredTransactions.length} transactions found
 						</p>
 					</div>
@@ -183,7 +183,7 @@ export default function TransactionsPage() {
 							placeholder="Search transactions..."
 							value={searchQuery}
 							onValueChange={setSearchQuery}
-							startContent={<Search className="w-4 h-4" />}
+							startContent={<Search className="h-4 w-4" />}
 							classNames={{
 								input: "text-sm",
 								inputWrapper: "bg-gray-50 border-gray-200 max-w-xs",
@@ -242,7 +242,7 @@ export default function TransactionsPage() {
 										</span>
 									</TableCell>
 									<TableCell>
-										<span className="text-sm text-muted-foreground">
+										<span className="text-muted-foreground text-sm">
 											{formatDate(transaction.date)}
 										</span>
 									</TableCell>
@@ -270,7 +270,7 @@ export default function TransactionsPage() {
 												isIconOnly
 												onPress={() => handleEdit(transaction)}
 											>
-												<Edit className="w-4 h-4" />
+												<Edit className="h-4 w-4" />
 											</Button>
 											<Button
 												size="sm"
@@ -279,7 +279,7 @@ export default function TransactionsPage() {
 												isIconOnly
 												onPress={() => handleDelete(transaction)}
 											>
-												<Trash2 className="w-4 h-4" />
+												<Trash2 className="h-4 w-4" />
 											</Button>
 										</div>
 									</TableCell>
@@ -326,7 +326,7 @@ export default function TransactionsPage() {
 											placeholder="123 Main St, Apt 2B"
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -348,7 +348,7 @@ export default function TransactionsPage() {
 											placeholder="John Doe"
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -374,7 +374,7 @@ export default function TransactionsPage() {
 											startContent="$"
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -401,7 +401,7 @@ export default function TransactionsPage() {
 											<SelectItem key="deposit">Deposit</SelectItem>
 										</Select>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -428,7 +428,7 @@ export default function TransactionsPage() {
 											<SelectItem key="overdue">Overdue</SelectItem>
 										</Select>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -451,7 +451,7 @@ export default function TransactionsPage() {
 										onValueChange={(e) => field.handleChange(e)}
 									/>
 									{field.state.meta.errors.map((error) => (
-										<p key={error?.message} className="text-sm text-danger">
+										<p key={error?.message} className="text-danger text-sm">
 											{error?.message}
 										</p>
 									))}

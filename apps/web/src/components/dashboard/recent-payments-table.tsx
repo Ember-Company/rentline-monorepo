@@ -1,21 +1,21 @@
 import {
+	Avatar,
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
+	Checkbox,
 	Chip,
 	Input,
-	Button,
-	Checkbox,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
-import { Search, Filter, ArrowUpDown, MoreVertical } from "lucide-react";
+import { ArrowUpDown, Filter, MoreVertical, Search } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
-import { Avatar } from "@heroui/react";
 
 type Payment = {
 	id: string;
@@ -40,7 +40,9 @@ export function RecentPaymentsTable({
 	onFilter,
 	onSort,
 }: RecentPaymentsTableProps) {
-	const getStatusColor = (status: Payment["status"]): "warning" | "success" | "danger" => {
+	const getStatusColor = (
+		status: Payment["status"],
+	): "warning" | "success" | "danger" => {
 		switch (status) {
 			case "Pending":
 				return "warning";
@@ -58,14 +60,14 @@ export function RecentPaymentsTable({
 	return (
 		<Card className="border border-gray-200 shadow-sm">
 			<CardHeader>
-				<h3 className="text-lg font-semibold text-gray-900">Recent Payments</h3>
+				<h3 className="font-semibold text-gray-900 text-lg">Recent Payments</h3>
 			</CardHeader>
 			<CardBody className="p-0">
 				{/* Search and Filter Bar */}
-				<div className="flex items-center gap-2 p-4 border-b border-gray-200">
+				<div className="flex items-center gap-2 border-gray-200 border-b p-4">
 					<Input
 						placeholder="Search payments..."
-						startContent={<Search className="w-4 h-4 text-gray-400" />}
+						startContent={<Search className="h-4 w-4 text-gray-400" />}
 						classNames={{
 							input: "text-sm",
 							inputWrapper: "bg-white border-gray-200 max-w-xs",
@@ -74,14 +76,14 @@ export function RecentPaymentsTable({
 					/>
 					<Button
 						variant="bordered"
-						startContent={<Filter className="w-4 h-4" />}
+						startContent={<Filter className="h-4 w-4" />}
 						onPress={onFilter}
 					>
 						Filter
 					</Button>
 					<Button
 						variant="bordered"
-						startContent={<ArrowUpDown className="w-4 h-4" />}
+						startContent={<ArrowUpDown className="h-4 w-4" />}
 						onPress={onSort}
 					>
 						Sort by
@@ -118,7 +120,7 @@ export function RecentPaymentsTable({
 										<Avatar
 											name={payment.customerName}
 											size="sm"
-											className="w-6 h-6"
+											className="h-6 w-6"
 										/>
 										<span>{payment.customerName}</span>
 									</div>
@@ -145,12 +147,8 @@ export function RecentPaymentsTable({
 									</Chip>
 								</TableCell>
 								<TableCell>
-									<Button
-										isIconOnly
-										variant="light"
-										size="sm"
-									>
-										<MoreVertical className="w-4 h-4" />
+									<Button isIconOnly variant="light" size="sm">
+										<MoreVertical className="h-4 w-4" />
 									</Button>
 								</TableCell>
 							</TableRow>
@@ -161,4 +159,3 @@ export function RecentPaymentsTable({
 		</Card>
 	);
 }
-

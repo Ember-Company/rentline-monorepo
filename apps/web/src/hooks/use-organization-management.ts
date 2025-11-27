@@ -1,6 +1,6 @@
-import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 type OrganizationInput = {
 	name: string;
@@ -22,36 +22,40 @@ type OrganizationInput = {
 export function useOrganizations() {
 	const queryClient = useQueryClient();
 
-	const { data: organizationsData, isLoading } = authClient.organization.list.useQuery();
-	
+	const { data: organizationsData, isLoading } =
+		authClient.organization.list.useQuery();
+
 	// Handle different response formats from better-auth
-	const organizations = Array.isArray(organizationsData) 
-		? organizationsData 
+	const organizations = Array.isArray(organizationsData)
+		? organizationsData
 		: organizationsData?.data || organizationsData?.organizations || [];
 
 	const createMutation = useMutation({
 		mutationFn: async (data: OrganizationInput) => {
-			const { data: organization, error } = await authClient.organization.create({
-				name: data.name,
-				slug: data.slug,
-				logo: data.logo,
-				metadata: data.metadata,
-				keepCurrentActiveOrganization: false,
-				...(data.address && { address: data.address }),
-				...(data.city && { city: data.city }),
-				...(data.state && { state: data.state }),
-				...(data.postalCode && { postalCode: data.postalCode }),
-				...(data.country && { country: data.country }),
-				...(data.phone && { phone: data.phone }),
-				...(data.email && { email: data.email }),
-				...(data.website && { website: data.website }),
-				...(data.cnpj && { cnpj: data.cnpj }),
-				...(data.type && { type: data.type }),
-			});
+			const { data: organization, error } =
+				await authClient.organization.create({
+					name: data.name,
+					slug: data.slug,
+					logo: data.logo,
+					metadata: data.metadata,
+					keepCurrentActiveOrganization: false,
+					...(data.address && { address: data.address }),
+					...(data.city && { city: data.city }),
+					...(data.state && { state: data.state }),
+					...(data.postalCode && { postalCode: data.postalCode }),
+					...(data.country && { country: data.country }),
+					...(data.phone && { phone: data.phone }),
+					...(data.email && { email: data.email }),
+					...(data.website && { website: data.website }),
+					...(data.cnpj && { cnpj: data.cnpj }),
+					...(data.type && { type: data.type }),
+				});
 
 			if (error) {
 				throw new Error(
-					typeof error === "string" ? error : error.message || "Failed to create organization",
+					typeof error === "string"
+						? error
+						: error.message || "Failed to create organization",
 				);
 			}
 
@@ -73,28 +77,37 @@ export function useOrganizations() {
 	});
 
 	const updateMutation = useMutation({
-		mutationFn: async ({ id, data }: { id: string; data: Partial<OrganizationInput> }) => {
-			const { data: organization, error } = await authClient.organization.update({
-				organizationId: id,
-				name: data.name,
-				slug: data.slug,
-				logo: data.logo,
-				metadata: data.metadata,
-				...(data.address !== undefined && { address: data.address }),
-				...(data.city !== undefined && { city: data.city }),
-				...(data.state !== undefined && { state: data.state }),
-				...(data.postalCode !== undefined && { postalCode: data.postalCode }),
-				...(data.country !== undefined && { country: data.country }),
-				...(data.phone !== undefined && { phone: data.phone }),
-				...(data.email !== undefined && { email: data.email }),
-				...(data.website !== undefined && { website: data.website }),
-				...(data.cnpj !== undefined && { cnpj: data.cnpj }),
-				...(data.type !== undefined && { type: data.type }),
-			});
+		mutationFn: async ({
+			id,
+			data,
+		}: {
+			id: string;
+			data: Partial<OrganizationInput>;
+		}) => {
+			const { data: organization, error } =
+				await authClient.organization.update({
+					organizationId: id,
+					name: data.name,
+					slug: data.slug,
+					logo: data.logo,
+					metadata: data.metadata,
+					...(data.address !== undefined && { address: data.address }),
+					...(data.city !== undefined && { city: data.city }),
+					...(data.state !== undefined && { state: data.state }),
+					...(data.postalCode !== undefined && { postalCode: data.postalCode }),
+					...(data.country !== undefined && { country: data.country }),
+					...(data.phone !== undefined && { phone: data.phone }),
+					...(data.email !== undefined && { email: data.email }),
+					...(data.website !== undefined && { website: data.website }),
+					...(data.cnpj !== undefined && { cnpj: data.cnpj }),
+					...(data.type !== undefined && { type: data.type }),
+				});
 
 			if (error) {
 				throw new Error(
-					typeof error === "string" ? error : error.message || "Failed to update organization",
+					typeof error === "string"
+						? error
+						: error.message || "Failed to update organization",
 				);
 			}
 
@@ -119,7 +132,9 @@ export function useOrganizations() {
 
 			if (error) {
 				throw new Error(
-					typeof error === "string" ? error : error.message || "Failed to delete organization",
+					typeof error === "string"
+						? error
+						: error.message || "Failed to delete organization",
 				);
 			}
 		},
@@ -142,7 +157,9 @@ export function useOrganizations() {
 
 			if (error) {
 				throw new Error(
-					typeof error === "string" ? error : error.message || "Failed to switch organization",
+					typeof error === "string"
+						? error
+						: error.message || "Failed to switch organization",
 				);
 			}
 		},
@@ -172,4 +189,3 @@ export function useOrganizations() {
 		isSwitching: switchMutation.isPending,
 	};
 }
-

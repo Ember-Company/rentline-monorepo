@@ -1,23 +1,23 @@
-import type { Route } from "./+types/route";
 import {
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Button,
+	Chip,
 	Input,
-	Tabs,
-	Tab,
-	Switch,
 	Select,
 	SelectItem,
-	Chip,
+	Switch,
+	Tab,
+	Tabs,
 } from "@heroui/react";
-import { User, Bell, Shield, CreditCard, Building2 } from "lucide-react";
-import { PageHeader } from "@/components/dashboard/page-header";
+import { Bell, Building2, CreditCard, Shield, User } from "lucide-react";
 import { useState } from "react";
-import { ProfileSettings } from "@/components/profile/ProfileSettings";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { OrganizationSettings } from "@/components/organization/OrganizationSettings";
+import { ProfileSettings } from "@/components/profile/ProfileSettings";
 import { Label } from "@/components/ui/label";
+import type { Route } from "./+types/route";
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -58,7 +58,7 @@ export default function SettingsPage() {
 					key="profile"
 					title={
 						<div className="flex items-center gap-2">
-							<User className="w-4 h-4" />
+							<User className="h-4 w-4" />
 							<span>Profile</span>
 						</div>
 					}
@@ -70,7 +70,7 @@ export default function SettingsPage() {
 					key="organization"
 					title={
 						<div className="flex items-center gap-2">
-							<Building2 className="w-4 h-4" />
+							<Building2 className="h-4 w-4" />
 							<span>Organization</span>
 						</div>
 					}
@@ -82,25 +82,25 @@ export default function SettingsPage() {
 					key="notifications"
 					title={
 						<div className="flex items-center gap-2">
-							<Bell className="w-4 h-4" />
+							<Bell className="h-4 w-4" />
 							<span>Notifications</span>
 						</div>
 					}
 				>
 					<Card className="border border-gray-200 shadow-sm">
 						<CardHeader>
-							<h2 className="text-xl font-semibold">
+							<h2 className="font-semibold text-xl">
 								Notification Preferences
 							</h2>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-muted-foreground text-sm">
 								Choose how you want to be notified
 							</p>
 						</CardHeader>
 						<CardBody className="space-y-6">
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<div>
 									<p className="font-medium">Email Notifications</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										Receive notifications via email
 									</p>
 								</div>
@@ -114,10 +114,10 @@ export default function SettingsPage() {
 									}
 								/>
 							</div>
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<div>
 									<p className="font-medium">SMS Notifications</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										Receive notifications via SMS
 									</p>
 								</div>
@@ -131,10 +131,10 @@ export default function SettingsPage() {
 									}
 								/>
 							</div>
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<div>
 									<p className="font-medium">Rent Reminders</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										Get reminded about upcoming rent payments
 									</p>
 								</div>
@@ -148,10 +148,10 @@ export default function SettingsPage() {
 									}
 								/>
 							</div>
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<div>
 									<p className="font-medium">Maintenance Alerts</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										Get notified about maintenance requests
 									</p>
 								</div>
@@ -165,10 +165,10 @@ export default function SettingsPage() {
 									}
 								/>
 							</div>
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<div>
 									<p className="font-medium">Payment Receipts</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										Automatically send payment receipts
 									</p>
 								</div>
@@ -193,15 +193,15 @@ export default function SettingsPage() {
 					key="security"
 					title={
 						<div className="flex items-center gap-2">
-							<Shield className="w-4 h-4" />
+							<Shield className="h-4 w-4" />
 							<span>Security</span>
 						</div>
 					}
 				>
 					<Card className="border border-gray-200 shadow-sm">
 						<CardHeader>
-							<h2 className="text-xl font-semibold">Security Settings</h2>
-							<p className="text-sm text-muted-foreground">
+							<h2 className="font-semibold text-xl">Security Settings</h2>
+							<p className="text-muted-foreground text-sm">
 								Manage your account security
 							</p>
 						</CardHeader>
@@ -233,10 +233,10 @@ export default function SettingsPage() {
 									placeholder="Confirm new password"
 								/>
 							</div>
-							<div className="flex justify-between items-center pt-4">
+							<div className="flex items-center justify-between pt-4">
 								<div>
 									<p className="font-medium">Two-Factor Authentication</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										Add an extra layer of security to your account
 									</p>
 								</div>
@@ -284,26 +284,26 @@ export default function SettingsPage() {
 					key="billing"
 					title={
 						<div className="flex items-center gap-2">
-							<CreditCard className="w-4 h-4" />
+							<CreditCard className="h-4 w-4" />
 							<span>Billing</span>
 						</div>
 					}
 				>
 					<Card className="border border-gray-200 shadow-sm">
 						<CardHeader>
-							<h2 className="text-xl font-semibold">Billing & Subscription</h2>
-							<p className="text-sm text-muted-foreground">
+							<h2 className="font-semibold text-xl">Billing & Subscription</h2>
+							<p className="text-muted-foreground text-sm">
 								Manage your subscription and payment methods
 							</p>
 						</CardHeader>
 						<CardBody className="space-y-6">
 							<div>
-								<h3 className="font-semibold mb-2">Current Plan</h3>
-								<div className="p-4 border rounded-lg">
-									<div className="flex justify-between items-center">
+								<h3 className="mb-2 font-semibold">Current Plan</h3>
+								<div className="rounded-lg border p-4">
+									<div className="flex items-center justify-between">
 										<div>
 											<p className="font-semibold">Professional</p>
-											<p className="text-sm text-muted-foreground">$79/month</p>
+											<p className="text-muted-foreground text-sm">$79/month</p>
 										</div>
 										<Chip color="primary" variant="flat">
 											Active
@@ -312,12 +312,12 @@ export default function SettingsPage() {
 								</div>
 							</div>
 							<div>
-								<h3 className="font-semibold mb-2">Payment Method</h3>
-								<div className="p-4 border rounded-lg">
-									<div className="flex justify-between items-center">
+								<h3 className="mb-2 font-semibold">Payment Method</h3>
+								<div className="rounded-lg border p-4">
+									<div className="flex items-center justify-between">
 										<div>
 											<p className="font-medium">•••• •••• •••• 4242</p>
-											<p className="text-sm text-muted-foreground">
+											<p className="text-muted-foreground text-sm">
 												Expires 12/25
 											</p>
 										</div>
@@ -328,12 +328,12 @@ export default function SettingsPage() {
 								</div>
 							</div>
 							<div>
-								<h3 className="font-semibold mb-2">Billing History</h3>
+								<h3 className="mb-2 font-semibold">Billing History</h3>
 								<div className="space-y-2">
-									<div className="flex justify-between items-center p-3 border rounded">
+									<div className="flex items-center justify-between rounded border p-3">
 										<div>
 											<p className="font-medium">January 2024</p>
-											<p className="text-sm text-muted-foreground">
+											<p className="text-muted-foreground text-sm">
 												Jan 15, 2024
 											</p>
 										</div>
@@ -342,10 +342,10 @@ export default function SettingsPage() {
 											<p className="text-sm text-success">Paid</p>
 										</div>
 									</div>
-									<div className="flex justify-between items-center p-3 border rounded">
+									<div className="flex items-center justify-between rounded border p-3">
 										<div>
 											<p className="font-medium">December 2023</p>
-											<p className="text-sm text-muted-foreground">
+											<p className="text-muted-foreground text-sm">
 												Dec 15, 2023
 											</p>
 										</div>

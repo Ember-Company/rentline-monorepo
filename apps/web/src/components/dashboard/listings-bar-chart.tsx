@@ -1,4 +1,11 @@
-import { Card, CardBody, CardHeader, Select, SelectItem, Button } from "@heroui/react";
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Select,
+	SelectItem,
+} from "@heroui/react";
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 
@@ -31,21 +38,25 @@ export function ListingsBarChart({
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex justify-between items-center pb-2">
+			<CardHeader className="flex items-center justify-between pb-2">
 				<div className="flex-1">
-					<h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-					<div className="flex items-center gap-4 mt-1">
-						<p className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</p>
-						<div className="flex items-center gap-1 text-sm text-green-600">
+					<h3 className="font-semibold text-gray-900 text-lg">{title}</h3>
+					<div className="mt-1 flex items-center gap-4">
+						<p className="font-bold text-2xl text-gray-900">
+							{total.toLocaleString()}
+						</p>
+						<div className="flex items-center gap-1 text-green-600 text-sm">
 							<span>+{percentage}%</span>
 						</div>
-						<p className="text-xs text-gray-500">Last updated: {lastUpdated}</p>
+						<p className="text-gray-500 text-xs">Last updated: {lastUpdated}</p>
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
 					<Select
 						selectedKeys={[period]}
-						onSelectionChange={(keys) => setPeriod(Array.from(keys)[0] as string)}
+						onSelectionChange={(keys) =>
+							setPeriod(Array.from(keys)[0] as string)
+						}
 						className="w-32"
 						size="sm"
 					>
@@ -60,33 +71,33 @@ export function ListingsBarChart({
 						onPress={onRefresh}
 						aria-label="Refresh"
 					>
-						<RefreshCw className="w-4 h-4" />
+						<RefreshCw className="h-4 w-4" />
 					</Button>
 				</div>
 			</CardHeader>
 			<CardBody className="pt-0">
 				<div className="relative" style={{ height: `${height}px` }}>
 					{/* Y-axis labels */}
-					<div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 pr-2 w-12">
+					<div className="absolute top-0 bottom-0 left-0 flex w-12 flex-col justify-between pr-2 text-gray-500 text-xs">
 						<span>$1K</span>
 						<span>$800</span>
 						<span>$600</span>
-						<span className="text-primary font-medium">Avg</span>
+						<span className="font-medium text-primary">Avg</span>
 						<span>$400</span>
 						<span>$200</span>
 						<span>$0</span>
 					</div>
 
 					{/* Chart area */}
-					<div className="ml-12 h-full relative">
+					<div className="relative ml-12 h-full">
 						{/* Grid lines */}
 						<div className="absolute inset-0 flex flex-col justify-between">
-							<div className="border-t border-gray-200" />
-							<div className="border-t border-gray-200" />
-							<div className="border-t border-primary-200" />
-							<div className="border-t border-gray-200" />
-							<div className="border-t border-gray-200" />
-							<div className="border-t border-gray-200" />
+							<div className="border-gray-200 border-t" />
+							<div className="border-gray-200 border-t" />
+							<div className="border-primary-200 border-t" />
+							<div className="border-gray-200 border-t" />
+							<div className="border-gray-200 border-t" />
+							<div className="border-gray-200 border-t" />
 						</div>
 
 						{/* Bars */}
@@ -104,21 +115,21 @@ export function ListingsBarChart({
 									>
 										{/* Property Rent bar (darker orange) */}
 										<div
-											className="bg-primary rounded-t transition-all hover:bg-primary-700 cursor-pointer relative group"
+											className="group relative cursor-pointer rounded-t bg-primary transition-all hover:bg-primary-700"
 											style={{ height: `${rentHeight}px`, width: "48%" }}
 											title={`Property Rent: ${d.rent}`}
 										>
-											<div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
+											<div className="-top-6 -translate-x-1/2 absolute left-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-white text-xs opacity-0 group-hover:opacity-100">
 												Property Rent {d.rent}
 											</div>
 										</div>
 										{/* Property Sale bar (lighter orange) */}
 										<div
-											className="bg-secondary rounded-t transition-all hover:bg-secondary-500 cursor-pointer relative group"
+											className="group relative cursor-pointer rounded-t bg-secondary transition-all hover:bg-secondary-500"
 											style={{ height: `${saleHeight}px`, width: "48%" }}
 											title={`Property Sale: ${d.sale}`}
 										>
-											<div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
+											<div className="-top-6 -translate-x-1/2 absolute left-1/2 transform whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-white text-xs opacity-0 group-hover:opacity-100">
 												Property Sale {d.sale}
 											</div>
 										</div>
@@ -128,9 +139,9 @@ export function ListingsBarChart({
 						</div>
 
 						{/* X-axis labels */}
-						<div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500 pt-2 px-2">
+						<div className="absolute right-0 bottom-0 left-0 flex justify-between px-2 pt-2 text-gray-500 text-xs">
 							{data.map((d, i) => (
-								<span key={i} className="flex-1 text-center truncate">
+								<span key={i} className="flex-1 truncate text-center">
 									{d.day}
 								</span>
 							))}
@@ -139,13 +150,13 @@ export function ListingsBarChart({
 				</div>
 
 				{/* Legend */}
-				<div className="flex items-center justify-end gap-4 mt-4 text-sm">
+				<div className="mt-4 flex items-center justify-end gap-4 text-sm">
 					<div className="flex items-center gap-2">
-						<div className="w-3 h-3 rounded bg-primary" />
+						<div className="h-3 w-3 rounded bg-primary" />
 						<span className="text-gray-600">Property Rent</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<div className="w-3 h-3 rounded bg-secondary" />
+						<div className="h-3 w-3 rounded bg-secondary" />
 						<span className="text-gray-600">Property Sale</span>
 					</div>
 				</div>
@@ -153,4 +164,3 @@ export function ListingsBarChart({
 		</Card>
 	);
 }
-

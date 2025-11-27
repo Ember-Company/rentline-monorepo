@@ -1,5 +1,4 @@
 import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 
 type OrganizationData = {
 	name: string;
@@ -16,33 +15,50 @@ type OrganizationData = {
 	type?: string;
 	logo?: string;
 	metadata?: Record<string, unknown>;
-	keepCurrentActiveOrganization?: boolean;
 };
 
 export function useCreateOrganization() {
 	const createOrganization = async (data: OrganizationData) => {
-		const { data: organization, error } = await authClient.organization.create({
+		// Build metadata to store additional fields that better-auth might not accept directly
+		const metadata: Record<string, unknown> = {
+			...(data.metadata || {}),
+		};
+
+		// Add custom fields to metadata
+		if (data.address) metadata.address = data.address;
+		if (data.city) metadata.city = data.city;
+		if (data.state) metadata.state = data.state;
+		if (data.postalCode) metadata.postalCode = data.postalCode;
+		if (data.country) metadata.country = data.country;
+		if (data.phone) metadata.phone = data.phone;
+		if (data.email) metadata.email = data.email;
+		if (data.website) metadata.website = data.website;
+		if (data.cnpj) metadata.cnpj = data.cnpj;
+		if (data.type) metadata.type = data.type;
+
+		// Create payload with only the fields that better-auth definitely accepts
+		const payload = {
 			name: data.name,
 			slug: data.slug,
-			logo: data.logo,
-			metadata: data.metadata,
-			keepCurrentActiveOrganization: data.keepCurrentActiveOrganization ?? false,
-			// Additional fields
-			...(data.address && { address: data.address }),
-			...(data.city && { city: data.city }),
-			...(data.state && { state: data.state }),
-			...(data.postalCode && { postalCode: data.postalCode }),
-			...(data.country && { country: data.country }),
-			...(data.phone && { phone: data.phone }),
-			...(data.email && { email: data.email }),
-			...(data.website && { website: data.website }),
-			...(data.cnpj && { cnpj: data.cnpj }),
-			...(data.type && { type: data.type }),
-		});
+			...(data.logo && { logo: data.logo }),
+			...(Object.keys(metadata).length > 0 && { metadata }),
+		};
+
+		console.log(
+			"Creating organization with payload:",
+			JSON.stringify(payload, null, 2),
+		);
+
+		const { data: organization, error } =
+			await authClient.organization.create(payload);
 
 		if (error) {
+			console.error("Organization creation error:", error);
 			throw new Error(
-				typeof error === "string" ? error : error.message || "Failed to create organization",
+				typeof error === "string"
+					? error
+					: (error as { message?: string }).message ||
+							"Failed to create organization",
 			);
 		}
 
@@ -50,6 +66,7 @@ export function useCreateOrganization() {
 			throw new Error("No organization data returned");
 		}
 
+		console.log("Organization created successfully:", organization);
 		return organization;
 	};
 
@@ -65,11 +82,13 @@ export function useInviteTeamMember() {
 
 		if (error) {
 			throw new Error(
-				typeof error === "string" ? error : error.message || "Failed to invite member",
+				typeof error === "string"
+					? error
+					: (error as { message?: string }).message ||
+							"Failed to invite member",
 			);
 		}
 	};
 
 	return { inviteMember };
 }
-

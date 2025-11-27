@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Button } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader } from "@heroui/react";
 import { formatCurrency } from "@/lib/utils/format";
 
 type CashFlowData = {
@@ -24,10 +24,10 @@ export function CashFlowChart({
 
 	return (
 		<Card>
-			<CardHeader className="flex justify-between items-center">
+			<CardHeader className="flex items-center justify-between">
 				<div>
-					<h2 className="text-xl font-semibold">{title}</h2>
-					<p className="text-sm text-muted-foreground">{subtitle}</p>
+					<h2 className="font-semibold text-xl">{title}</h2>
+					<p className="text-muted-foreground text-sm">{subtitle}</p>
 				</div>
 				<Button variant="light" size="sm">
 					View Details
@@ -35,31 +35,31 @@ export function CashFlowChart({
 			</CardHeader>
 			<CardBody>
 				<div className="space-y-4">
-					<div className="flex items-end justify-between gap-2 h-64">
+					<div className="flex h-64 items-end justify-between gap-2">
 						{data.map((item, index) => (
 							<div
 								key={index}
-								className="flex flex-col items-center gap-2 flex-1"
+								className="flex flex-1 flex-col items-center gap-2"
 							>
-								<div className="relative w-full h-full flex flex-col justify-end">
+								<div className="relative flex h-full w-full flex-col justify-end">
 									<div
-										className="w-full bg-primary rounded-t transition-all hover:opacity-80 cursor-pointer"
+										className="w-full cursor-pointer rounded-t bg-primary transition-all hover:opacity-80"
 										style={{
 											height: `${(item.net / maxNetFlow) * 100}%`,
 										}}
 										title={`${item.month}: ${formatCurrency(item.net)}`}
 									/>
 								</div>
-								<span className="text-xs text-muted-foreground">
+								<span className="text-muted-foreground text-xs">
 									{item.month}
 								</span>
 							</div>
 						))}
 					</div>
-					<div className="flex items-center justify-center gap-6 pt-4 border-t">
+					<div className="flex items-center justify-center gap-6 border-t pt-4">
 						<div className="flex items-center gap-2">
-							<div className="w-3 h-3 rounded bg-primary" />
-							<span className="text-sm text-muted-foreground">
+							<div className="h-3 w-3 rounded bg-primary" />
+							<span className="text-muted-foreground text-sm">
 								Net Cash Flow
 							</span>
 						</div>
@@ -73,4 +73,3 @@ export function CashFlowChart({
 		</Card>
 	);
 }
-

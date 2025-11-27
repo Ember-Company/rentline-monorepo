@@ -1,9 +1,17 @@
-import { Card, CardBody, Button, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
-import { Edit, ChevronDown, Plus } from "lucide-react";
+import {
+	Button,
+	Card,
+	CardBody,
+	Chip,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
+} from "@heroui/react";
+import { ChevronDown, Edit, Plus } from "lucide-react";
 import { useNavigate } from "react-router";
-import { formatCurrency } from "@/lib/utils/format";
-import { formatDate } from "@/lib/utils/format";
-import type { PropertyDetail, Lease } from "@/lib/mock-data/property-types";
+import type { Lease, PropertyDetail } from "@/lib/mock-data/property-types";
+import { formatCurrency, formatDate } from "@/lib/utils/format";
 
 interface RentOverviewCardEnhancedProps {
 	property: PropertyDetail;
@@ -20,15 +28,15 @@ export function RentOverviewCardEnhanced({
 
 	if (!lease) {
 		return (
-			<Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+			<Card className="border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 				<CardBody className="p-6">
-					<div className="flex items-start justify-between mb-4">
-						<h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+					<div className="mb-4 flex items-start justify-between">
+						<h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
 							Rent overview
 						</h3>
 					</div>
-					<div className="text-center py-8">
-						<p className="text-gray-500 mb-4">No active lease</p>
+					<div className="py-8 text-center">
+						<p className="mb-4 text-gray-500">No active lease</p>
 						<Button
 							color="primary"
 							startContent={<Plus className="h-4 w-4" />}
@@ -49,7 +57,11 @@ export function RentOverviewCardEnhanced({
 	}
 
 	const today = new Date();
-	const dueDate = new Date(today.getFullYear(), today.getMonth(), lease.paymentDay);
+	const dueDate = new Date(
+		today.getFullYear(),
+		today.getMonth(),
+		lease.paymentDay,
+	);
 	if (dueDate < today) {
 		dueDate.setMonth(dueDate.getMonth() + 1);
 	}
@@ -64,10 +76,10 @@ export function RentOverviewCardEnhanced({
 	};
 
 	return (
-		<Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+		<Card className="border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 			<CardBody className="p-6">
-				<div className="flex items-start justify-between mb-4">
-					<h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+				<div className="mb-4 flex items-start justify-between">
+					<h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
 						Rent overview
 					</h3>
 					<Dropdown>
@@ -105,10 +117,10 @@ export function RentOverviewCardEnhanced({
 				)}
 
 				<div className="space-y-1">
-					<p className="text-3xl font-bold text-gray-900">
+					<p className="font-bold text-3xl text-gray-900">
 						{formatCurrency(lease.monthlyRent, lease.currency)}
 					</p>
-					<p className="text-sm text-gray-600">
+					<p className="text-gray-600 text-sm">
 						Due {formatDate(dueDate.toISOString().split("T")[0])}
 					</p>
 				</div>
@@ -116,4 +128,3 @@ export function RentOverviewCardEnhanced({
 		</Card>
 	);
 }
-

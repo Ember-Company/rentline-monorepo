@@ -1,10 +1,10 @@
-import type { Route } from "./+types/route";
-import { useNavigate } from "react-router";
-import { useState } from "react";
 import { Button, Switch } from "@heroui/react";
-import { ChevronRight, ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
+import type { Route } from "./+types/route";
 
 export function meta(_args: Route.MetaArgs) {
 	return [{ title: "Notification Preferences - Onboarding" }];
@@ -47,144 +47,144 @@ export default function NotificationsStep() {
 			description="Configure how you want to receive notifications. You can always change these settings later."
 			showProgress={true}
 		>
-					<div className="space-y-6">
-						<div className="space-y-4">
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="font-medium">Email Notifications</p>
-									<p className="text-sm text-gray-600">
-										Receive notifications via email
-									</p>
-								</div>
-								<Switch
-									isSelected={notifications.email}
-									onValueChange={(value) =>
-										setNotifications({ ...notifications, email: value })
-									}
-								/>
-							</div>
+			<div className="space-y-6">
+				<div className="space-y-4">
+					<div className="flex items-center justify-between">
+						<div>
+							<p className="font-medium">Email Notifications</p>
+							<p className="text-gray-600 text-sm">
+								Receive notifications via email
+							</p>
+						</div>
+						<Switch
+							isSelected={notifications.email}
+							onValueChange={(value) =>
+								setNotifications({ ...notifications, email: value })
+							}
+						/>
+					</div>
 
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="font-medium">SMS Notifications</p>
-									<p className="text-sm text-gray-600">
-										Receive notifications via SMS
-									</p>
-								</div>
-								<Switch
-									isSelected={notifications.sms}
-									onValueChange={(value) =>
-										setNotifications({ ...notifications, sms: value })
-									}
-								/>
-							</div>
+					<div className="flex items-center justify-between">
+						<div>
+							<p className="font-medium">SMS Notifications</p>
+							<p className="text-gray-600 text-sm">
+								Receive notifications via SMS
+							</p>
+						</div>
+						<Switch
+							isSelected={notifications.sms}
+							onValueChange={(value) =>
+								setNotifications({ ...notifications, sms: value })
+							}
+						/>
+					</div>
 
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="font-medium">In-App Notifications</p>
-									<p className="text-sm text-gray-600">
-										Receive notifications in the app
-									</p>
-								</div>
-								<Switch
-									isSelected={notifications.inApp}
-									onValueChange={(value) =>
-										setNotifications({ ...notifications, inApp: value })
-									}
-								/>
-							</div>
+					<div className="flex items-center justify-between">
+						<div>
+							<p className="font-medium">In-App Notifications</p>
+							<p className="text-gray-600 text-sm">
+								Receive notifications in the app
+							</p>
+						</div>
+						<Switch
+							isSelected={notifications.inApp}
+							onValueChange={(value) =>
+								setNotifications({ ...notifications, inApp: value })
+							}
+						/>
+					</div>
 
-							<div className="border-t pt-4 space-y-4">
-								<p className="font-medium text-sm text-gray-700">
-									Notification Types
+					<div className="space-y-4 border-t pt-4">
+						<p className="font-medium text-gray-700 text-sm">
+							Notification Types
+						</p>
+
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="font-medium">Maintenance Requests</p>
+								<p className="text-gray-600 text-sm">
+									Get notified about maintenance requests
 								</p>
-
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="font-medium">Maintenance Requests</p>
-										<p className="text-sm text-gray-600">
-											Get notified about maintenance requests
-										</p>
-									</div>
-									<Switch
-										isSelected={notifications.maintenance}
-										onValueChange={(value) =>
-											setNotifications({ ...notifications, maintenance: value })
-										}
-									/>
-								</div>
-
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="font-medium">Payments</p>
-										<p className="text-sm text-gray-600">
-											Get notified about payments
-										</p>
-									</div>
-									<Switch
-										isSelected={notifications.payments}
-										onValueChange={(value) =>
-											setNotifications({ ...notifications, payments: value })
-										}
-									/>
-								</div>
-
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="font-medium">Leases</p>
-										<p className="text-sm text-gray-600">
-											Get notified about lease updates
-										</p>
-									</div>
-									<Switch
-										isSelected={notifications.leases}
-										onValueChange={(value) =>
-											setNotifications({ ...notifications, leases: value })
-										}
-									/>
-								</div>
 							</div>
+							<Switch
+								isSelected={notifications.maintenance}
+								onValueChange={(value) =>
+									setNotifications({ ...notifications, maintenance: value })
+								}
+							/>
 						</div>
 
-						<div className="flex justify-between gap-3 pt-4">
-							<Button
-								variant="light"
-								startContent={<ArrowLeft className="w-4 h-4" />}
-								onPress={() => navigate("/onboarding/complete")}
-							>
-								Back
-							</Button>
-							<Button
-								color="primary"
-								endContent={<ChevronRight className="w-4 h-4" />}
-								onPress={handleNext}
-								isLoading={isSubmitting}
-							>
-								Continue
-							</Button>
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="font-medium">Payments</p>
+								<p className="text-gray-600 text-sm">
+									Get notified about payments
+								</p>
+							</div>
+							<Switch
+								isSelected={notifications.payments}
+								onValueChange={(value) =>
+									setNotifications({ ...notifications, payments: value })
+								}
+							/>
 						</div>
 
-						<div className="flex justify-between gap-3 pt-6">
-							<Button
-								variant="light"
-								startContent={<ArrowLeft className="w-4 h-4" />}
-								onPress={() => navigate("/onboarding/complete")}
-								size="lg"
-							>
-								Back
-							</Button>
-							<Button
-								color="primary"
-								endContent={<ChevronRight className="w-4 h-4" />}
-								onPress={handleNext}
-								isLoading={isSubmitting}
-								size="lg"
-								className="min-w-[140px]"
-							>
-								Continue
-							</Button>
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="font-medium">Leases</p>
+								<p className="text-gray-600 text-sm">
+									Get notified about lease updates
+								</p>
+							</div>
+							<Switch
+								isSelected={notifications.leases}
+								onValueChange={(value) =>
+									setNotifications({ ...notifications, leases: value })
+								}
+							/>
 						</div>
 					</div>
+				</div>
+
+				<div className="flex justify-between gap-3 pt-4">
+					<Button
+						variant="light"
+						startContent={<ArrowLeft className="h-4 w-4" />}
+						onPress={() => navigate("/onboarding/complete")}
+					>
+						Back
+					</Button>
+					<Button
+						color="primary"
+						endContent={<ChevronRight className="h-4 w-4" />}
+						onPress={handleNext}
+						isLoading={isSubmitting}
+					>
+						Continue
+					</Button>
+				</div>
+
+				<div className="flex justify-between gap-3 pt-6">
+					<Button
+						variant="light"
+						startContent={<ArrowLeft className="h-4 w-4" />}
+						onPress={() => navigate("/onboarding/complete")}
+						size="lg"
+					>
+						Back
+					</Button>
+					<Button
+						color="primary"
+						endContent={<ChevronRight className="h-4 w-4" />}
+						onPress={handleNext}
+						isLoading={isSubmitting}
+						size="lg"
+						className="min-w-[140px]"
+					>
+						Continue
+					</Button>
+				</div>
+			</div>
 		</OnboardingLayout>
 	);
 }

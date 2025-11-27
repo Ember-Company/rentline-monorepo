@@ -28,7 +28,8 @@ export const properties: Property[] = [
 		squareFeet: 850,
 		dueDate: "2025-05-15",
 		isMultiUnit: false,
-		image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop",
+		image:
+			"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop",
 	},
 	{
 		id: 2,
@@ -43,7 +44,8 @@ export const properties: Property[] = [
 		squareFeet: 1200,
 		dueDate: "2025-06-01",
 		isMultiUnit: false,
-		image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&h=300&fit=crop",
+		image:
+			"https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&h=300&fit=crop",
 	},
 	{
 		id: 3,
@@ -58,7 +60,8 @@ export const properties: Property[] = [
 		squareFeet: 1500,
 		dueDate: "2025-05-20",
 		isMultiUnit: false,
-		image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop",
+		image:
+			"https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop",
 	},
 	{
 		id: 4,
@@ -73,7 +76,8 @@ export const properties: Property[] = [
 		squareFeet: 650,
 		dueDate: "2025-05-10",
 		isMultiUnit: false,
-		image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop",
+		image:
+			"https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop",
 	},
 	{
 		id: 5,
@@ -88,7 +92,8 @@ export const properties: Property[] = [
 		squareFeet: 2200,
 		dueDate: "2025-06-15",
 		isMultiUnit: true,
-		image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop",
+		image:
+			"https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400&h=300&fit=crop",
 	},
 	{
 		id: 6,
@@ -102,6 +107,7 @@ export const properties: Property[] = [
 		bathrooms: 2,
 		squareFeet: 950,
 		isMultiUnit: false,
-		image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=300&fit=crop",
+		image:
+			"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=300&fit=crop",
 	},
 ];

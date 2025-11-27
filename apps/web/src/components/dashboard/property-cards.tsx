@@ -1,5 +1,5 @@
-import { Card, CardBody, Button } from "@heroui/react";
-import { RefreshCw, Home } from "lucide-react";
+import { Button, Card, CardBody } from "@heroui/react";
+import { Home, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
 
 type Property = {
@@ -19,8 +19,8 @@ export function PropertyCards({ properties, onRefresh }: PropertyCardsProps) {
 	return (
 		<Card className="border border-gray-200 shadow-sm">
 			<CardBody className="p-6">
-				<div className="flex items-center justify-between mb-4">
-					<h3 className="text-lg font-semibold text-gray-900">My Properties</h3>
+				<div className="mb-4 flex items-center justify-between">
+					<h3 className="font-semibold text-gray-900 text-lg">My Properties</h3>
 					<Button
 						isIconOnly
 						variant="light"
@@ -28,32 +28,34 @@ export function PropertyCards({ properties, onRefresh }: PropertyCardsProps) {
 						onPress={onRefresh}
 						aria-label="Refresh"
 					>
-						<RefreshCw className="w-4 h-4" />
+						<RefreshCw className="h-4 w-4" />
 					</Button>
 				</div>
 				<div className="space-y-4">
 					{properties.map((property) => (
 						<div
 							key={property.id}
-							className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+							className="flex cursor-pointer items-center gap-4 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50"
 						>
-							<div className="w-20 h-20 rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0">
+							<div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-gray-200 to-gray-300">
 								{property.image ? (
 									<img
 										src={property.image}
 										alt={property.name}
-										className="w-full h-full object-cover rounded-lg"
+										className="h-full w-full rounded-lg object-cover"
 									/>
 								) : (
-									<Home className="w-8 h-8 text-gray-400" />
+									<Home className="h-8 w-8 text-gray-400" />
 								)}
 							</div>
-							<div className="flex-1 min-w-0">
-								<h4 className="font-semibold text-gray-900 mb-1 truncate">
+							<div className="min-w-0 flex-1">
+								<h4 className="mb-1 truncate font-semibold text-gray-900">
 									{property.name}
 								</h4>
-								<p className="text-sm text-gray-600 truncate">{property.location}</p>
-								<p className="text-lg font-bold text-gray-900 mt-1">
+								<p className="truncate text-gray-600 text-sm">
+									{property.location}
+								</p>
+								<p className="mt-1 font-bold text-gray-900 text-lg">
 									{formatCurrency(property.price)} /month
 								</p>
 							</div>
@@ -64,4 +66,3 @@ export function PropertyCards({ properties, onRefresh }: PropertyCardsProps) {
 		</Card>
 	);
 }
-

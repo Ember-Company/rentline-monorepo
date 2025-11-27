@@ -1,17 +1,19 @@
-import type { Route } from "./+types/route";
-import { useMemo } from "react";
-import { useNavigate } from "react-router";
 import { Button, Card, CardBody } from "@heroui/react";
 import { ArrowLeft } from "lucide-react";
-import { enhancedPropertyDetails, getPropertyWithTenants } from "@/lib/mock-data/enhanced-property-details";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { EnhancedPropertyHeader } from "@/components/property/enhanced-property-header";
 import { EnhancedPropertyTabs } from "@/components/property/enhanced-property-tabs";
-import { RentOverviewCardEnhanced } from "@/components/property/rent-overview-card-enhanced";
-import { TenantsCardEnhanced } from "@/components/property/tenants-card-enhanced";
 import { PaymentsTableEnhanced } from "@/components/property/payments-table-enhanced";
 import { PropertyInfoCard } from "@/components/property/property-info-card";
-import { useState } from "react";
-import { toast } from "sonner";
+import { RentOverviewCardEnhanced } from "@/components/property/rent-overview-card-enhanced";
+import { TenantsCardEnhanced } from "@/components/property/tenants-card-enhanced";
+import {
+	enhancedPropertyDetails,
+	getPropertyWithTenants,
+} from "@/lib/mock-data/enhanced-property-details";
+import type { Route } from "./+types/route";
 
 export function meta(_args: Route.MetaArgs) {
 	return [
@@ -23,7 +25,9 @@ export function meta(_args: Route.MetaArgs) {
 export default function UnitDetailPage({ params }: Route.ComponentProps) {
 	const navigate = useNavigate();
 	const [activeTab, setActiveTab] = useState("overview");
-	const [activeLeaseId, setActiveLeaseId] = useState<string | undefined>(undefined);
+	const [activeLeaseId, setActiveLeaseId] = useState<string | undefined>(
+		undefined,
+	);
 
 	const propertyId = params.id ? Number.parseInt(params.id, 10) : null;
 	const unitId = params.unitId;
@@ -72,7 +76,9 @@ export default function UnitDetailPage({ params }: Route.ComponentProps) {
 		}
 	}, [unitProperty, activeLeaseId]);
 
-	const activeLease = unitProperty?.leases.find((l) => l.id === activeLeaseId) || unitProperty?.leases[0];
+	const activeLease =
+		unitProperty?.leases.find((l) => l.id === activeLeaseId) ||
+		unitProperty?.leases[0];
 
 	const payments = useMemo(() => {
 		if (!unitProperty) return [];
@@ -86,11 +92,17 @@ export default function UnitDetailPage({ params }: Route.ComponentProps) {
 
 	if (!property || !unit || !unitProperty) {
 		return (
-			<div className="flex items-center justify-center h-96">
+			<div className="flex h-96 items-center justify-center">
 				<div className="text-center">
-					<h2 className="text-2xl font-bold text-gray-900 mb-2">Unit Not Found</h2>
-					<p className="text-gray-600 mb-4">The unit you're looking for doesn't exist.</p>
-					<Button onPress={() => navigate(`/dashboard/properties/${propertyId}`)}>
+					<h2 className="mb-2 font-bold text-2xl text-gray-900">
+						Unit Not Found
+					</h2>
+					<p className="mb-4 text-gray-600">
+						The unit you're looking for doesn't exist.
+					</p>
+					<Button
+						onPress={() => navigate(`/dashboard/properties/${propertyId}`)}
+					>
 						Back to Property
 					</Button>
 				</div>
@@ -100,7 +112,9 @@ export default function UnitDetailPage({ params }: Route.ComponentProps) {
 
 	const handleEditLease = () => {
 		if (activeLease) {
-			navigate(`/dashboard/properties/${propertyId}/lease/${activeLease.id}/edit`);
+			navigate(
+				`/dashboard/properties/${propertyId}/lease/${activeLease.id}/edit`,
+			);
 		} else {
 			navigate(`/dashboard/properties/${propertyId}/lease/new`);
 		}
@@ -125,7 +139,7 @@ export default function UnitDetailPage({ params }: Route.ComponentProps) {
 					<div className="space-y-6">
 						<PropertyInfoCard property={unitProperty} />
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<RentOverviewCardEnhanced
 								property={unitProperty}
 								lease={activeLease}
@@ -160,7 +174,7 @@ export default function UnitDetailPage({ params }: Route.ComponentProps) {
 				<Button
 					variant="light"
 					onPress={() => navigate(`/dashboard/properties/${propertyId}`)}
-					startContent={<ArrowLeft className="w-4 h-4" />}
+					startContent={<ArrowLeft className="h-4 w-4" />}
 				>
 					Back to {property.name}
 				</Button>
@@ -179,4 +193,3 @@ export default function UnitDetailPage({ params }: Route.ComponentProps) {
 		</div>
 	);
 }
-

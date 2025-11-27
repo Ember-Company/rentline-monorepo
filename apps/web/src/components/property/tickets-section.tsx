@@ -1,19 +1,19 @@
 import {
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
-	Button,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
 import { Plus } from "lucide-react";
-import { formatDate } from "@/lib/utils/format";
 import type { PropertyDetail } from "@/lib/mock-data/property-details";
+import { formatDate } from "@/lib/utils/format";
 
 type TicketsSectionProps = {
 	property: PropertyDetail;
@@ -53,12 +53,12 @@ export function TicketsSection({ property, onAddTicket }: TicketsSectionProps) {
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex justify-between items-center">
-				<h3 className="text-lg font-semibold text-gray-900">Tickets</h3>
+			<CardHeader className="flex items-center justify-between">
+				<h3 className="font-semibold text-gray-900 text-lg">Tickets</h3>
 				<Button
 					color="primary"
 					size="sm"
-					startContent={<Plus className="w-4 h-4" />}
+					startContent={<Plus className="h-4 w-4" />}
 					onPress={onAddTicket}
 				>
 					New Ticket
@@ -108,7 +108,7 @@ export function TicketsSection({ property, onAddTicket }: TicketsSectionProps) {
 					</TableBody>
 				</Table>
 				{property.tickets.length === 0 && (
-					<p className="text-sm text-gray-500 text-center py-8">
+					<p className="py-8 text-center text-gray-500 text-sm">
 						No tickets found
 					</p>
 				)}
@@ -116,4 +116,3 @@ export function TicketsSection({ property, onAddTicket }: TicketsSectionProps) {
 		</Card>
 	);
 }
-

@@ -1,27 +1,26 @@
 import {
+	Button,
 	Card,
 	CardBody,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
 	Input,
-	Button,
 	Select,
 	SelectItem,
-	Dropdown,
-	DropdownTrigger,
-	DropdownMenu,
-	DropdownItem,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
-import { Search, Plus, MoreVertical } from "lucide-react";
-import { useState, useMemo } from "react";
-import { formatCurrency } from "@/lib/utils/format";
-import { formatDate } from "@/lib/utils/format";
+import { MoreVertical, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { PropertyDetail } from "@/lib/mock-data/property-types";
+import { formatCurrency, formatDate } from "@/lib/utils/format";
 
 interface Payment {
 	id: string;
@@ -56,8 +55,12 @@ export function PaymentsTableEnhanced({
 	onAddPayment,
 	onAddExpense,
 }: PaymentsTableEnhancedProps) {
-	const [activeTab, setActiveTab] = useState<"payments" | "expenses">("payments");
-	const [paymentSubTab, setPaymentSubTab] = useState<"payments" | "periods">("payments");
+	const [activeTab, setActiveTab] = useState<"payments" | "expenses">(
+		"payments",
+	);
+	const [paymentSubTab, setPaymentSubTab] = useState<"payments" | "periods">(
+		"payments",
+	);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -96,7 +99,7 @@ export function PaymentsTableEnhanced({
 
 	const getCategoryIcon = (category: string) => {
 		return (
-			<div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
+			<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-green-500">
 				<span className="text-white text-xs">🏠</span>
 			</div>
 		);
@@ -106,14 +109,14 @@ export function PaymentsTableEnhanced({
 		<Card className="border border-gray-200 shadow-sm">
 			<CardBody className="p-0">
 				{/* Tabs */}
-				<div className="flex items-center justify-between border-b border-gray-200 px-6 pt-6 pb-0">
+				<div className="flex items-center justify-between border-gray-200 border-b px-6 pt-6 pb-0">
 					<div className="flex gap-1">
 						<button
 							type="button"
 							onClick={() => setActiveTab("payments")}
-							className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+							className={`relative px-4 py-3 font-medium text-sm transition-colors ${
 								activeTab === "payments"
-									? "text-primary border-b-2 border-primary"
+									? "border-primary border-b-2 text-primary"
 									: "text-gray-600 hover:text-gray-900"
 							}`}
 						>
@@ -122,9 +125,9 @@ export function PaymentsTableEnhanced({
 						<button
 							type="button"
 							onClick={() => setActiveTab("expenses")}
-							className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+							className={`relative px-4 py-3 font-medium text-sm transition-colors ${
 								activeTab === "expenses"
-									? "text-primary border-b-2 border-primary"
+									? "border-primary border-b-2 text-primary"
 									: "text-gray-600 hover:text-gray-900"
 							}`}
 						>
@@ -134,13 +137,13 @@ export function PaymentsTableEnhanced({
 
 					{activeTab === "payments" && (
 						<div className="flex items-center gap-3">
-							<div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+							<div className="flex gap-1 rounded-lg bg-gray-100 p-1">
 								<button
 									type="button"
 									onClick={() => setPaymentSubTab("payments")}
-									className={`px-3 py-1.5 text-xs font-medium transition-colors rounded ${
+									className={`rounded px-3 py-1.5 font-medium text-xs transition-colors ${
 										paymentSubTab === "payments"
-											? "text-primary bg-white shadow-sm"
+											? "bg-white text-primary shadow-sm"
 											: "text-gray-600 hover:text-gray-900"
 									}`}
 								>
@@ -149,9 +152,9 @@ export function PaymentsTableEnhanced({
 								<button
 									type="button"
 									onClick={() => setPaymentSubTab("periods")}
-									className={`px-3 py-1.5 text-xs font-medium transition-colors rounded ${
+									className={`rounded px-3 py-1.5 font-medium text-xs transition-colors ${
 										paymentSubTab === "periods"
-											? "text-primary bg-white shadow-sm"
+											? "bg-white text-primary shadow-sm"
 											: "text-gray-600 hover:text-gray-900"
 									}`}
 								>
@@ -184,7 +187,7 @@ export function PaymentsTableEnhanced({
 				</div>
 
 				{/* Search Bar */}
-				<div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+				<div className="border-gray-200 border-b bg-gray-50 px-6 py-4">
 					<Input
 						placeholder="Search"
 						value={searchQuery}
@@ -192,7 +195,8 @@ export function PaymentsTableEnhanced({
 						startContent={<Search className="h-4 w-4 text-gray-400" />}
 						classNames={{
 							input: "text-sm",
-							inputWrapper: "bg-white border-gray-200 hover:border-gray-300 max-w-xs",
+							inputWrapper:
+								"bg-white border-gray-200 hover:border-gray-300 max-w-xs",
 						}}
 					/>
 				</div>
@@ -220,36 +224,36 @@ export function PaymentsTableEnhanced({
 								<TableColumn>NOTES</TableColumn>
 								<TableColumn>STATUS</TableColumn>
 								<TableColumn>AMOUNT</TableColumn>
-								<TableColumn width={50}></TableColumn>
+								<TableColumn width={50} />
 							</TableHeader>
 							<TableBody emptyContent="No payments found">
 								{paginatedPayments.map((payment) => (
 									<TableRow key={payment.id}>
 										<TableCell>
-											<span className="text-sm text-gray-900">
+											<span className="text-gray-900 text-sm">
 												{formatDate(payment.date)}
 											</span>
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-3">
 												{getCategoryIcon(payment.category)}
-												<span className="text-sm font-medium text-gray-900">
+												<span className="font-medium text-gray-900 text-sm">
 													{payment.category}
 												</span>
 											</div>
 										</TableCell>
 										<TableCell>
-											<span className="text-sm text-gray-900">
+											<span className="text-gray-900 text-sm">
 												{payment.period}
 											</span>
 										</TableCell>
 										<TableCell>
-											<span className="text-sm text-gray-900">
+											<span className="text-gray-900 text-sm">
 												{payment.tenant || "-"}
 											</span>
 										</TableCell>
 										<TableCell>
-											<span className="text-sm text-gray-500">
+											<span className="text-gray-500 text-sm">
 												{payment.notes || "-"}
 											</span>
 										</TableCell>
@@ -264,7 +268,7 @@ export function PaymentsTableEnhanced({
 											</Chip>
 										</TableCell>
 										<TableCell>
-											<span className="text-sm font-semibold text-gray-900">
+											<span className="font-semibold text-gray-900 text-sm">
 												{formatCurrency(payment.amount, property.currency)}
 											</span>
 										</TableCell>
@@ -298,12 +302,14 @@ export function PaymentsTableEnhanced({
 
 				{activeTab === "expenses" && (
 					<div className="p-12 text-center">
-						<div className="max-w-md mx-auto">
-							<div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+						<div className="mx-auto max-w-md">
+							<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
 								<span className="text-2xl">📊</span>
 							</div>
-							<p className="text-gray-600 font-medium mb-2">No expenses recorded</p>
-							<p className="text-sm text-gray-500 mb-4">
+							<p className="mb-2 font-medium text-gray-600">
+								No expenses recorded
+							</p>
+							<p className="mb-4 text-gray-500 text-sm">
 								Start tracking expenses for this property
 							</p>
 							<Button
@@ -320,8 +326,8 @@ export function PaymentsTableEnhanced({
 
 				{/* Pagination */}
 				{activeTab === "payments" && filteredPayments.length > 0 && (
-					<div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-						<div className="flex items-center gap-2 text-sm text-gray-600">
+					<div className="flex items-center justify-between border-gray-200 border-t px-6 py-4">
+						<div className="flex items-center gap-2 text-gray-600 text-sm">
 							<span>Rows per page:</span>
 							<Select
 								selectedKeys={[rowsPerPage.toString()]}
@@ -339,10 +345,10 @@ export function PaymentsTableEnhanced({
 							</Select>
 						</div>
 						<div className="flex items-center gap-4">
-							<span className="text-sm text-gray-600">
+							<span className="text-gray-600 text-sm">
 								{(currentPage - 1) * rowsPerPage + 1}-
-								{Math.min(currentPage * rowsPerPage, filteredPayments.length)} of{" "}
-								{filteredPayments.length}
+								{Math.min(currentPage * rowsPerPage, filteredPayments.length)}{" "}
+								of {filteredPayments.length}
 							</span>
 							<div className="flex gap-1">
 								<Button
@@ -357,7 +363,9 @@ export function PaymentsTableEnhanced({
 									size="sm"
 									variant="light"
 									isDisabled={currentPage === totalPages || totalPages === 0}
-									onPress={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+									onPress={() =>
+										setCurrentPage((p) => Math.min(totalPages, p + 1))
+									}
 								>
 									→
 								</Button>
@@ -369,4 +377,3 @@ export function PaymentsTableEnhanced({
 		</Card>
 	);
 }
-

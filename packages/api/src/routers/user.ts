@@ -1,7 +1,7 @@
-import { protectedProcedure, router } from "../index";
+import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import prisma from "@rentline/db";
+import { protectedProcedure, router } from "../index";
 
 export const userRouter = router({
 	privateData: protectedProcedure.query(({ ctx }) => {
@@ -77,7 +77,8 @@ export const userRouter = router({
 			if (input.state) updateData.state = input.state;
 			if (input.postalCode) updateData.postalCode = input.postalCode;
 			if (input.country) updateData.country = input.country;
-			if (input.preferredLanguage) updateData.preferredLanguage = input.preferredLanguage;
+			if (input.preferredLanguage)
+				updateData.preferredLanguage = input.preferredLanguage;
 			if (input.userType) updateData.userType = input.userType;
 
 			const user = await prisma.user.update({
@@ -88,4 +89,3 @@ export const userRouter = router({
 			return { success: true, user };
 		}),
 });
-

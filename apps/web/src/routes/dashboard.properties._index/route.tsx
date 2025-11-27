@@ -1,394 +1,320 @@
-import type { Route } from "./+types/route";
 import {
+	Button,
 	Card,
 	CardBody,
-	Button,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
 	Input,
 	Select,
 	SelectItem,
+	Spinner,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
-import { Home, Plus, Search, Building2 } from "lucide-react";
-import { CrudModal } from "@/components/dashboard/crud-modal";
-import { properties, type Property } from "@/lib/mock-data/properties";
-import { formatCurrency } from "@/lib/utils/format";
-import { useState, useMemo } from "react";
-import { useForm } from "@tanstack/react-form";
-import { Label } from "@/components/ui/label";
+import {
+	Briefcase,
+	Building2,
+	Eye,
+	Home,
+	MoreVertical,
+	Mountain,
+	Pencil,
+	Plus,
+	Search,
+	Trash2,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Link } from "react-router";
-import z from "zod";
+import { CrudModal } from "@/components/dashboard/crud-modal";
+import {
+	formatBRL,
+	PROPERTY_CATEGORY_LABELS,
+	PROPERTY_STATUS_LABELS,
+	PROPERTY_TYPE_LABELS,
+} from "@/lib/constants/brazil";
+import { useDeleteProperty, useProperties } from "@/lib/hooks";
+import type {
+	PropertyCategory,
+	PropertyStatus,
+	PropertyType,
+} from "@/lib/types/api";
+import { formatCurrency } from "@/lib/utils/format";
+import type { Route } from "./+types/route";
 
 export function meta(_args: Route.MetaArgs) {
 	return [
-		{ title: "Properties - Rentline" },
-		{ name: "description", content: "Manage your properties" },
+		{ title: "Imóveis - Rentline" },
+		{ name: "description", content: "Gerencie seus imóveis" },
 	];
 }
 
 type FilterType =
 	| "all"
-	| "overdue"
-	| "due-soon"
-	| "due-later"
-	| "vacant"
-	| "multi-unit";
+	| "apartment_building"
+	| "house"
+	| "office"
+	| "land"
+	| "rent"
+	| "sale";
 
 export default function PropertiesPage() {
+	const navigate = useNavigate();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<FilterType>("all");
-	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+	const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(
 		null,
 	);
-	const [propertiesList, setPropertiesList] = useState(properties);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
-	// Calculate filter counts
-	const filterCounts = useMemo(() => {
-		const now = new Date();
-		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-		const sevenDaysFromNow = new Date(today);
-		sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-
-		return {
-			all: propertiesList.length,
-			overdue: propertiesList.filter((p) => {
-				if (!p.dueDate || !p.tenant) return false;
-				const due = new Date(p.dueDate);
-				return due < today && p.status === "occupied";
-			}).length,
-			"due-soon": propertiesList.filter((p) => {
-				if (!p.dueDate || !p.tenant) return false;
-				const due = new Date(p.dueDate);
-				return (
-					due >= today && due <= sevenDaysFromNow && p.status === "occupied"
-				);
-			}).length,
-			"due-later": propertiesList.filter((p) => {
-				if (!p.dueDate || !p.tenant) return false;
-				const due = new Date(p.dueDate);
-				return due > sevenDaysFromNow && p.status === "occupied";
-			}).length,
-			vacant: propertiesList.filter((p) => p.status === "vacant").length,
-			"multi-unit": propertiesList.filter((p) => p.isMultiUnit).length,
+	// Build query params based on filter
+	const queryInput = useMemo(() => {
+		const input: {
+			type?: PropertyType;
+			category?: PropertyCategory;
+			search?: string;
+			limit: number;
+			offset: number;
+		} = {
+			limit: rowsPerPage,
+			offset: (currentPage - 1) * rowsPerPage,
 		};
-	}, [propertiesList]);
 
-	// Filter properties based on active filter and search
-	const filteredProperties = useMemo(() => {
-		let filtered = propertiesList;
-
-		// Apply search filter
 		if (searchQuery) {
-			filtered = filtered.filter(
-				(property) =>
-					property.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-					property.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-					(property.tenant?.toLowerCase().includes(searchQuery.toLowerCase()) ??
-						false),
-			);
+			input.search = searchQuery;
 		}
 
-		// Apply status filter
-		if (activeFilter !== "all") {
-			const now = new Date();
-			const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-			const sevenDaysFromNow = new Date(today);
-			sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-
-			switch (activeFilter) {
-				case "overdue":
-					filtered = filtered.filter((p) => {
-						if (!p.dueDate || !p.tenant) return false;
-						const due = new Date(p.dueDate);
-						return due < today && p.status === "occupied";
-					});
-					break;
-				case "due-soon":
-					filtered = filtered.filter((p) => {
-						if (!p.dueDate || !p.tenant) return false;
-						const due = new Date(p.dueDate);
-						return (
-							due >= today && due <= sevenDaysFromNow && p.status === "occupied"
-						);
-					});
-					break;
-				case "due-later":
-					filtered = filtered.filter((p) => {
-						if (!p.dueDate || !p.tenant) return false;
-						const due = new Date(p.dueDate);
-						return due > sevenDaysFromNow && p.status === "occupied";
-					});
-					break;
-				case "vacant":
-					filtered = filtered.filter((p) => p.status === "vacant");
-					break;
-				case "multi-unit":
-					filtered = filtered.filter((p) => p.isMultiUnit);
-					break;
-			}
-		}
-
-		return filtered;
-	}, [propertiesList, searchQuery, activeFilter]);
-
-	// Pagination
-	const paginatedProperties = useMemo(() => {
-		const start = (currentPage - 1) * rowsPerPage;
-		const end = start + rowsPerPage;
-		return filteredProperties.slice(start, end);
-	}, [filteredProperties, currentPage, rowsPerPage]);
-
-	const totalPages = Math.ceil(filteredProperties.length / rowsPerPage);
-
-	// Get rent status
-	const getRentStatus = (
-		property: Property,
-	): "overdue" | "due-soon" | "due-later" | null => {
+		// Property type filters
 		if (
-			!property.dueDate ||
-			!property.tenant ||
-			property.status !== "occupied"
+			["apartment_building", "house", "office", "land"].includes(activeFilter)
 		) {
-			return null;
+			input.type = activeFilter as PropertyType;
 		}
 
-		const now = new Date();
-		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-		const sevenDaysFromNow = new Date(today);
-		sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-		const due = new Date(property.dueDate);
+		// Category filters
+		if (activeFilter === "rent") {
+			input.category = "rent";
+		} else if (activeFilter === "sale") {
+			input.category = "sale";
+		}
 
-		if (due < today) return "overdue";
-		if (due >= today && due <= sevenDaysFromNow) return "due-soon";
-		if (due > sevenDaysFromNow) return "due-later";
-		return null;
+		return input;
+	}, [searchQuery, activeFilter, rowsPerPage, currentPage]);
+
+	// Fetch properties from backend
+	const {
+		data: propertiesData,
+		isLoading,
+		error,
+		refetch,
+	} = useProperties(queryInput);
+	const deleteProperty = useDeleteProperty();
+
+	const properties = propertiesData?.properties ?? [];
+	const total = propertiesData?.total ?? 0;
+	const totalPages = Math.ceil(total / rowsPerPage);
+
+	const handleDelete = (propertyId: string) => {
+		setSelectedPropertyId(propertyId);
+		setIsDeleteModalOpen(true);
 	};
 
-	const form = useForm({
-		defaultValues: {
-			address: "",
-			type: "Apartment" as Property["type"],
-			rent: "",
-			bedrooms: "",
-			bathrooms: "",
-			squareFeet: "",
-			status: "vacant" as Property["status"],
-		},
-		onSubmit: async ({ value }) => {
-			if (selectedProperty) {
-				// Update
-				setPropertiesList(
-					propertiesList.map((p) =>
-						p.id === selectedProperty.id
-							? {
-									...p,
-									address: value.address,
-									type: value.type,
-									rent: Number(value.rent),
-									bedrooms: Number(value.bedrooms),
-									bathrooms: Number(value.bathrooms),
-									squareFeet: Number(value.squareFeet),
-									status: value.status,
-								}
-							: p,
-					),
-				);
-				toast.success("Property updated successfully");
-			} else {
-				// Create
-				const newProperty: Property = {
-					id: propertiesList.length + 1,
-					address: value.address,
-					type: value.type,
-					tenant: null,
-					rent: Number(value.rent),
-					status: value.status,
-					occupancy: value.status === "occupied" ? "100%" : "0%",
-					bedrooms: Number(value.bedrooms),
-					bathrooms: Number(value.bathrooms),
-					squareFeet: Number(value.squareFeet),
-				};
-				setPropertiesList([...propertiesList, newProperty]);
-				toast.success("Property created successfully");
+	const confirmDelete = async () => {
+		if (selectedPropertyId) {
+			try {
+				await deleteProperty.mutateAsync({ id: selectedPropertyId });
+				toast.success("Imóvel excluído com sucesso");
+				setIsDeleteModalOpen(false);
+				setSelectedPropertyId(null);
+				refetch();
+			} catch (err) {
+				toast.error("Erro ao excluir imóvel");
+				console.error(err);
 			}
-			setIsModalOpen(false);
-			setSelectedProperty(null);
-			form.reset();
-		},
-		validators: {
-			onSubmit: z.object({
-				address: z.string().min(5, "Address is required"),
-				type: z.enum(["Apartment", "House", "Condo"]),
-				rent: z.string().regex(/^\d+$/, "Must be a valid number"),
-				bedrooms: z.string().regex(/^\d+$/, "Must be a valid number"),
-				bathrooms: z.string().regex(/^\d+$/, "Must be a valid number"),
-				squareFeet: z.string().regex(/^\d+$/, "Must be a valid number"),
-				status: z.enum(["occupied", "vacant", "maintenance"]),
-			}),
-		},
-	});
-
-	const handleCreate = () => {
-		setSelectedProperty(null);
-		form.reset();
-		setIsModalOpen(true);
-	};
-
-	const confirmDelete = () => {
-		if (selectedProperty) {
-			setPropertiesList(
-				propertiesList.filter((p) => p.id !== selectedProperty.id),
-			);
-			toast.success("Property deleted successfully");
-			setIsDeleteModalOpen(false);
-			setSelectedProperty(null);
 		}
 	};
 
-	const formatDueDate = (dateString?: string): string => {
-		if (!dateString) return "-";
-		const date = new Date(dateString);
-		return date
-			.toLocaleDateString("en-US", {
-				day: "numeric",
-				month: "short",
-				year: "numeric",
-			})
-			.toUpperCase();
+	const getPropertyIcon = (type: PropertyType) => {
+		switch (type) {
+			case "apartment_building":
+				return <Building2 className="h-6 w-6 text-gray-400" />;
+			case "house":
+				return <Home className="h-6 w-6 text-gray-400" />;
+			case "office":
+				return <Briefcase className="h-6 w-6 text-gray-400" />;
+			case "land":
+				return <Mountain className="h-6 w-6 text-gray-400" />;
+			default:
+				return <Home className="h-6 w-6 text-gray-400" />;
+		}
 	};
+
+	const formatPrice = (property: (typeof properties)[0]) => {
+		if (property.monthlyRent) {
+			return `${formatBRL(Number(property.monthlyRent))}/mês`;
+		}
+		if (property.askingPrice) {
+			return formatBRL(Number(property.askingPrice));
+		}
+		return "-";
+	};
+
+	if (error) {
+		return (
+			<div className="flex h-96 flex-col items-center justify-center space-y-4">
+				<p className="text-red-600">Erro ao carregar imóveis</p>
+				<Button color="primary" onPress={() => refetch()}>
+					Tentar novamente
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex justify-between items-center">
+			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">Properties</h1>
+					<h1 className="font-bold text-3xl text-gray-900">Imóveis</h1>
+					<p className="mt-1 text-gray-500 text-sm">
+						Gerencie todos os seus imóveis em um só lugar
+					</p>
 				</div>
 				<Button
 					color="primary"
-					startContent={<Plus className="w-4 h-4" />}
-					onPress={handleCreate}
+					startContent={<Plus className="h-4 w-4" />}
+					onPress={() => navigate("/dashboard/properties/new")}
 					size="lg"
-					className="bg-primary hover:bg-primary-600 text-white"
+					className="bg-primary text-white hover:bg-primary-600"
 				>
-					Add property
+					Novo Imóvel
 				</Button>
 			</div>
 
 			{/* Filters */}
-			<div className="flex items-center gap-1 border-b border-gray-200 pb-0">
+			<div className="flex items-center gap-1 border-gray-200 border-b pb-0">
 				<button
 					type="button"
-					onClick={() => setActiveFilter("all")}
-					className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+					onClick={() => {
+						setActiveFilter("all");
+						setCurrentPage(1);
+					}}
+					className={`relative px-4 py-2 font-medium text-sm transition-colors ${
 						activeFilter === "all"
-							? "text-primary border-b-2 border-primary"
+							? "border-primary border-b-2 text-primary"
 							: "text-gray-600 hover:text-gray-900"
 					}`}
 				>
-					All
+					Todos
 				</button>
 				<button
 					type="button"
-					onClick={() => setActiveFilter("overdue")}
-					className={`px-4 py-2 text-sm font-medium transition-colors relative flex items-center gap-2 ${
-						activeFilter === "overdue"
-							? "text-primary border-b-2 border-primary"
+					onClick={() => {
+						setActiveFilter("apartment_building");
+						setCurrentPage(1);
+					}}
+					className={`relative flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
+						activeFilter === "apartment_building"
+							? "border-primary border-b-2 text-primary"
 							: "text-gray-600 hover:text-gray-900"
 					}`}
 				>
-					Rent overdue
-					{filterCounts.overdue > 0 && (
-						<span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-							{filterCounts.overdue}
-						</span>
-					)}
+					Apartamentos
 				</button>
 				<button
 					type="button"
-					onClick={() => setActiveFilter("due-soon")}
-					className={`px-4 py-2 text-sm font-medium transition-colors relative flex items-center gap-2 ${
-						activeFilter === "due-soon"
-							? "text-primary border-b-2 border-primary"
+					onClick={() => {
+						setActiveFilter("house");
+						setCurrentPage(1);
+					}}
+					className={`relative flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
+						activeFilter === "house"
+							? "border-primary border-b-2 text-primary"
 							: "text-gray-600 hover:text-gray-900"
 					}`}
 				>
-					Rent due soon
-					{filterCounts["due-soon"] > 0 && (
-						<span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-							{filterCounts["due-soon"]}
-						</span>
-					)}
+					Casas
 				</button>
 				<button
 					type="button"
-					onClick={() => setActiveFilter("due-later")}
-					className={`px-4 py-2 text-sm font-medium transition-colors relative flex items-center gap-2 ${
-						activeFilter === "due-later"
-							? "text-primary border-b-2 border-primary"
+					onClick={() => {
+						setActiveFilter("office");
+						setCurrentPage(1);
+					}}
+					className={`relative flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
+						activeFilter === "office"
+							? "border-primary border-b-2 text-primary"
 							: "text-gray-600 hover:text-gray-900"
 					}`}
 				>
-					Rent due later
-					{filterCounts["due-later"] > 0 && (
-						<span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-							{filterCounts["due-later"]}
-						</span>
-					)}
+					Comerciais
 				</button>
 				<button
 					type="button"
-					onClick={() => setActiveFilter("vacant")}
-					className={`px-4 py-2 text-sm font-medium transition-colors relative flex items-center gap-2 ${
-						activeFilter === "vacant"
-							? "text-primary border-b-2 border-primary"
+					onClick={() => {
+						setActiveFilter("land");
+						setCurrentPage(1);
+					}}
+					className={`relative flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
+						activeFilter === "land"
+							? "border-primary border-b-2 text-primary"
 							: "text-gray-600 hover:text-gray-900"
 					}`}
 				>
-					Vacant
-					{filterCounts.vacant > 0 && (
-						<span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-							{filterCounts.vacant}
-						</span>
-					)}
+					Terrenos
+				</button>
+				<div className="mx-2 h-6 w-px bg-gray-300" />
+				<button
+					type="button"
+					onClick={() => {
+						setActiveFilter("rent");
+						setCurrentPage(1);
+					}}
+					className={`relative flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
+						activeFilter === "rent"
+							? "border-primary border-b-2 text-primary"
+							: "text-gray-600 hover:text-gray-900"
+					}`}
+				>
+					Para Aluguel
 				</button>
 				<button
 					type="button"
-					onClick={() => setActiveFilter("multi-unit")}
-					className={`px-4 py-2 text-sm font-medium transition-colors relative flex items-center gap-2 ${
-						activeFilter === "multi-unit"
-							? "text-primary border-b-2 border-primary"
+					onClick={() => {
+						setActiveFilter("sale");
+						setCurrentPage(1);
+					}}
+					className={`relative flex items-center gap-2 px-4 py-2 font-medium text-sm transition-colors ${
+						activeFilter === "sale"
+							? "border-primary border-b-2 text-primary"
 							: "text-gray-600 hover:text-gray-900"
 					}`}
 				>
-					Multi-Unit
-					{filterCounts["multi-unit"] > 0 && (
-						<span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-							{filterCounts["multi-unit"]}
-						</span>
-					)}
+					Para Venda
 				</button>
 			</div>
 
 			{/* Search Bar */}
 			<Input
-				placeholder="Search address or tenants"
+				placeholder="Buscar por nome, endereço ou cidade..."
 				value={searchQuery}
-				onValueChange={setSearchQuery}
-				startContent={<Search className="w-4 h-4 text-gray-400" />}
+				onValueChange={(value) => {
+					setSearchQuery(value);
+					setCurrentPage(1);
+				}}
+				startContent={<Search className="h-4 w-4 text-gray-400" />}
 				classNames={{
 					input: "text-sm",
-					inputWrapper: "bg-white border-gray-200 hover:border-gray-300",
+					inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
 				}}
 				className="max-w-md"
 			/>
@@ -396,68 +322,63 @@ export default function PropertiesPage() {
 			{/* Properties Table */}
 			<Card className="border border-gray-200 shadow-sm">
 				<CardBody className="p-0">
-					<Table
-						aria-label="Properties table"
-						removeWrapper
-						classNames={{
-							base: "min-h-[400px]",
-							table: "min-h-[400px]",
-							thead: "[&>tr]:first:shadow-none",
-							th: "bg-gray-50 text-gray-700 font-semibold text-xs uppercase tracking-wider border-b border-gray-200",
-							td: "border-b border-gray-100",
-						}}
-					>
-						<TableHeader>
-							<TableColumn>PROPERTY</TableColumn>
-							<TableColumn>TENANTS</TableColumn>
-							<TableColumn>DUE DATE</TableColumn>
-							<TableColumn>RENT DUE</TableColumn>
-							<TableColumn>STATUS</TableColumn>
-						</TableHeader>
-						<TableBody emptyContent="No properties found">
-							{paginatedProperties.map((property) => {
-								const rentStatus = getRentStatus(property);
-								const isOverdue = rentStatus === "overdue";
-
-								return (
+					{isLoading ? (
+						<div className="flex items-center justify-center py-20">
+							<Spinner size="lg" />
+						</div>
+					) : (
+						<Table
+							aria-label="Tabela de imóveis"
+							removeWrapper
+							classNames={{
+								base: "min-h-[400px]",
+								table: "min-h-[400px]",
+								thead: "[&>tr]:first:shadow-none",
+								th: "border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-700",
+								td: "border-b border-gray-100",
+							}}
+						>
+							<TableHeader>
+								<TableColumn>IMÓVEL</TableColumn>
+								<TableColumn>TIPO</TableColumn>
+								<TableColumn>FINALIDADE</TableColumn>
+								<TableColumn>UNIDADES</TableColumn>
+								<TableColumn>VALOR</TableColumn>
+								<TableColumn>STATUS</TableColumn>
+								<TableColumn width={50}>AÇÕES</TableColumn>
+							</TableHeader>
+							<TableBody emptyContent="Nenhum imóvel encontrado. Cadastre seu primeiro imóvel!">
+								{properties.map((property) => (
 									<TableRow
 										key={property.id}
-										className="hover:bg-gray-50 transition-colors"
+										className="transition-colors hover:bg-gray-50"
 									>
 										<TableCell>
 											<Link
 												to={`/dashboard/properties/${property.id}`}
-												className="flex items-center gap-4 no-underline text-inherit hover:text-inherit"
+												className="flex items-center gap-4 text-inherit no-underline hover:text-inherit"
 											>
 												{/* Property Image */}
-												<div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 flex-shrink-0">
-													{property.image ? (
+												<div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-gray-200 to-gray-300">
+													{property.coverImage ? (
 														<img
-															src={property.image}
-															alt={property.address}
-															className="w-full h-full object-cover"
+															src={property.coverImage}
+															alt={property.name}
+															className="h-full w-full object-cover"
 														/>
 													) : (
-														<div className="w-full h-full flex items-center justify-center">
-															{property.isMultiUnit ? (
-																<Building2 className="w-6 h-6 text-gray-400" />
-															) : (
-																<Home className="w-6 h-6 text-gray-400" />
-															)}
-														</div>
+														getPropertyIcon(property.type as PropertyType)
 													)}
 												</div>
 												{/* Property Info */}
-												<div className="flex-1 min-w-0">
-													<p className="font-semibold text-gray-900 truncate">
-														{property.address.split(",")[0]}
+												<div className="min-w-0 flex-1">
+													<p className="truncate font-semibold text-gray-900">
+														{property.name}
 													</p>
-													<p className="text-sm text-gray-500 truncate">
-														{property.address
-															.split(",")
-															.slice(1)
-															.join(",")
-															.trim() || property.type}
+													<p className="truncate text-gray-500 text-sm">
+														{property.address}
+														{property.city && `, ${property.city}`}
+														{property.state && ` - ${property.state}`}
 													</p>
 												</div>
 											</Link>
@@ -465,11 +386,46 @@ export default function PropertiesPage() {
 										<TableCell>
 											<Link
 												to={`/dashboard/properties/${property.id}`}
-												className="no-underline text-inherit hover:text-inherit block"
+												className="block text-inherit no-underline hover:text-inherit"
 											>
-												{property.tenant ? (
+												<span className="text-gray-900">
+													{PROPERTY_TYPE_LABELS[property.type as PropertyType]}
+												</span>
+											</Link>
+										</TableCell>
+										<TableCell>
+											<Link
+												to={`/dashboard/properties/${property.id}`}
+												className="block text-inherit no-underline hover:text-inherit"
+											>
+												<Chip
+													size="sm"
+													variant="flat"
+													color={
+														property.category === "rent"
+															? "primary"
+															: property.category === "sale"
+																? "secondary"
+																: "default"
+													}
+												>
+													{
+														PROPERTY_CATEGORY_LABELS[
+															property.category as PropertyCategory
+														]
+													}
+												</Chip>
+											</Link>
+										</TableCell>
+										<TableCell>
+											<Link
+												to={`/dashboard/properties/${property.id}`}
+												className="block text-inherit no-underline hover:text-inherit"
+											>
+												{property.unitCount && property.unitCount > 0 ? (
 													<span className="text-gray-900">
-														{property.tenant}
+														{property.occupiedUnits}/{property.unitCount}{" "}
+														ocupadas
 													</span>
 												) : (
 													<span className="text-gray-400">-</span>
@@ -479,78 +435,95 @@ export default function PropertiesPage() {
 										<TableCell>
 											<Link
 												to={`/dashboard/properties/${property.id}`}
-												className="no-underline text-inherit hover:text-inherit block"
+												className="block text-inherit no-underline hover:text-inherit"
 											>
-												{property.dueDate && property.tenant ? (
-													<span className="text-gray-900">
-														{formatDueDate(property.dueDate)}
-													</span>
-												) : (
-													<span className="text-gray-400">-</span>
-												)}
+												<span className="font-semibold text-gray-900">
+													{formatPrice(property)}
+												</span>
 											</Link>
 										</TableCell>
 										<TableCell>
 											<Link
 												to={`/dashboard/properties/${property.id}`}
-												className="no-underline text-inherit hover:text-inherit block"
+												className="block text-inherit no-underline hover:text-inherit"
 											>
-												{property.tenant ? (
-													<span className="font-semibold text-gray-900">
-														{formatCurrency(property.rent)}
-													</span>
-												) : (
-													<span className="text-gray-400">-</span>
-												)}
+												<Chip
+													size="sm"
+													variant="flat"
+													color={
+														property.status === "active"
+															? "success"
+															: property.status === "rented"
+																? "primary"
+																: property.status === "sold"
+																	? "secondary"
+																	: "default"
+													}
+												>
+													{
+														PROPERTY_STATUS_LABELS[
+															property.status as PropertyStatus
+														]
+													}
+												</Chip>
 											</Link>
 										</TableCell>
 										<TableCell>
-											<Link
-												to={`/dashboard/properties/${property.id}`}
-												className="no-underline text-inherit hover:text-inherit block"
-											>
-												{isOverdue ? (
-													<Chip
-														size="sm"
+											<Dropdown>
+												<DropdownTrigger>
+													<Button isIconOnly variant="light" size="sm">
+														<MoreVertical className="h-4 w-4" />
+													</Button>
+												</DropdownTrigger>
+												<DropdownMenu
+													aria-label="Ações do imóvel"
+													onAction={(key) => {
+														if (key === "view") {
+															navigate(`/dashboard/properties/${property.id}`);
+														} else if (key === "edit") {
+															navigate(
+																`/dashboard/properties/${property.id}/edit`,
+															);
+														} else if (key === "delete") {
+															handleDelete(property.id);
+														}
+													}}
+												>
+													<DropdownItem
+														key="view"
+														startContent={<Eye className="h-4 w-4" />}
+													>
+														Ver Detalhes
+													</DropdownItem>
+													<DropdownItem
+														key="edit"
+														startContent={<Pencil className="h-4 w-4" />}
+													>
+														Editar
+													</DropdownItem>
+													<DropdownItem
+														key="delete"
+														className="text-danger"
 														color="danger"
-														variant="flat"
-														className="font-semibold"
+														startContent={<Trash2 className="h-4 w-4" />}
 													>
-														OVERDUE
-													</Chip>
-												) : property.status === "vacant" ? (
-													<Chip
-														size="sm"
-														color="default"
-														variant="flat"
-														className="font-semibold"
-													>
-														VACANT
-													</Chip>
-												) : (
-													<Chip
-														size="sm"
-														color="success"
-														variant="flat"
-														className="font-semibold"
-													>
-														OCCUPIED
-													</Chip>
-												)}
-											</Link>
+														Excluir
+													</DropdownItem>
+												</DropdownMenu>
+											</Dropdown>
 										</TableCell>
 									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
+								))}
+							</TableBody>
+						</Table>
+					)}
 				</CardBody>
 			</Card>
 
 			{/* Pagination */}
 			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2 text-sm text-gray-600">
-					<span>Rows per page:</span>
+				<div className="flex items-center gap-2 text-gray-600 text-sm">
+					<span>Linhas por página:</span>
 					<Select
 						selectedKeys={[rowsPerPage.toString()]}
 						onSelectionChange={(keys) => {
@@ -568,10 +541,15 @@ export default function PropertiesPage() {
 					</Select>
 				</div>
 				<div className="flex items-center gap-4">
-					<span className="text-sm text-gray-600">
-						{(currentPage - 1) * rowsPerPage + 1}-
-						{Math.min(currentPage * rowsPerPage, filteredProperties.length)} of{" "}
-						{filteredProperties.length}
+					<span className="text-gray-600 text-sm">
+						{total > 0 ? (
+							<>
+								{(currentPage - 1) * rowsPerPage + 1}-
+								{Math.min(currentPage * rowsPerPage, total)} de {total}
+							</>
+						) : (
+							"0 resultados"
+						)}
 					</span>
 					<div className="flex gap-1">
 						<Button
@@ -594,220 +572,24 @@ export default function PropertiesPage() {
 				</div>
 			</div>
 
-			{/* Create/Edit Modal */}
-			<CrudModal
-				isOpen={isModalOpen}
-				onClose={() => {
-					setIsModalOpen(false);
-					setSelectedProperty(null);
-					form.reset();
-				}}
-				title={selectedProperty ? "Edit Property" : "Add New Property"}
-				onSave={() => form.handleSubmit()}
-				saveLabel={selectedProperty ? "Update" : "Create"}
-				isLoading={form.state.isSubmitting}
-			>
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						form.handleSubmit();
-					}}
-					className="space-y-4"
-				>
-					<div>
-						<form.Field name="address">
-							{(field) => (
-								<div className="space-y-2">
-									<Label htmlFor={field.name}>Address *</Label>
-									<Input
-										id={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onValueChange={(e) => field.handleChange(e)}
-										placeholder="123 Main St, Apt 2B"
-									/>
-									{field.state.meta.errors.map((error) => (
-										<p key={error?.message} className="text-sm text-danger">
-											{error?.message}
-										</p>
-									))}
-								</div>
-							)}
-						</form.Field>
-					</div>
-
-					<div className="grid grid-cols-2 gap-4">
-						<div>
-							<form.Field name="type">
-								{(field) => (
-									<div className="space-y-2">
-										<Label htmlFor={field.name}>Type *</Label>
-										<Select
-											selectedKeys={[field.state.value]}
-											onSelectionChange={(keys) =>
-												field.handleChange(
-													Array.from(keys)[0] as Property["type"],
-												)
-											}
-										>
-											<SelectItem key="Apartment">Apartment</SelectItem>
-											<SelectItem key="House">House</SelectItem>
-											<SelectItem key="Condo">Condo</SelectItem>
-										</Select>
-										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
-												{error?.message}
-											</p>
-										))}
-									</div>
-								)}
-							</form.Field>
-						</div>
-
-						<div>
-							<form.Field name="status">
-								{(field) => (
-									<div className="space-y-2">
-										<Label htmlFor={field.name}>Status *</Label>
-										<Select
-											selectedKeys={[field.state.value]}
-											onSelectionChange={(keys) =>
-												field.handleChange(
-													Array.from(keys)[0] as Property["status"],
-												)
-											}
-										>
-											<SelectItem key="occupied">Occupied</SelectItem>
-											<SelectItem key="vacant">Vacant</SelectItem>
-											<SelectItem key="maintenance">Maintenance</SelectItem>
-										</Select>
-										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
-												{error?.message}
-											</p>
-										))}
-									</div>
-								)}
-							</form.Field>
-						</div>
-					</div>
-
-					<div>
-						<form.Field name="rent">
-							{(field) => (
-								<div className="space-y-2">
-									<Label htmlFor={field.name}>Monthly Rent *</Label>
-									<Input
-										id={field.name}
-										type="number"
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onValueChange={(e) => field.handleChange(e)}
-										placeholder="2500"
-										startContent="$"
-									/>
-									{field.state.meta.errors.map((error) => (
-										<p key={error?.message} className="text-sm text-danger">
-											{error?.message}
-										</p>
-									))}
-								</div>
-							)}
-						</form.Field>
-					</div>
-
-					<div className="grid grid-cols-3 gap-4">
-						<div>
-							<form.Field name="bedrooms">
-								{(field) => (
-									<div className="space-y-2">
-										<Label htmlFor={field.name}>Bedrooms *</Label>
-										<Input
-											id={field.name}
-											type="number"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onValueChange={(e) => field.handleChange(e)}
-											placeholder="2"
-										/>
-										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
-												{error?.message}
-											</p>
-										))}
-									</div>
-								)}
-							</form.Field>
-						</div>
-
-						<div>
-							<form.Field name="bathrooms">
-								{(field) => (
-									<div className="space-y-2">
-										<Label htmlFor={field.name}>Bathrooms *</Label>
-										<Input
-											id={field.name}
-											type="number"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onValueChange={(e) => field.handleChange(e)}
-											placeholder="1"
-										/>
-										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
-												{error?.message}
-											</p>
-										))}
-									</div>
-								)}
-							</form.Field>
-						</div>
-
-						<div>
-							<form.Field name="squareFeet">
-								{(field) => (
-									<div className="space-y-2">
-										<Label htmlFor={field.name}>Square Feet *</Label>
-										<Input
-											id={field.name}
-											type="number"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onValueChange={(e) => field.handleChange(e)}
-											placeholder="850"
-										/>
-										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
-												{error?.message}
-											</p>
-										))}
-									</div>
-								)}
-							</form.Field>
-						</div>
-					</div>
-				</form>
-			</CrudModal>
-
 			{/* Delete Confirmation Modal */}
 			<CrudModal
 				isOpen={isDeleteModalOpen}
 				onClose={() => {
 					setIsDeleteModalOpen(false);
-					setSelectedProperty(null);
+					setSelectedPropertyId(null);
 				}}
-				title="Delete Property"
+				title="Excluir Imóvel"
 				onDelete={confirmDelete}
-				deleteLabel="Delete"
+				deleteLabel="Excluir"
 				size="md"
+				isLoading={deleteProperty.isPending}
 			>
 				<p>
-					Are you sure you want to delete{" "}
-					<strong>{selectedProperty?.address}</strong>? This action cannot be
-					undone.
+					Tem certeza que deseja excluir este imóvel? Esta ação não pode ser
+					desfeita.
 				</p>
 			</CrudModal>
 		</div>
 	);
 }
-

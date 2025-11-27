@@ -1,5 +1,5 @@
 import { Button } from "@heroui/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type PageHeaderProps = {
 	title: string;
@@ -9,15 +9,12 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
 	return (
-		<div className="flex justify-between items-center">
+		<div className="flex items-center justify-between">
 			<div>
-				<h1 className="text-3xl font-bold">{title}</h1>
-				{subtitle && (
-					<p className="text-muted-foreground mt-1">{subtitle}</p>
-				)}
+				<h1 className="font-bold text-3xl">{title}</h1>
+				{subtitle && <p className="mt-1 text-muted-foreground">{subtitle}</p>}
 			</div>
 			{actions && <div className="flex gap-2">{actions}</div>}
 		</div>
 	);
 }
-

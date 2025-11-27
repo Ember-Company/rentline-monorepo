@@ -1,6 +1,6 @@
-import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
 type ProfileUpdateInput = {
@@ -45,4 +45,3 @@ export function useProfile() {
 		isUpdating: updateProfileMutation.isPending,
 	};
 }
-

@@ -1,25 +1,70 @@
 model Property {
-  id            String   @id @default(uuid())
-  agencyId      String?
-  landlordId    String
-  landlord      User     @relation("PropertyLandlord", fields: [landlordId], references: [id], onDelete: Cascade)
-  name          String
-  address       String
-  type          String   // building, office, etc.
-  description   String?
+  id             String       @id @default(uuid())
   organizationId String
-  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  landlordId     String
+  landlord       User         @relation("PropertyLandlord", fields: [landlordId], references: [id], onDelete: Cascade)
+  
+  // Basic info
+  name           String
+  type           String       // apartment_building, house, office, land
+  category       String       @default("rent") // rent, sale, both
+  status         String       @default("active") // active, inactive, sold, rented
+  
+  // Location
+  address        String
+  city           String?
+  state          String?
+  postalCode     String?
+  country        String?
+  latitude       Decimal?
+  longitude      Decimal?
+  
+  // Description
+  description    String?
+  features       String?      // JSON array of features
+  amenities      String?      // JSON array of amenities
+  
+  // Physical characteristics
+  totalArea      Decimal?     // Total area in sqft or m2
+  usableArea     Decimal?     // Usable area
+  lotSize        Decimal?     // For houses and land
+  floors         Int?         // Number of floors
+  yearBuilt      Int?
+  parkingSpaces  Int?
+  
+  // For houses/single units
+  bedrooms       Int?
+  bathrooms      Decimal?
+  
+  // Financial
+  purchasePrice  Decimal?     // What the property was bought for
+  currentValue   Decimal?     // Current market value
+  askingPrice    Decimal?     // For sale
+  monthlyRent    Decimal?     // For rent (base rent for whole property or individual)
+  currencyId     String?
+  currency       Currency?    @relation(fields: [currencyId], references: [id])
+  
+  // Images
+  coverImage     String?
+  images         String?      // JSON array of image URLs
+  
+  // Timestamps
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
   // Relations
-  units         Unit[]
-  expenses      Expense[]
-  documents     Document[]
-  contacts      PropertyContact[]
+  units          Unit[]
+  expenses       Expense[]
+  documents      Document[]
+  contacts       PropertyContact[]
+  leases         Lease[]      @relation("PropertyLease")
 
   @@index([landlordId])
   @@index([organizationId])
   @@index([type])
+  @@index([category])
+  @@index([status])
+  @@index([currencyId])
   @@map("property")
 }
-

@@ -1,9 +1,9 @@
-import { Card, CardBody, CardHeader, Button, Input } from "@heroui/react";
-import { User, Save } from "lucide-react";
+import { Button, Card, CardBody, CardHeader, Input } from "@heroui/react";
+import { useForm } from "@tanstack/react-form";
+import { Save, User } from "lucide-react";
+import { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { useProfile } from "@/hooks/use-profile";
-import { useForm } from "@tanstack/react-form";
-import { useEffect } from "react";
 
 export function ProfileSettings() {
 	const { profile, updateProfile, isUpdating } = useProfile();
@@ -67,14 +67,14 @@ export function ProfileSettings() {
 		<Card className="border border-gray-200 shadow-sm">
 			<CardHeader>
 				<div>
-					<h2 className="text-xl font-semibold">Profile Information</h2>
-					<p className="text-sm text-gray-600">
+					<h2 className="font-semibold text-xl">Profile Information</h2>
+					<p className="text-gray-600 text-sm">
 						Update your personal information and preferences
 					</p>
 				</div>
 			</CardHeader>
 			<CardBody className="space-y-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<form.Field name="name">
 						{(field) => (
 							<div className="space-y-2">
@@ -119,7 +119,7 @@ export function ProfileSettings() {
 					</form.Field>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<form.Field name="dateOfBirth">
 						{(field) => (
 							<div className="space-y-2">
@@ -169,7 +169,7 @@ export function ProfileSettings() {
 					)}
 				</form.Field>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<form.Field name="city">
 						{(field) => (
 							<div className="space-y-2">
@@ -227,7 +227,7 @@ export function ProfileSettings() {
 					</form.Field>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<form.Field name="country">
 						{(field) => (
 							<div className="space-y-2">
@@ -261,10 +261,10 @@ export function ProfileSettings() {
 					</form.Field>
 				</div>
 
-				<div className="flex justify-end pt-4 border-t">
+				<div className="flex justify-end border-t pt-4">
 					<Button
 						color="primary"
-						startContent={<Save className="w-4 h-4" />}
+						startContent={<Save className="h-4 w-4" />}
 						onPress={() => form.handleSubmit()}
 						isLoading={isUpdating}
 					>
@@ -275,4 +275,3 @@ export function ProfileSettings() {
 		</Card>
 	);
 }
-

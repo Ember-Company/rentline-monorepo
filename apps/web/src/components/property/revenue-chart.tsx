@@ -37,8 +37,8 @@ export function RevenueChart({
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex justify-between items-center pb-2">
-				<h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+			<CardHeader className="flex items-center justify-between pb-2">
+				<h3 className="font-semibold text-gray-900 text-lg">{title}</h3>
 				<Select
 					selectedKeys={[period]}
 					onSelectionChange={(keys) => {
@@ -56,37 +56,43 @@ export function RevenueChart({
 			</CardHeader>
 			<CardBody className="pt-0">
 				{/* Legend */}
-				<div className="flex gap-6 mb-4 text-sm">
+				<div className="mb-4 flex gap-6 text-sm">
 					<div className="flex items-center gap-2">
-						<div className="w-3 h-3 rounded bg-purple-300" />
-						<span className="text-gray-600">Income: {formatCurrency(totalIncome)}</span>
+						<div className="h-3 w-3 rounded bg-purple-300" />
+						<span className="text-gray-600">
+							Income: {formatCurrency(totalIncome)}
+						</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<div className="w-3 h-3 rounded bg-blue-500" />
-						<span className="text-gray-600">Expense: {formatCurrency(totalExpense)}</span>
+						<div className="h-3 w-3 rounded bg-blue-500" />
+						<span className="text-gray-600">
+							Expense: {formatCurrency(totalExpense)}
+						</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<div className="w-3 h-3 rounded bg-purple-600" />
-						<span className="text-gray-600">Revenue: {formatCurrency(totalRevenue)}</span>
+						<div className="h-3 w-3 rounded bg-purple-600" />
+						<span className="text-gray-600">
+							Revenue: {formatCurrency(totalRevenue)}
+						</span>
 					</div>
 				</div>
 
 				<div className="relative overflow-x-auto">
 					<div style={{ minWidth: `${chartWidth}px`, height: `${height}px` }}>
 						{/* Y-axis labels */}
-						<div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 pr-2 w-12">
+						<div className="absolute top-0 bottom-0 left-0 flex w-12 flex-col justify-between pr-2 text-gray-500 text-xs">
 							<span>${(maxValue / 1000).toFixed(0)}K</span>
 							<span>${(maxValue / 2000).toFixed(0)}K</span>
 							<span>$0K</span>
 						</div>
 
 						{/* Chart area */}
-						<div className="ml-12 h-full relative">
+						<div className="relative ml-12 h-full">
 							{/* Grid lines */}
 							<div className="absolute inset-0 flex flex-col justify-between">
-								<div className="border-t border-gray-200" />
-								<div className="border-t border-gray-200" />
-								<div className="border-t border-gray-200" />
+								<div className="border-gray-200 border-t" />
+								<div className="border-gray-200 border-t" />
+								<div className="border-gray-200 border-t" />
 							</div>
 
 							{/* Bars */}
@@ -138,7 +144,7 @@ export function RevenueChart({
 							</svg>
 
 							{/* X-axis labels */}
-							<div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500 pt-2 px-2">
+							<div className="absolute right-0 bottom-0 left-0 flex justify-between px-2 pt-2 text-gray-500 text-xs">
 								{data.map((d, i) => (
 									<span key={i} className="flex-1 text-center">
 										{d.month}
@@ -161,4 +167,3 @@ function formatCurrency(amount: number): string {
 		maximumFractionDigits: 0,
 	}).format(amount);
 }
-

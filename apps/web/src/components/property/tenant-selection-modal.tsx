@@ -1,32 +1,35 @@
 import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalBody,
-	ModalFooter,
+	Avatar,
 	Button,
+	Chip,
 	Input,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
 	Select,
 	SelectItem,
-	Tabs,
 	Tab,
 	Table,
-	TableHeader,
-	TableColumn,
 	TableBody,
-	TableRow,
 	TableCell,
-	Avatar,
-	Chip,
+	TableColumn,
+	TableHeader,
+	TableRow,
+	Tabs,
 } from "@heroui/react";
-import { Search, Plus } from "lucide-react";
-import { useState, useMemo } from "react";
 import { useForm } from "@tanstack/react-form";
-import { Label } from "@/components/ui/label";
-import { tenantEntities, type TenantEntity } from "@/lib/mock-data/tenants-entities";
-import type { PropertyDetail } from "@/lib/mock-data/property-types";
+import { Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import { Label } from "@/components/ui/label";
+import type { PropertyDetail } from "@/lib/mock-data/property-types";
+import {
+	type TenantEntity,
+	tenantEntities,
+} from "@/lib/mock-data/tenants-entities";
 
 interface TenantSelectionModalProps {
 	isOpen: boolean;
@@ -44,7 +47,9 @@ export function TenantSelectionModal({
 	const [activeTab, setActiveTab] = useState<"select" | "create">("select");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-	const [selectedUnitId, setSelectedUnitId] = useState<string | undefined>(undefined);
+	const [selectedUnitId, setSelectedUnitId] = useState<string | undefined>(
+		undefined,
+	);
 
 	const filteredTenants = useMemo(() => {
 		if (!searchQuery) return tenantEntities;
@@ -110,7 +115,9 @@ export function TenantSelectionModal({
 				<ModalBody>
 					<Tabs
 						selectedKey={activeTab}
-						onSelectionChange={(key) => setActiveTab(key as "select" | "create")}
+						onSelectionChange={(key) =>
+							setActiveTab(key as "select" | "create")
+						}
 						aria-label="Tenant selection tabs"
 					>
 						<Tab key="select" title="Select Existing">
@@ -126,30 +133,31 @@ export function TenantSelectionModal({
 									}}
 								/>
 
-								{property.type === "apartments" && availableUnits.length > 0 && (
-									<div>
-										<Label>Select Unit (Optional)</Label>
-										<Select
-											selectedKeys={selectedUnitId ? [selectedUnitId] : []}
-											onSelectionChange={(keys) => {
-												const unitId = Array.from(keys)[0] as string;
-												setSelectedUnitId(unitId || undefined);
-											}}
-											placeholder="Select unit"
-										>
-											{availableUnits.map((unit) => (
-												<SelectItem key={unit.id}>
-													{unit.unitNumber} - {unit.type}
-												</SelectItem>
-											))}
-										</Select>
-									</div>
-								)}
+								{property.type === "apartments" &&
+									availableUnits.length > 0 && (
+										<div>
+											<Label>Select Unit (Optional)</Label>
+											<Select
+												selectedKeys={selectedUnitId ? [selectedUnitId] : []}
+												onSelectionChange={(keys) => {
+													const unitId = Array.from(keys)[0] as string;
+													setSelectedUnitId(unitId || undefined);
+												}}
+												placeholder="Select unit"
+											>
+												{availableUnits.map((unit) => (
+													<SelectItem key={unit.id}>
+														{unit.unitNumber} - {unit.type}
+													</SelectItem>
+												))}
+											</Select>
+										</div>
+									)}
 
-								<div className="border border-gray-200 rounded-lg max-h-96 overflow-y-auto">
+								<div className="max-h-96 overflow-y-auto rounded-lg border border-gray-200">
 									<Table aria-label="Tenants table" removeWrapper>
 										<TableHeader>
-											<TableColumn width={50}></TableColumn>
+											<TableColumn width={50} />
 											<TableColumn>NAME</TableColumn>
 											<TableColumn>EMAIL</TableColumn>
 											<TableColumn>PHONE</TableColumn>
@@ -159,7 +167,11 @@ export function TenantSelectionModal({
 											{filteredTenants.map((tenant) => (
 												<TableRow
 													key={tenant.id}
-													className={selectedTenantId === tenant.id ? "bg-primary-50" : ""}
+													className={
+														selectedTenantId === tenant.id
+															? "bg-primary-50"
+															: ""
+													}
 													onClick={() => setSelectedTenantId(tenant.id)}
 												>
 													<TableCell>
@@ -177,19 +189,29 @@ export function TenantSelectionModal({
 																size="sm"
 																className="bg-orange-100 text-orange-600"
 															/>
-															<span className="text-sm font-medium">{tenant.name}</span>
+															<span className="font-medium text-sm">
+																{tenant.name}
+															</span>
 														</div>
 													</TableCell>
 													<TableCell>
-														<span className="text-sm text-gray-600">{tenant.email}</span>
+														<span className="text-gray-600 text-sm">
+															{tenant.email}
+														</span>
 													</TableCell>
 													<TableCell>
-														<span className="text-sm text-gray-600">{tenant.phone}</span>
+														<span className="text-gray-600 text-sm">
+															{tenant.phone}
+														</span>
 													</TableCell>
 													<TableCell>
 														<Chip
 															size="sm"
-															color={tenant.status === "active" ? "success" : "default"}
+															color={
+																tenant.status === "active"
+																	? "success"
+																	: "default"
+															}
 															variant="flat"
 														>
 															{tenant.status}
@@ -223,7 +245,10 @@ export function TenantSelectionModal({
 													placeholder="John Doe"
 												/>
 												{field.state.meta.errors.map((error) => (
-													<p key={error?.message} className="text-sm text-danger">
+													<p
+														key={error?.message}
+														className="text-danger text-sm"
+													>
 														{error?.message}
 													</p>
 												))}
@@ -244,7 +269,10 @@ export function TenantSelectionModal({
 													placeholder="john@example.com"
 												/>
 												{field.state.meta.errors.map((error) => (
-													<p key={error?.message} className="text-sm text-danger">
+													<p
+														key={error?.message}
+														className="text-danger text-sm"
+													>
 														{error?.message}
 													</p>
 												))}
@@ -265,7 +293,7 @@ export function TenantSelectionModal({
 												placeholder="+1 (555) 123-4567"
 											/>
 											{field.state.meta.errors.map((error) => (
-												<p key={error?.message} className="text-sm text-danger">
+												<p key={error?.message} className="text-danger text-sm">
 													{error?.message}
 												</p>
 											))}
@@ -273,25 +301,26 @@ export function TenantSelectionModal({
 									)}
 								</createForm.Field>
 
-								{property.type === "apartments" && availableUnits.length > 0 && (
-									<div>
-										<Label>Select Unit (Optional)</Label>
-										<Select
-											selectedKeys={selectedUnitId ? [selectedUnitId] : []}
-											onSelectionChange={(keys) => {
-												const unitId = Array.from(keys)[0] as string;
-												setSelectedUnitId(unitId || undefined);
-											}}
-											placeholder="Select unit"
-										>
-											{availableUnits.map((unit) => (
-												<SelectItem key={unit.id}>
-													{unit.unitNumber} - {unit.type}
-												</SelectItem>
-											))}
-										</Select>
-									</div>
-								)}
+								{property.type === "apartments" &&
+									availableUnits.length > 0 && (
+										<div>
+											<Label>Select Unit (Optional)</Label>
+											<Select
+												selectedKeys={selectedUnitId ? [selectedUnitId] : []}
+												onSelectionChange={(keys) => {
+													const unitId = Array.from(keys)[0] as string;
+													setSelectedUnitId(unitId || undefined);
+												}}
+												placeholder="Select unit"
+											>
+												{availableUnits.map((unit) => (
+													<SelectItem key={unit.id}>
+														{unit.unitNumber} - {unit.type}
+													</SelectItem>
+												))}
+											</Select>
+										</div>
+									)}
 							</form>
 						</Tab>
 					</Tabs>
@@ -318,4 +347,3 @@ export function TenantSelectionModal({
 		</Modal>
 	);
 }
-

@@ -1,10 +1,10 @@
 import { Button, Input } from "@heroui/react";
-import { Label } from "@/components/ui/label";
-import { ChevronRight, ArrowLeft, Search } from "lucide-react";
-import { toast } from "sonner";
-import { trpc } from "@/utils/trpc";
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, ChevronRight, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { trpc } from "@/utils/trpc";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FormType = any;
@@ -72,7 +72,7 @@ export function OrganizationAddress({
 		<div className="w-full">
 			<div className="space-y-6">
 				{/* CEP Lookup */}
-				<div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+				<div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
 					<form.Field name="postalCode">
 						{(field) => (
 							<div className="space-y-2">
@@ -102,12 +102,12 @@ export function OrganizationAddress({
 										variant="flat"
 										onPress={() => handleCepLookup(field.state.value)}
 										isLoading={cepQuery.isFetching}
-										startContent={<Search className="w-4 h-4" />}
+										startContent={<Search className="h-4 w-4" />}
 									>
 										Buscar
 									</Button>
 								</div>
-								<p className="text-xs text-gray-500">
+								<p className="text-gray-500 text-xs">
 									Digite o CEP e clique em buscar para preencher automaticamente
 								</p>
 							</div>
@@ -132,7 +132,7 @@ export function OrganizationAddress({
 							/>
 							{field.state.meta.errors &&
 								field.state.meta.errors.length > 0 && (
-									<p className="text-sm text-red-500">
+									<p className="text-red-500 text-sm">
 										{String(field.state.meta.errors[0])}
 									</p>
 								)}
@@ -140,7 +140,7 @@ export function OrganizationAddress({
 					)}
 				</form.Field>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<form.Field name="city">
 						{(field) => (
 							<div className="space-y-2">
@@ -157,7 +157,7 @@ export function OrganizationAddress({
 								/>
 								{field.state.meta.errors &&
 									field.state.meta.errors.length > 0 && (
-										<p className="text-sm text-red-500">
+										<p className="text-red-500 text-sm">
 											{String(field.state.meta.errors[0])}
 										</p>
 									)}
@@ -184,7 +184,7 @@ export function OrganizationAddress({
 								/>
 								{field.state.meta.errors &&
 									field.state.meta.errors.length > 0 && (
-										<p className="text-sm text-red-500">
+										<p className="text-red-500 text-sm">
 											{String(field.state.meta.errors[0])}
 										</p>
 									)}
@@ -208,7 +208,7 @@ export function OrganizationAddress({
 								/>
 								{field.state.meta.errors &&
 									field.state.meta.errors.length > 0 && (
-										<p className="text-sm text-red-500">
+										<p className="text-red-500 text-sm">
 											{String(field.state.meta.errors[0])}
 										</p>
 									)}
@@ -220,7 +220,7 @@ export function OrganizationAddress({
 				<div className="flex justify-between gap-3 pt-6">
 					<Button
 						variant="light"
-						startContent={<ArrowLeft className="w-4 h-4" />}
+						startContent={<ArrowLeft className="h-4 w-4" />}
 						onPress={onBack}
 						size="lg"
 					>
@@ -228,7 +228,7 @@ export function OrganizationAddress({
 					</Button>
 					<Button
 						color="primary"
-						endContent={<ChevronRight className="w-4 h-4" />}
+						endContent={<ChevronRight className="h-4 w-4" />}
 						onPress={onNext}
 						isLoading={isSubmitting}
 						size="lg"

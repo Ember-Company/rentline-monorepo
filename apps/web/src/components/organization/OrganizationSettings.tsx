@@ -1,23 +1,33 @@
-import { Card, CardBody, CardHeader, Button, Input } from "@heroui/react";
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Input,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+} from "@heroui/react";
+import { useForm } from "@tanstack/react-form";
 import { Building2, Save, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { useOrganizations } from "@/hooks/use-organization-management";
 import { authClient } from "@/lib/auth-client";
-import { useForm } from "@tanstack/react-form";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalBody,
-	ModalFooter,
-} from "@heroui/react";
 
 export function OrganizationSettings() {
 	const { data: session } = authClient.useSession();
-	const { organizations, isLoading, updateOrganization, deleteOrganization, isUpdating, isDeleting } =
-		useOrganizations();
+	const {
+		organizations,
+		isLoading,
+		updateOrganization,
+		deleteOrganization,
+		isUpdating,
+		isDeleting,
+	} = useOrganizations();
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
 	const currentOrgId = session?.user?.activeOrganizationId;
@@ -70,11 +80,23 @@ export function OrganizationSettings() {
 		if (currentOrg) {
 			form.setFieldValue("name", currentOrg.name);
 			form.setFieldValue("slug", currentOrg.slug);
-			form.setFieldValue("email", (currentOrg as { email?: string })?.email || "");
-			form.setFieldValue("phone", (currentOrg as { phone?: string })?.phone || "");
-			form.setFieldValue("address", (currentOrg as { address?: string })?.address || "");
+			form.setFieldValue(
+				"email",
+				(currentOrg as { email?: string })?.email || "",
+			);
+			form.setFieldValue(
+				"phone",
+				(currentOrg as { phone?: string })?.phone || "",
+			);
+			form.setFieldValue(
+				"address",
+				(currentOrg as { address?: string })?.address || "",
+			);
 			form.setFieldValue("city", (currentOrg as { city?: string })?.city || "");
-			form.setFieldValue("state", (currentOrg as { state?: string })?.state || "");
+			form.setFieldValue(
+				"state",
+				(currentOrg as { state?: string })?.state || "",
+			);
 			form.setFieldValue(
 				"postalCode",
 				(currentOrg as { postalCode?: string })?.postalCode || "",
@@ -83,7 +105,10 @@ export function OrganizationSettings() {
 				"country",
 				(currentOrg as { country?: string })?.country || "Brasil",
 			);
-			form.setFieldValue("website", (currentOrg as { website?: string })?.website || "");
+			form.setFieldValue(
+				"website",
+				(currentOrg as { website?: string })?.website || "",
+			);
 			form.setFieldValue("cnpj", (currentOrg as { cnpj?: string })?.cnpj || "");
 		}
 	}, [currentOrg, form]);
@@ -105,7 +130,7 @@ export function OrganizationSettings() {
 		return (
 			<Card className="border border-gray-200 shadow-sm">
 				<CardBody className="p-12 text-center">
-					<Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4 animate-pulse" />
+					<Building2 className="mx-auto mb-4 h-16 w-16 animate-pulse text-gray-300" />
 					<p className="text-gray-600">Loading organization...</p>
 				</CardBody>
 			</Card>
@@ -116,9 +141,9 @@ export function OrganizationSettings() {
 		return (
 			<Card className="border border-gray-200 shadow-sm">
 				<CardBody className="p-12 text-center">
-					<Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-					<p className="text-gray-600 mb-2">No organizations found</p>
-					<p className="text-sm text-gray-500">
+					<Building2 className="mx-auto mb-4 h-16 w-16 text-gray-300" />
+					<p className="mb-2 text-gray-600">No organizations found</p>
+					<p className="text-gray-500 text-sm">
 						Create an organization to get started
 					</p>
 				</CardBody>
@@ -130,12 +155,12 @@ export function OrganizationSettings() {
 		return (
 			<Card className="border border-gray-200 shadow-sm">
 				<CardBody className="p-12 text-center">
-					<Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-					<p className="text-gray-600 mb-2">Organization not found</p>
-					<p className="text-sm text-gray-500">
+					<Building2 className="mx-auto mb-4 h-16 w-16 text-gray-300" />
+					<p className="mb-2 text-gray-600">Organization not found</p>
+					<p className="text-gray-500 text-sm">
 						The active organization (ID: {currentOrgId}) could not be loaded.
 					</p>
-					<p className="text-xs text-gray-400 mt-2">
+					<p className="mt-2 text-gray-400 text-xs">
 						Available organizations: {organizations.length}
 					</p>
 				</CardBody>
@@ -147,7 +172,7 @@ export function OrganizationSettings() {
 		return (
 			<Card className="border border-gray-200 shadow-sm">
 				<CardBody className="p-12 text-center">
-					<Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+					<Building2 className="mx-auto mb-4 h-16 w-16 text-gray-300" />
 					<p className="text-gray-600">No organization selected</p>
 				</CardBody>
 			</Card>
@@ -159,15 +184,15 @@ export function OrganizationSettings() {
 			<Card className="border border-gray-200 shadow-sm">
 				<CardHeader className="flex items-center justify-between">
 					<div>
-						<h2 className="text-xl font-semibold">Organization Settings</h2>
-						<p className="text-sm text-gray-600">
+						<h2 className="font-semibold text-xl">Organization Settings</h2>
+						<p className="text-gray-600 text-sm">
 							Manage your organization details and information
 						</p>
 					</div>
 					<Button
 						color="danger"
 						variant="light"
-						startContent={<Trash2 className="w-4 h-4" />}
+						startContent={<Trash2 className="h-4 w-4" />}
 						onPress={() => setIsDeleteModalOpen(true)}
 					>
 						Delete
@@ -208,14 +233,14 @@ export function OrganizationSettings() {
 									classNames={{ input: "text-sm" }}
 									isRequired
 								/>
-								<p className="text-xs text-gray-500">
+								<p className="text-gray-500 text-xs">
 									Used in your organization URL
 								</p>
 							</div>
 						)}
 					</form.Field>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<form.Field name="email">
 							{(field) => (
 								<div className="space-y-2">
@@ -308,7 +333,7 @@ export function OrganizationSettings() {
 						)}
 					</form.Field>
 
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<form.Field name="city">
 							{(field) => (
 								<div className="space-y-2">
@@ -354,7 +379,10 @@ export function OrganizationSettings() {
 										onBlur={field.handleBlur}
 										onValueChange={(value) => {
 											const cleaned = value.replace(/\D/g, "");
-											const formatted = cleaned.replace(/^(\d{5})(\d)/, "$1-$2");
+											const formatted = cleaned.replace(
+												/^(\d{5})(\d)/,
+												"$1-$2",
+											);
 											field.handleChange(formatted);
 										}}
 										placeholder="00000-000"
@@ -382,10 +410,10 @@ export function OrganizationSettings() {
 						)}
 					</form.Field>
 
-					<div className="flex justify-end pt-4 border-t">
+					<div className="flex justify-end border-t pt-4">
 						<Button
 							color="primary"
-							startContent={<Save className="w-4 h-4" />}
+							startContent={<Save className="h-4 w-4" />}
 							onPress={() => form.handleSubmit()}
 							isLoading={isUpdating}
 						>
@@ -403,12 +431,12 @@ export function OrganizationSettings() {
 			>
 				<ModalContent>
 					<ModalHeader>
-						<h3 className="text-lg font-semibold">Delete Organization</h3>
+						<h3 className="font-semibold text-lg">Delete Organization</h3>
 					</ModalHeader>
 					<ModalBody>
 						<p className="text-gray-600">
-							Are you sure you want to delete this organization? This action cannot
-							be undone and will remove all associated data.
+							Are you sure you want to delete this organization? This action
+							cannot be undone and will remove all associated data.
 						</p>
 					</ModalBody>
 					<ModalFooter>
@@ -432,4 +460,3 @@ export function OrganizationSettings() {
 		</>
 	);
 }
-

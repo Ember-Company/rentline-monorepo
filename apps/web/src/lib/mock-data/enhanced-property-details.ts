@@ -257,12 +257,14 @@ export const enhancedPropertyDetails: Record<number, PropertyDetail> = {
 };
 
 // Helper function to get property with tenant details
-export function getPropertyWithTenants(propertyId: number): (PropertyDetail & {
-	tenantDetails: Array<{
-		propertyTenant: PropertyDetail["tenants"][0];
-		tenant: typeof tenantEntities[0];
-	}>;
-}) | null {
+export function getPropertyWithTenants(propertyId: number):
+	| (PropertyDetail & {
+			tenantDetails: Array<{
+				propertyTenant: PropertyDetail["tenants"][0];
+				tenant: (typeof tenantEntities)[0];
+			}>;
+	  })
+	| null {
 	const property = enhancedPropertyDetails[propertyId];
 	if (!property) return null;
 
@@ -294,4 +296,3 @@ export function getPropertyWithTenants(propertyId: number): (PropertyDetail & {
 		tenantDetails,
 	};
 }
-

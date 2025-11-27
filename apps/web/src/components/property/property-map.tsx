@@ -17,19 +17,21 @@ export function PropertyMap({
 	return (
 		<Card className="border border-gray-200 shadow-sm">
 			<CardHeader>
-				<h3 className="text-lg font-semibold text-gray-900">Location</h3>
+				<h3 className="font-semibold text-gray-900 text-lg">Location</h3>
 			</CardHeader>
 			<CardBody>
-				<div className="w-full h-64 rounded-lg overflow-hidden bg-gray-100 relative">
+				<div className="relative h-64 w-full overflow-hidden rounded-lg bg-gray-100">
 					{/* Placeholder for map - replace with actual map component */}
 					<div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
 						<div className="text-center">
-							<div className="w-12 h-12 bg-red-500 rounded-full mx-auto mb-2 flex items-center justify-center">
-								<span className="text-white text-xs font-bold">📍</span>
+							<div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500">
+								<span className="font-bold text-white text-xs">📍</span>
 							</div>
-							<p className="text-sm text-gray-700 font-medium">{propertyName}</p>
-							<p className="text-xs text-gray-600">{address}</p>
-							<p className="text-xs text-gray-500 mt-1">
+							<p className="font-medium text-gray-700 text-sm">
+								{propertyName}
+							</p>
+							<p className="text-gray-600 text-xs">{address}</p>
+							<p className="mt-1 text-gray-500 text-xs">
 								{coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
 							</p>
 						</div>
@@ -47,4 +49,3 @@ export function PropertyMap({
 		</Card>
 	);
 }
-

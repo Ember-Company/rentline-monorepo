@@ -1,19 +1,44 @@
 model Expense {
   id                  String    @id @default(uuid())
+  
+  // Property/Unit association
   propertyId          String
   property            Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   unitId              String?
   unit                Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  
+  // Who paid
   paidBy              String    // user.id
   paidByUser          User      @relation("ExpensePaidBy", fields: [paidBy], references: [id], onDelete: Cascade)
-  category            String    // maintenance, utilities, tax, etc.
+  
+  // Expense details
+  category            String    // maintenance, utilities, tax, insurance, mortgage, management, repairs, supplies, advertising, other
+  subcategory         String?
+  vendor              String?   // Vendor/payee name
+  
+  // Financial
   amount              Decimal
   currencyId          String
   currency            Currency  @relation(fields: [currencyId], references: [id])
+  
+  // Date
   date                DateTime
+  
+  // Description
   description         String?
+  
+  // Receipt
   receiptDocumentId   String?   @unique
   receiptDocument     Document? @relation("ExpenseReceipt", fields: [receiptDocumentId], references: [id], onDelete: SetNull)
+  
+  // Recurring expense
+  isRecurring         Boolean   @default(false)
+  recurringFrequency  String?   // monthly, quarterly, annually
+  
+  // Tax deductible
+  isTaxDeductible     Boolean   @default(false)
+  
+  // Timestamps
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -25,4 +50,3 @@ model Expense {
   @@index([currencyId])
   @@map("expense")
 }
-

@@ -1,10 +1,17 @@
-import type { Route } from "./+types/route";
-import { Card, CardBody, CardHeader, Button, Select, SelectItem } from "@heroui/react";
-import { Download, FileText, BarChart3, TrendingUp } from "lucide-react";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { LineChart } from "@/components/dashboard/line-chart";
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Select,
+	SelectItem,
+} from "@heroui/react";
+import { BarChart3, Download, FileText, TrendingUp } from "lucide-react";
 import { DonutChart } from "@/components/dashboard/donut-chart";
+import { LineChart } from "@/components/dashboard/line-chart";
 import { MetricCard } from "@/components/dashboard/metric-card";
+import { PageHeader } from "@/components/dashboard/page-header";
+import type { Route } from "./+types/route";
 
 const propertyOverviewData = [
 	{ month: "Jan", value: 12000 },
@@ -46,7 +53,10 @@ export default function ReportsPage() {
 							<SelectItem key="monthly">Monthly</SelectItem>
 							<SelectItem key="yearly">Yearly</SelectItem>
 						</Select>
-						<Button color="primary" startContent={<Download className="w-4 h-4" />}>
+						<Button
+							color="primary"
+							startContent={<Download className="h-4 w-4" />}
+						>
 							Export Report
 						</Button>
 					</>
@@ -54,7 +64,7 @@ export default function ReportsPage() {
 			/>
 
 			{/* Summary Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
 				<MetricCard
 					title="Total Income"
 					value={143083}
@@ -73,7 +83,7 @@ export default function ReportsPage() {
 			</div>
 
 			{/* Charts */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 				<LineChart
 					title="Property Performance"
 					data={propertyOverviewData}
@@ -88,42 +98,42 @@ export default function ReportsPage() {
 			</div>
 
 			{/* Report Types */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				<Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+				<Card className="cursor-pointer border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 					<CardBody className="p-6">
 						<div className="flex items-center gap-4">
-							<div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-								<FileText className="w-6 h-6 text-blue-600" />
+							<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+								<FileText className="h-6 w-6 text-blue-600" />
 							</div>
 							<div>
 								<h3 className="font-semibold text-gray-900">Income Report</h3>
-								<p className="text-sm text-gray-600">View income details</p>
+								<p className="text-gray-600 text-sm">View income details</p>
 							</div>
 						</div>
 					</CardBody>
 				</Card>
-				<Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+				<Card className="cursor-pointer border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 					<CardBody className="p-6">
 						<div className="flex items-center gap-4">
-							<div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-								<BarChart3 className="w-6 h-6 text-green-600" />
+							<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+								<BarChart3 className="h-6 w-6 text-green-600" />
 							</div>
 							<div>
 								<h3 className="font-semibold text-gray-900">Expense Report</h3>
-								<p className="text-sm text-gray-600">View expense breakdown</p>
+								<p className="text-gray-600 text-sm">View expense breakdown</p>
 							</div>
 						</div>
 					</CardBody>
 				</Card>
-				<Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+				<Card className="cursor-pointer border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 					<CardBody className="p-6">
 						<div className="flex items-center gap-4">
-							<div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-								<TrendingUp className="w-6 h-6 text-purple-600" />
+							<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+								<TrendingUp className="h-6 w-6 text-purple-600" />
 							</div>
 							<div>
 								<h3 className="font-semibold text-gray-900">Profit Report</h3>
-								<p className="text-sm text-gray-600">View profit analysis</p>
+								<p className="text-gray-600 text-sm">View profit analysis</p>
 							</div>
 						</div>
 					</CardBody>
@@ -132,4 +142,3 @@ export default function ReportsPage() {
 		</div>
 	);
 }
-

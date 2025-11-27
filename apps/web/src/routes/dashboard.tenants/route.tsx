@@ -1,39 +1,39 @@
-import type { Route } from "./+types/route";
 import {
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Button,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
 	Input,
 	Select,
 	SelectItem,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
+import { useForm } from "@tanstack/react-form";
 import {
-	Users,
-	Plus,
-	Search,
 	Edit,
-	Trash2,
 	Eye,
 	Mail,
 	Phone,
+	Plus,
+	Search,
+	Trash2,
+	Users,
 } from "lucide-react";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { CrudModal } from "@/components/dashboard/crud-modal";
-import { tenants, type Tenant } from "@/lib/mock-data/tenants";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
 import { useState } from "react";
-import { useForm } from "@tanstack/react-form";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import z from "zod";
+import { CrudModal } from "@/components/dashboard/crud-modal";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { Label } from "@/components/ui/label";
+import { type Tenant, tenants } from "@/lib/mock-data/tenants";
+import { formatCurrency, formatDate } from "@/lib/utils/format";
+import type { Route } from "./+types/route";
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -168,7 +168,7 @@ export default function TenantsPage() {
 				actions={
 					<Button
 						color="primary"
-						startContent={<Plus className="w-4 h-4" />}
+						startContent={<Plus className="h-4 w-4" />}
 						onPress={handleCreate}
 					>
 						Add Tenant
@@ -177,10 +177,10 @@ export default function TenantsPage() {
 			/>
 
 			<Card className="border border-gray-200 shadow-sm">
-				<CardHeader className="flex justify-between items-center">
+				<CardHeader className="flex items-center justify-between">
 					<div>
-						<h2 className="text-xl font-semibold">All Tenants</h2>
-						<p className="text-sm text-gray-600">
+						<h2 className="font-semibold text-xl">All Tenants</h2>
+						<p className="text-gray-600 text-sm">
 							{filteredTenants.length} tenants found
 						</p>
 					</div>
@@ -188,7 +188,7 @@ export default function TenantsPage() {
 						placeholder="Search tenants..."
 						value={searchQuery}
 						onValueChange={setSearchQuery}
-						startContent={<Search className="w-4 h-4" />}
+						startContent={<Search className="h-4 w-4" />}
 						classNames={{
 							input: "text-sm",
 							inputWrapper: "bg-gray-50 border-gray-200 max-w-xs",
@@ -216,11 +216,11 @@ export default function TenantsPage() {
 									<TableCell>
 										<div className="flex flex-col gap-1">
 											<div className="flex items-center gap-1 text-sm">
-												<Mail className="w-3 h-3" />
+												<Mail className="h-3 w-3" />
 												{tenant.email}
 											</div>
-											<div className="flex items-center gap-1 text-sm text-muted-foreground">
-												<Phone className="w-3 h-3" />
+											<div className="flex items-center gap-1 text-muted-foreground text-sm">
+												<Phone className="h-3 w-3" />
 												{tenant.phone}
 											</div>
 										</div>
@@ -267,7 +267,7 @@ export default function TenantsPage() {
 												isIconOnly
 												onPress={() => handleView(tenant)}
 											>
-												<Eye className="w-4 h-4" />
+												<Eye className="h-4 w-4" />
 											</Button>
 											<Button
 												size="sm"
@@ -275,7 +275,7 @@ export default function TenantsPage() {
 												isIconOnly
 												onPress={() => handleEdit(tenant)}
 											>
-												<Edit className="w-4 h-4" />
+												<Edit className="h-4 w-4" />
 											</Button>
 											<Button
 												size="sm"
@@ -284,7 +284,7 @@ export default function TenantsPage() {
 												isIconOnly
 												onPress={() => handleDelete(tenant)}
 											>
-												<Trash2 className="w-4 h-4" />
+												<Trash2 className="h-4 w-4" />
 											</Button>
 										</div>
 									</TableCell>
@@ -328,7 +328,7 @@ export default function TenantsPage() {
 										placeholder="John Doe"
 									/>
 									{field.state.meta.errors.map((error) => (
-										<p key={error?.message} className="text-sm text-danger">
+										<p key={error?.message} className="text-danger text-sm">
 											{error?.message}
 										</p>
 									))}
@@ -352,7 +352,7 @@ export default function TenantsPage() {
 											placeholder="john@example.com"
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -375,7 +375,7 @@ export default function TenantsPage() {
 											placeholder="+1 (555) 123-4567"
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -398,7 +398,7 @@ export default function TenantsPage() {
 										placeholder="123 Main St, Apt 2B"
 									/>
 									{field.state.meta.errors.map((error) => (
-										<p key={error?.message} className="text-sm text-danger">
+										<p key={error?.message} className="text-danger text-sm">
 											{error?.message}
 										</p>
 									))}
@@ -423,7 +423,7 @@ export default function TenantsPage() {
 											startContent="$"
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -445,7 +445,7 @@ export default function TenantsPage() {
 											onValueChange={(e) => field.handleChange(e)}
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -467,7 +467,7 @@ export default function TenantsPage() {
 											onValueChange={(e) => field.handleChange(e)}
 										/>
 										{field.state.meta.errors.map((error) => (
-											<p key={error?.message} className="text-sm text-danger">
+											<p key={error?.message} className="text-danger text-sm">
 												{error?.message}
 											</p>
 										))}
@@ -495,7 +495,7 @@ export default function TenantsPage() {
 										<SelectItem key="pending">Pending</SelectItem>
 									</Select>
 									{field.state.meta.errors.map((error) => (
-										<p key={error?.message} className="text-sm text-danger">
+										<p key={error?.message} className="text-danger text-sm">
 											{error?.message}
 										</p>
 									))}

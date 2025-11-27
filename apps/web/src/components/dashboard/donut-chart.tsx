@@ -1,4 +1,14 @@
-import { Card, CardBody, CardHeader, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Link } from "@heroui/react";
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
+	Link,
+} from "@heroui/react";
 import { MoreVertical } from "lucide-react";
 
 type DonutChartProps = {
@@ -8,7 +18,12 @@ type DonutChartProps = {
 	waiting: number;
 };
 
-export function DonutChart({ title, completed, total, waiting }: DonutChartProps) {
+export function DonutChart({
+	title,
+	completed,
+	total,
+	waiting,
+}: DonutChartProps) {
 	const percentage = (completed / total) * 100;
 	const circumference = 2 * Math.PI * 40;
 	const strokeDasharray = circumference;
@@ -16,8 +31,8 @@ export function DonutChart({ title, completed, total, waiting }: DonutChartProps
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex justify-between items-center pb-2">
-				<h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+			<CardHeader className="flex items-center justify-between pb-2">
+				<h3 className="font-semibold text-gray-900 text-lg">{title}</h3>
 				<Dropdown>
 					<DropdownTrigger>
 						<Button
@@ -26,7 +41,7 @@ export function DonutChart({ title, completed, total, waiting }: DonutChartProps
 							size="sm"
 							className="text-gray-400"
 						>
-							<MoreVertical className="w-4 h-4" />
+							<MoreVertical className="h-4 w-4" />
 						</Button>
 					</DropdownTrigger>
 					<DropdownMenu aria-label="Chart actions">
@@ -37,8 +52,8 @@ export function DonutChart({ title, completed, total, waiting }: DonutChartProps
 			</CardHeader>
 			<CardBody className="pt-0">
 				<div className="flex flex-col items-center">
-					<div className="relative w-32 h-32 mb-4">
-						<svg className="transform -rotate-90 w-32 h-32">
+					<div className="relative mb-4 h-32 w-32">
+						<svg className="-rotate-90 h-32 w-32 transform">
 							<circle
 								cx="64"
 								cy="64"
@@ -66,17 +81,19 @@ export function DonutChart({ title, completed, total, waiting }: DonutChartProps
 								strokeWidth="12"
 								fill="none"
 								strokeDasharray={strokeDasharray}
-								strokeDashoffset={strokeDashoffset - (waiting / total) * circumference}
+								strokeDashoffset={
+									strokeDashoffset - (waiting / total) * circumference
+								}
 								strokeLinecap="round"
 								className="opacity-50"
 							/>
 						</svg>
 						<div className="absolute inset-0 flex items-center justify-center">
 							<div className="text-center">
-								<p className="text-2xl font-bold text-gray-900">
+								<p className="font-bold text-2xl text-gray-900">
 									{completed}/{total}
 								</p>
-								<p className="text-xs text-gray-500">Units</p>
+								<p className="text-gray-500 text-xs">Units</p>
 							</div>
 						</div>
 					</div>
@@ -85,7 +102,9 @@ export function DonutChart({ title, completed, total, waiting }: DonutChartProps
 							<span className="text-gray-600">Has been maintained</span>
 						</div>
 						<div className="flex items-center justify-between text-sm">
-							<span className="text-gray-600">{waiting} Units still waiting</span>
+							<span className="text-gray-600">
+								{waiting} Units still waiting
+							</span>
 							<Link href="#" className="text-primary text-sm">
 								See details
 							</Link>
@@ -96,4 +115,3 @@ export function DonutChart({ title, completed, total, waiting }: DonutChartProps
 		</Card>
 	);
 }
-

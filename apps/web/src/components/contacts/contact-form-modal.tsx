@@ -1,23 +1,22 @@
 import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalBody,
-	ModalFooter,
 	Button,
 	Input,
-	Textarea,
-	RadioGroup,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
 	Radio,
+	RadioGroup,
+	Textarea,
 } from "@heroui/react";
-import { X } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
-import { Label } from "@/components/ui/label";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { trpc } from "@/utils/trpc";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import z from "zod";
+import { Label } from "@/components/ui/label";
+import { type Contact, getContactById } from "@/lib/mock-data/contacts";
 
 interface ContactFormModalProps {
 	isOpen: boolean;
@@ -25,6 +24,7 @@ interface ContactFormModalProps {
 	contactType: "tenant" | "agent" | "owner";
 	contactId?: string;
 	propertyId?: string;
+	onSave?: (contact: Contact) => void;
 }
 
 export function ContactFormModal({
@@ -33,18 +33,13 @@ export function ContactFormModal({
 	contactType,
 	contactId,
 	propertyId,
+	onSave,
 }: ContactFormModalProps) {
-	const queryClient = useQueryClient();
 	const isEdit = !!contactId;
+	const [isLoading, setIsLoading] = useState(false);
 
-	const contactQuery = useQuery({
-		...trpc.contacts.getById.queryOptions({ id: contactId! }),
-		enabled: isEdit && !!contactId,
-	});
-
-	const createMutation = useMutation(trpc.contacts.create.mutationOptions());
-	const updateMutation = useMutation(trpc.contacts.update.mutationOptions());
-	const linkMutation = useMutation(trpc.contacts.linkToProperty.mutationOptions());
+	// Get existing contact if editing
+	const existingContact = contactId ? getContactById(contactId) : null;
 
 	const form = useForm({
 		defaultValues: {
@@ -66,82 +61,53 @@ export function ContactFormModal({
 			notes: "",
 		},
 		onSubmit: async ({ value }) => {
+			setIsLoading(true);
 			try {
-				const contactData: {
-					type: string;
-					firstName?: string;
-					lastName?: string;
-					email?: string;
-					phone?: string;
-					mobile?: string;
-					dateOfBirth?: string;
-					companyName?: string;
-					taxId?: string;
-					registrationNumber?: string;
-					address?: string;
-					city?: string;
-					state?: string;
-					postalCode?: string;
-					country?: string;
-					notes?: string;
-				} = {
+				// Simulate API call
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				const now = new Date().toISOString();
+				const contact: Contact = {
+					id: contactId || `cnt_${Date.now()}`,
+					organizationId: "org_1",
 					type: contactType,
+					firstName:
+						value.tenantType === "person" ? value.firstName || null : null,
+					lastName:
+						value.tenantType === "person" ? value.lastName || null : null,
+					email: value.email || null,
+					phone: value.phone || null,
+					mobile: value.mobile || null,
+					dateOfBirth: value.dateOfBirth || null,
+					notes: value.notes || null,
+					companyName:
+						value.tenantType === "company" ? value.companyName || null : null,
+					taxId: value.taxId || null,
+					registrationNumber: value.registrationNumber || null,
+					address: value.address || null,
+					city: value.city || null,
+					state: value.state || null,
+					postalCode: value.postalCode || null,
+					country: value.country || null,
+					avatarUrl: null,
+					status: "active",
+					createdAt: existingContact?.createdAt || now,
+					updatedAt: now,
 				};
 
-				if (value.tenantType === "person") {
-					if (value.firstName) contactData.firstName = value.firstName;
-					if (value.lastName) contactData.lastName = value.lastName;
-				} else {
-					if (value.companyName) contactData.companyName = value.companyName;
-				}
-
-				if (value.email) contactData.email = value.email;
-				if (value.phone) contactData.phone = value.phone;
-				if (value.mobile) contactData.mobile = value.mobile;
-				if (value.dateOfBirth) contactData.dateOfBirth = value.dateOfBirth;
-				if (value.taxId) contactData.taxId = value.taxId;
-				if (value.registrationNumber) contactData.registrationNumber = value.registrationNumber;
-				if (value.address) contactData.address = value.address;
-				if (value.city) contactData.city = value.city;
-				if (value.state) contactData.state = value.state;
-				if (value.postalCode) contactData.postalCode = value.postalCode;
-				if (value.country) contactData.country = value.country;
-				if (value.notes) contactData.notes = value.notes;
-
-				if (isEdit) {
-					await updateMutation.mutateAsync({
-						id: contactId!,
-						...contactData,
-					});
-					toast.success("Contact updated successfully");
-				} else {
-					const result = await createMutation.mutateAsync(contactData);
-					
-					// Link to property if propertyId is provided
-					if (propertyId && result.contact) {
-						await linkMutation.mutateAsync({
-							contactId: result.contact.id,
-							propertyId,
-						});
-					}
-					
-					toast.success("Contact created successfully");
-				}
-
-				// Invalidate queries
-				queryClient.invalidateQueries({ queryKey: [["contacts", "list"]] });
-				if (propertyId) {
-					queryClient.invalidateQueries({ queryKey: [["contacts", "getByProperty"]] });
-				}
-
-				// Reset form
+				onSave?.(contact);
+				toast.success(
+					isEdit
+						? "Contact updated successfully"
+						: "Contact created successfully",
+				);
 				form.reset();
-				setTimeout(() => {
-					onClose();
-				}, 100);
+				onClose();
 			} catch (error) {
 				console.error("Error saving contact:", error);
-				toast.error(error instanceof Error ? error.message : "Failed to save contact");
+				toast.error("Failed to save contact");
+			} finally {
+				setIsLoading(false);
 			}
 		},
 		validators: {
@@ -158,49 +124,56 @@ export function ContactFormModal({
 		},
 	});
 
-	const contact = contactQuery.data?.contact;
-
-	const isLoading =
-		createMutation.isPending ||
-		updateMutation.isPending ||
-		linkMutation.isPending ||
-		contactQuery.isLoading;
-
 	// Update form when contact data loads or modal opens/closes
 	useEffect(() => {
 		if (!isOpen) {
-			// Reset form when modal closes
 			form.reset();
 			return;
 		}
 
-		if (contact && isEdit && contactQuery.isSuccess) {
-			form.setFieldValue("tenantType", contact.companyName ? "company" : "person");
-			form.setFieldValue("firstName", contact.firstName || "");
-			form.setFieldValue("lastName", contact.lastName || "");
-			form.setFieldValue("email", contact.email || "");
-			form.setFieldValue("phone", contact.phone || "");
-			form.setFieldValue("mobile", contact.mobile || "");
+		if (existingContact && isEdit) {
+			form.setFieldValue(
+				"tenantType",
+				existingContact.companyName ? "company" : "person",
+			);
+			form.setFieldValue("firstName", existingContact.firstName || "");
+			form.setFieldValue("lastName", existingContact.lastName || "");
+			form.setFieldValue("email", existingContact.email || "");
+			form.setFieldValue("phone", existingContact.phone || "");
+			form.setFieldValue("mobile", existingContact.mobile || "");
 			form.setFieldValue(
 				"dateOfBirth",
-				contact.dateOfBirth
-					? new Date(contact.dateOfBirth).toISOString().split("T")[0]
+				existingContact.dateOfBirth
+					? new Date(existingContact.dateOfBirth).toISOString().split("T")[0]
 					: "",
 			);
-			form.setFieldValue("companyName", contact.companyName || "");
-			form.setFieldValue("taxId", contact.taxId || "");
-			form.setFieldValue("registrationNumber", contact.registrationNumber || "");
-			form.setFieldValue("address", contact.address || "");
-			form.setFieldValue("city", contact.city || "");
-			form.setFieldValue("state", contact.state || "");
-			form.setFieldValue("postalCode", contact.postalCode || "");
-			form.setFieldValue("country", contact.country || "");
-			form.setFieldValue("notes", contact.notes || "");
+			form.setFieldValue("companyName", existingContact.companyName || "");
+			form.setFieldValue("taxId", existingContact.taxId || "");
+			form.setFieldValue(
+				"registrationNumber",
+				existingContact.registrationNumber || "",
+			);
+			form.setFieldValue("address", existingContact.address || "");
+			form.setFieldValue("city", existingContact.city || "");
+			form.setFieldValue("state", existingContact.state || "");
+			form.setFieldValue("postalCode", existingContact.postalCode || "");
+			form.setFieldValue("country", existingContact.country || "");
+			form.setFieldValue("notes", existingContact.notes || "");
 		} else if (!isEdit) {
-			// Reset to defaults for new contact
 			form.reset();
 		}
-	}, [contact, isEdit, isOpen, contactQuery.isSuccess, form]);
+	}, [existingContact, isEdit, isOpen, form]);
+
+	const getTypeLabel = () => {
+		switch (contactType) {
+			case "tenant":
+				return "Tenant";
+			case "agent":
+				return "Agent";
+			case "owner":
+				return "Owner";
+		}
+	};
 
 	return (
 		<Modal
@@ -211,19 +184,27 @@ export function ContactFormModal({
 			classNames={{
 				base: "max-h-[90vh]",
 				body: "py-6",
+				backdrop: "bg-black/50",
 			}}
 		>
 			<ModalContent>
-				<ModalHeader className="flex items-center justify-between border-b border-gray-200 pb-4">
-					<h2 className="text-xl font-bold text-gray-900">
-						{isEdit ? "Edit" : "Add new"} {contactType}
-					</h2>
+				<ModalHeader className="flex items-center justify-between border-gray-200 border-b pb-4">
+					<div>
+						<h2 className="font-bold text-gray-900 text-xl">
+							{isEdit ? "Edit" : "Add New"} {getTypeLabel()}
+						</h2>
+						<p className="mt-1 text-gray-500 text-sm">
+							{isEdit
+								? "Update the contact information below"
+								: "Fill in the details to create a new contact"}
+						</p>
+					</div>
 					<Button
 						isIconOnly
 						variant="light"
 						size="sm"
 						onPress={onClose}
-						className="min-w-0"
+						className="min-w-0 text-gray-400 hover:text-gray-600"
 					>
 						<X className="h-5 w-5" />
 					</Button>
@@ -236,26 +217,28 @@ export function ContactFormModal({
 						}}
 						className="space-y-6"
 					>
-						{/* Tenant Type Selection */}
+						{/* Contact Type Selection */}
 						<form.Field name="tenantType">
 							{(field) => (
 								<div className="space-y-3">
-									<Label className="text-sm font-semibold text-gray-700">
-										{contactType === "tenant" ? "Tenant type" : "Contact type"}
+									<Label className="font-semibold text-gray-700 text-sm">
+										Contact Type
 									</Label>
 									<RadioGroup
 										value={field.state.value}
-										onValueChange={(value) => field.handleChange(value as "person" | "company")}
+										onValueChange={(value) =>
+											field.handleChange(value as "person" | "company")
+										}
 										orientation="horizontal"
 										classNames={{
 											wrapper: "gap-6",
 										}}
 									>
 										<Radio value="person" classNames={{ label: "text-sm" }}>
-											Person
+											Individual
 										</Radio>
 										<Radio value="company" classNames={{ label: "text-sm" }}>
-											Company
+											Company / Organization
 										</Radio>
 									</RadioGroup>
 								</div>
@@ -268,8 +251,11 @@ export function ContactFormModal({
 								<form.Field name="firstName">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												First name
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												First Name
 											</Label>
 											<Input
 												id={field.name}
@@ -279,7 +265,7 @@ export function ContactFormModal({
 												placeholder="John"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -289,8 +275,11 @@ export function ContactFormModal({
 								<form.Field name="lastName">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												Last name
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												Last Name
 											</Label>
 											<Input
 												id={field.name}
@@ -300,7 +289,7 @@ export function ContactFormModal({
 												placeholder="Doe"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -315,18 +304,21 @@ export function ContactFormModal({
 								<form.Field name="companyName">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												Company name
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												Company Name <span className="text-danger">*</span>
 											</Label>
 											<Input
 												id={field.name}
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onValueChange={(e) => field.handleChange(e)}
-												placeholder="Company Name"
+												placeholder="Acme Corporation"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -337,18 +329,22 @@ export function ContactFormModal({
 									<form.Field name="taxId">
 										{(field) => (
 											<div className="space-y-2">
-												<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-													Tax ID
+												<Label
+													htmlFor={field.name}
+													className="font-medium text-gray-700 text-sm"
+												>
+													Tax ID / EIN
 												</Label>
 												<Input
 													id={field.name}
 													value={field.state.value}
 													onBlur={field.handleBlur}
 													onValueChange={(e) => field.handleChange(e)}
-													placeholder="Tax ID"
+													placeholder="12-3456789"
 													classNames={{
 														input: "text-sm",
-														inputWrapper: "border-gray-200",
+														inputWrapper:
+															"border-gray-200 hover:border-gray-300",
 													}}
 												/>
 											</div>
@@ -358,18 +354,22 @@ export function ContactFormModal({
 									<form.Field name="registrationNumber">
 										{(field) => (
 											<div className="space-y-2">
-												<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-													Registration number
+												<Label
+													htmlFor={field.name}
+													className="font-medium text-gray-700 text-sm"
+												>
+													Registration Number
 												</Label>
 												<Input
 													id={field.name}
 													value={field.state.value}
 													onBlur={field.handleBlur}
 													onValueChange={(e) => field.handleChange(e)}
-													placeholder="Registration Number"
+													placeholder="REG-2024-001"
 													classNames={{
 														input: "text-sm",
-														inputWrapper: "border-gray-200",
+														inputWrapper:
+															"border-gray-200 hover:border-gray-300",
 													}}
 												/>
 											</div>
@@ -381,13 +381,18 @@ export function ContactFormModal({
 
 						{/* Contact Information */}
 						<div className="space-y-4">
-							<h3 className="text-sm font-semibold text-gray-700">Contact Information</h3>
+							<h3 className="border-gray-200 border-b pb-2 font-semibold text-gray-900 text-sm">
+								Contact Information
+							</h3>
 							<div className="grid grid-cols-2 gap-4">
 								<form.Field name="email">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												Email address
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												Email Address
 											</Label>
 											<Input
 												id={field.name}
@@ -398,7 +403,7 @@ export function ContactFormModal({
 												placeholder="email@example.com"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -408,8 +413,11 @@ export function ContactFormModal({
 								<form.Field name="phone">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												Phone number
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												Phone Number
 											</Label>
 											<Input
 												id={field.name}
@@ -419,7 +427,7 @@ export function ContactFormModal({
 												placeholder="+1 (555) 123-4567"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -431,18 +439,21 @@ export function ContactFormModal({
 								<form.Field name="mobile">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												Mobile number
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												Mobile Number
 											</Label>
 											<Input
 												id={field.name}
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onValueChange={(e) => field.handleChange(e)}
-												placeholder="+1 (555) 123-4567"
+												placeholder="+1 (555) 987-6543"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -453,8 +464,11 @@ export function ContactFormModal({
 									<form.Field name="dateOfBirth">
 										{(field) => (
 											<div className="space-y-2">
-												<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-													Date of birth
+												<Label
+													htmlFor={field.name}
+													className="font-medium text-gray-700 text-sm"
+												>
+													Date of Birth
 												</Label>
 												<Input
 													id={field.name}
@@ -462,10 +476,10 @@ export function ContactFormModal({
 													value={field.state.value}
 													onBlur={field.handleBlur}
 													onValueChange={(e) => field.handleChange(e)}
-													placeholder="DD / MM / YYYY"
 													classNames={{
 														input: "text-sm",
-														inputWrapper: "border-gray-200",
+														inputWrapper:
+															"border-gray-200 hover:border-gray-300",
 													}}
 												/>
 											</div>
@@ -477,22 +491,27 @@ export function ContactFormModal({
 
 						{/* Address Information */}
 						<div className="space-y-4">
-							<h3 className="text-sm font-semibold text-gray-700">Address</h3>
+							<h3 className="border-gray-200 border-b pb-2 font-semibold text-gray-900 text-sm">
+								Address
+							</h3>
 							<form.Field name="address">
 								{(field) => (
 									<div className="space-y-2">
-										<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-											Address
+										<Label
+											htmlFor={field.name}
+											className="font-medium text-gray-700 text-sm"
+										>
+											Street Address
 										</Label>
 										<Input
 											id={field.name}
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onValueChange={(e) => field.handleChange(e)}
-											placeholder="Street address"
+											placeholder="123 Main Street, Suite 100"
 											classNames={{
 												input: "text-sm",
-												inputWrapper: "border-gray-200",
+												inputWrapper: "border-gray-200 hover:border-gray-300",
 											}}
 										/>
 									</div>
@@ -503,7 +522,10 @@ export function ContactFormModal({
 								<form.Field name="city">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
 												City
 											</Label>
 											<Input
@@ -511,10 +533,10 @@ export function ContactFormModal({
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onValueChange={(e) => field.handleChange(e)}
-												placeholder="City"
+												placeholder="San Francisco"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -524,18 +546,21 @@ export function ContactFormModal({
 								<form.Field name="state">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												State
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												State / Province
 											</Label>
 											<Input
 												id={field.name}
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onValueChange={(e) => field.handleChange(e)}
-												placeholder="State"
+												placeholder="CA"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -547,18 +572,21 @@ export function ContactFormModal({
 								<form.Field name="postalCode">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-												Postal code
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
+												Postal / ZIP Code
 											</Label>
 											<Input
 												id={field.name}
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onValueChange={(e) => field.handleChange(e)}
-												placeholder="Postal Code"
+												placeholder="94102"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -568,7 +596,10 @@ export function ContactFormModal({
 								<form.Field name="country">
 									{(field) => (
 										<div className="space-y-2">
-											<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
+											<Label
+												htmlFor={field.name}
+												className="font-medium text-gray-700 text-sm"
+											>
 												Country
 											</Label>
 											<Input
@@ -576,10 +607,10 @@ export function ContactFormModal({
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onValueChange={(e) => field.handleChange(e)}
-												placeholder="Country"
+												placeholder="USA"
 												classNames={{
 													input: "text-sm",
-													inputWrapper: "border-gray-200",
+													inputWrapper: "border-gray-200 hover:border-gray-300",
 												}}
 											/>
 										</div>
@@ -592,7 +623,10 @@ export function ContactFormModal({
 						<form.Field name="notes">
 							{(field) => (
 								<div className="space-y-2">
-									<Label htmlFor={field.name} className="text-sm font-medium text-gray-700">
+									<Label
+										htmlFor={field.name}
+										className="font-medium text-gray-700 text-sm"
+									>
 										Notes
 									</Label>
 									<Textarea
@@ -600,11 +634,11 @@ export function ContactFormModal({
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onValueChange={(e) => field.handleChange(e)}
-										placeholder="Additional notes..."
-										rows={4}
+										placeholder="Add any additional notes about this contact..."
+										minRows={3}
 										classNames={{
 											input: "text-sm",
-											inputWrapper: "border-gray-200",
+											inputWrapper: "border-gray-200 hover:border-gray-300",
 										}}
 									/>
 								</div>
@@ -612,20 +646,25 @@ export function ContactFormModal({
 						</form.Field>
 					</form>
 				</ModalBody>
-				<ModalFooter className="border-t border-gray-200 pt-4">
-					<Button variant="light" onPress={onClose} isDisabled={isLoading}>
+				<ModalFooter className="border-gray-200 border-t pt-4">
+					<Button
+						variant="light"
+						onPress={onClose}
+						isDisabled={isLoading}
+						className="font-medium"
+					>
 						Cancel
 					</Button>
 					<Button
 						color="primary"
 						onPress={() => form.handleSubmit()}
 						isLoading={isLoading}
+						className="font-medium"
 					>
-						Save
+						{isEdit ? "Save Changes" : "Create Contact"}
 					</Button>
 				</ModalFooter>
 			</ModalContent>
 		</Modal>
 	);
 }
-

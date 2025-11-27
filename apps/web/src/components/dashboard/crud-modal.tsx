@@ -1,12 +1,12 @@
 import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalBody,
-	ModalFooter,
 	Button,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
 } from "@heroui/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type CrudModalProps = {
 	isOpen: boolean;
@@ -34,7 +34,12 @@ export function CrudModal({
 	size = "2xl",
 }: CrudModalProps) {
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} size={size} scrollBehavior="inside">
+		<Modal
+			isOpen={isOpen}
+			onClose={onClose}
+			size={size}
+			scrollBehavior="inside"
+		>
 			<ModalContent>
 				<ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
 				<ModalBody>{children}</ModalBody>
@@ -57,4 +62,3 @@ export function CrudModal({
 		</Modal>
 	);
 }
-

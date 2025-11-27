@@ -5,4 +5,3 @@ export const healthRouter = router({
 		return "OK";
 	}),
 });
-

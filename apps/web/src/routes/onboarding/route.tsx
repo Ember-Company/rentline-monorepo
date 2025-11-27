@@ -1,11 +1,12 @@
-import type { Route } from "./+types/route";
-import { Outlet, Navigate } from "react-router";
+import { Spinner } from "@heroui/react";
+import { Navigate, Outlet } from "react-router";
 import { authClient } from "@/lib/auth-client";
+import type { Route } from "./+types/route";
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_args: Route.MetaArgs) {
 	return [
-		{ title: "Onboarding - Rentline" },
-		{ name: "description", content: "Complete your onboarding setup" },
+		{ title: "Configuração - Rentline" },
+		{ name: "description", content: "Complete a configuração da sua conta" },
 	];
 }
 
@@ -14,9 +15,10 @@ export default function OnboardingLayout() {
 
 	if (isPending) {
 		return (
-			<div className="flex items-center justify-center h-screen">
+			<div className="flex min-h-screen items-center justify-center bg-gray-50">
 				<div className="text-center">
-					<p>Loading...</p>
+					<Spinner size="lg" color="primary" />
+					<p className="mt-4 text-gray-600">Carregando...</p>
 				</div>
 			</div>
 		);
@@ -33,9 +35,5 @@ export default function OnboardingLayout() {
 		return <Navigate to="/dashboard" replace />;
 	}
 
-	return (
-		<div className="min-h-screen bg-white">
-			<Outlet />
-		</div>
-	);
+	return <Outlet />;
 }

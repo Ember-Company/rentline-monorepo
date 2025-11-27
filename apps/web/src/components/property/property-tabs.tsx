@@ -1,14 +1,11 @@
-import { Tabs, Tab } from "@heroui/react";
+import { Tab, Tabs } from "@heroui/react";
 
 type PropertyTabsProps = {
 	activeTab: string;
 	onTabChange: (key: string) => void;
 };
 
-export function PropertyTabs({
-	activeTab,
-	onTabChange,
-}: PropertyTabsProps) {
+export function PropertyTabs({ activeTab, onTabChange }: PropertyTabsProps) {
 	return (
 		<Tabs
 			selectedKey={activeTab}
@@ -24,4 +21,3 @@ export function PropertyTabs({
 		</Tabs>
 	);
 }
-

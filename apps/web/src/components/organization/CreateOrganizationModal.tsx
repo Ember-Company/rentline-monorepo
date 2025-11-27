@@ -1,18 +1,18 @@
 import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalBody,
-	ModalFooter,
 	Button,
 	Input,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
 } from "@heroui/react";
+import { useForm } from "@tanstack/react-form";
 import { Building2, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { useOrganizations } from "@/hooks/use-organization-management";
-import { useForm } from "@tanstack/react-form";
-import { toast } from "sonner";
 
 type Props = {
 	isOpen: boolean;
@@ -78,12 +78,12 @@ export function CreateOrganizationModal({ isOpen, onClose }: Props) {
 			<ModalContent>
 				<ModalHeader className="flex flex-col gap-1">
 					<div className="flex items-center gap-3">
-						<div className="p-2 bg-primary/10 rounded-lg">
-							<Building2 className="w-5 h-5 text-primary" />
+						<div className="rounded-lg bg-primary/10 p-2">
+							<Building2 className="h-5 w-5 text-primary" />
 						</div>
 						<div>
-							<h2 className="text-xl font-bold">Create New Organization</h2>
-							<p className="text-sm text-gray-600 font-normal">
+							<h2 className="font-bold text-xl">Create New Organization</h2>
+							<p className="font-normal text-gray-600 text-sm">
 								Set up a new organization to manage
 							</p>
 						</div>
@@ -108,11 +108,12 @@ export function CreateOrganizationModal({ isOpen, onClose }: Props) {
 									classNames={{ input: "text-sm" }}
 									isRequired
 								/>
-								{field.state.meta.errors && field.state.meta.errors.length > 0 && (
-									<p className="text-sm text-red-500">
-										{String(field.state.meta.errors[0])}
-									</p>
-								)}
+								{field.state.meta.errors &&
+									field.state.meta.errors.length > 0 && (
+										<p className="text-red-500 text-sm">
+											{String(field.state.meta.errors[0])}
+										</p>
+									)}
 							</div>
 						)}
 					</form.Field>
@@ -136,19 +137,20 @@ export function CreateOrganizationModal({ isOpen, onClose }: Props) {
 									classNames={{ input: "text-sm" }}
 									isRequired
 								/>
-								<p className="text-xs text-gray-500">
+								<p className="text-gray-500 text-xs">
 									Used in your organization URL
 								</p>
-								{field.state.meta.errors && field.state.meta.errors.length > 0 && (
-									<p className="text-sm text-red-500">
-										{String(field.state.meta.errors[0])}
-									</p>
-								)}
+								{field.state.meta.errors &&
+									field.state.meta.errors.length > 0 && (
+										<p className="text-red-500 text-sm">
+											{String(field.state.meta.errors[0])}
+										</p>
+									)}
 							</div>
 						)}
 					</form.Field>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<form.Field name="email">
 							{(field) => (
 								<div className="space-y-2">
@@ -200,7 +202,7 @@ export function CreateOrganizationModal({ isOpen, onClose }: Props) {
 						)}
 					</form.Field>
 
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<form.Field name="city">
 							{(field) => (
 								<div className="space-y-2">
@@ -246,7 +248,10 @@ export function CreateOrganizationModal({ isOpen, onClose }: Props) {
 										onBlur={field.handleBlur}
 										onValueChange={(value) => {
 											const cleaned = value.replace(/\D/g, "");
-											const formatted = cleaned.replace(/^(\d{5})(\d)/, "$1-$2");
+											const formatted = cleaned.replace(
+												/^(\d{5})(\d)/,
+												"$1-$2",
+											);
 											field.handleChange(formatted);
 										}}
 										placeholder="00000-000"
@@ -290,4 +295,3 @@ export function CreateOrganizationModal({ isOpen, onClose }: Props) {
 		</Modal>
 	);
 }
-

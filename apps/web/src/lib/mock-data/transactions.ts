@@ -55,4 +55,3 @@ export const recentTransactions: Transaction[] = [
 		date: "2024-01-13",
 	},
 ];
-

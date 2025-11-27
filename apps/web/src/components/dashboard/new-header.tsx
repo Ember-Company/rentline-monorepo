@@ -1,7 +1,14 @@
-import { Button, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
-import { RefreshCw, Download, ChevronRight, LogOut } from "lucide-react";
+import {
+	Avatar,
+	Button,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
+} from "@heroui/react";
+import { ChevronRight, Download, LogOut, RefreshCw } from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate, useLocation } from "react-router";
 import { formatDate } from "@/lib/utils/format";
 
 export function NewHeader() {
@@ -16,14 +23,18 @@ export function NewHeader() {
 	const getBreadcrumbs = () => {
 		const path = location.pathname;
 		if (path === "/dashboard") {
-			return [{ label: "Home", path: "/dashboard" }, { label: "Dashboard", path: "/dashboard" }];
+			return [
+				{ label: "Home", path: "/dashboard" },
+				{ label: "Dashboard", path: "/dashboard" },
+			];
 		}
 		const parts = path.split("/").filter(Boolean);
 		const breadcrumbs = [{ label: "Home", path: "/dashboard" }];
 		let currentPath = "";
 		parts.forEach((part, index) => {
 			currentPath += `/${part}`;
-			const label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " ");
+			const label =
+				part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " ");
 			breadcrumbs.push({ label, path: currentPath });
 		});
 		return breadcrumbs;
@@ -48,21 +59,29 @@ export function NewHeader() {
 	};
 
 	return (
-		<header className="sticky top-0 z-20 bg-white border-b border-gray-200">
+		<header className="sticky top-0 z-20 border-gray-200 border-b bg-white">
 			<div className="flex items-center justify-between px-6 py-4">
 				{/* Left: Logo and Breadcrumbs */}
 				<div className="flex items-center gap-4">
 					<div className="flex items-center gap-2">
-						<div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-							<span className="text-white font-bold text-lg">R</span>
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+							<span className="font-bold text-lg text-white">R</span>
 						</div>
-						<span className="text-lg font-bold text-gray-900 hidden sm:inline">Rentline</span>
+						<span className="hidden font-bold text-gray-900 text-lg sm:inline">
+							Rentline
+						</span>
 					</div>
-					<div className="flex items-center gap-2 text-sm text-gray-600">
+					<div className="flex items-center gap-2 text-gray-600 text-sm">
 						{breadcrumbs.map((crumb, index) => (
 							<div key={crumb.path} className="flex items-center gap-2">
-								{index > 0 && <ChevronRight className="w-4 h-4" />}
-								<span className={index === breadcrumbs.length - 1 ? "text-gray-900 font-medium" : ""}>
+								{index > 0 && <ChevronRight className="h-4 w-4" />}
+								<span
+									className={
+										index === breadcrumbs.length - 1
+											? "font-medium text-gray-900"
+											: ""
+									}
+								>
 									{crumb.label}
 								</span>
 							</div>
@@ -73,8 +92,8 @@ export function NewHeader() {
 				{/* Right: User Info, Last Updated, Export */}
 				<div className="flex items-center gap-4">
 					{/* Last Updated */}
-					<div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
-						<RefreshCw className="w-4 h-4" />
+					<div className="hidden items-center gap-2 text-gray-600 text-sm md:flex">
+						<RefreshCw className="h-4 w-4" />
 						<span>Last updated: {formatDate(lastUpdated)}</span>
 					</div>
 
@@ -82,9 +101,9 @@ export function NewHeader() {
 					<Button
 						color="primary"
 						variant="solid"
-						startContent={<Download className="w-4 h-4" />}
+						startContent={<Download className="h-4 w-4" />}
 						onPress={handleExport}
-						className="bg-primary hover:bg-primary-600 text-white"
+						className="bg-primary text-white hover:bg-primary-600"
 					>
 						Export CSV
 					</Button>
@@ -94,16 +113,12 @@ export function NewHeader() {
 						<DropdownTrigger>
 							<Button variant="light" className="flex items-center gap-3 px-2">
 								<div className="flex flex-col items-end text-right">
-									<span className="text-sm font-medium text-gray-900">
+									<span className="font-medium text-gray-900 text-sm">
 										{userName}
 									</span>
-									<span className="text-xs text-gray-500">{userRole}</span>
+									<span className="text-gray-500 text-xs">{userRole}</span>
 								</div>
-								<Avatar
-									name={userName}
-									size="sm"
-									className="w-8 h-8"
-								/>
+								<Avatar name={userName} size="sm" className="h-8 w-8" />
 							</Button>
 						</DropdownTrigger>
 						<DropdownMenu
@@ -123,7 +138,7 @@ export function NewHeader() {
 							<DropdownItem
 								key="logout"
 								color="danger"
-								startContent={<LogOut className="w-4 h-4" />}
+								startContent={<LogOut className="h-4 w-4" />}
 							>
 								Logout
 							</DropdownItem>
@@ -134,4 +149,3 @@ export function NewHeader() {
 		</header>
 	);
 }
-

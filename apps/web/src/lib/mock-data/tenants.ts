@@ -67,4 +67,3 @@ export const tenants: Tenant[] = [
 		status: "active",
 	},
 ];
-

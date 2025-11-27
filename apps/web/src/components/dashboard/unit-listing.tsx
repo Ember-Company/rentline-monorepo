@@ -1,8 +1,16 @@
-import { Card, CardBody, CardHeader, Button, Input, Tabs, Tab } from "@heroui/react";
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Input,
+	Tab,
+	Tabs,
+} from "@heroui/react";
 import { Home, Search } from "lucide-react";
+import { useState } from "react";
 import { properties } from "@/lib/mock-data/properties";
 import { formatCurrency } from "@/lib/utils/format";
-import { useState } from "react";
 
 export function UnitListing() {
 	const [selectedTab, setSelectedTab] = useState("all");
@@ -22,13 +30,15 @@ export function UnitListing() {
 	return (
 		<Card className="border border-gray-200 shadow-sm">
 			<CardHeader className="flex flex-col gap-4">
-				<div className="flex items-center justify-between w-full">
+				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center gap-2">
-						<Home className="w-5 h-5 text-gray-600" />
-						<h3 className="text-lg font-semibold text-gray-900">Unit Listing</h3>
+						<Home className="h-5 w-5 text-gray-600" />
+						<h3 className="font-semibold text-gray-900 text-lg">
+							Unit Listing
+						</h3>
 					</div>
 				</div>
-				<div className="flex items-center gap-4 w-full">
+				<div className="flex w-full items-center gap-4">
 					<Tabs
 						selectedKey={selectedTab}
 						onSelectionChange={(key) => setSelectedTab(key as string)}
@@ -45,7 +55,7 @@ export function UnitListing() {
 						placeholder="Search property location"
 						value={searchQuery}
 						onValueChange={setSearchQuery}
-						startContent={<Search className="w-4 h-4 text-gray-400" />}
+						startContent={<Search className="h-4 w-4 text-gray-400" />}
 						classNames={{
 							input: "text-sm",
 							inputWrapper: "bg-gray-50 border-gray-200 max-w-xs",
@@ -54,26 +64,26 @@ export function UnitListing() {
 				</div>
 			</CardHeader>
 			<CardBody>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{filteredProperties.map((property) => (
 						<div
 							key={property.id}
-							className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+							className="overflow-hidden rounded-lg border border-gray-200 transition-shadow hover:shadow-md"
 						>
-							<div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-								<Home className="w-16 h-16 text-gray-400" />
+							<div className="flex h-48 items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+								<Home className="h-16 w-16 text-gray-400" />
 							</div>
 							<div className="p-4">
-								<h4 className="font-semibold text-gray-900 mb-1">
+								<h4 className="mb-1 font-semibold text-gray-900">
 									{property.address}
 								</h4>
-								<p className="text-sm text-gray-600 mb-2">{property.type}</p>
+								<p className="mb-2 text-gray-600 text-sm">{property.type}</p>
 								<div className="flex items-center justify-between">
-									<span className="text-lg font-bold text-gray-900">
+									<span className="font-bold text-gray-900 text-lg">
 										{formatCurrency(property.rent)}
 									</span>
 									<span
-										className={`text-sm px-2 py-1 rounded ${
+										className={`rounded px-2 py-1 text-sm ${
 											property.status === "occupied"
 												? "bg-green-100 text-green-700"
 												: "bg-gray-100 text-gray-700"
@@ -90,4 +100,3 @@ export function UnitListing() {
 		</Card>
 	);
 }
-

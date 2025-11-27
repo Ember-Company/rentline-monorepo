@@ -1,7 +1,7 @@
-import { protectedProcedure, router } from "../index";
+import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import prisma from "@rentline/db";
+import { protectedProcedure, router } from "../index";
 
 const contactInputSchema = z.object({
 	type: z.enum(["tenant", "agent", "owner"]),
@@ -186,7 +186,8 @@ export const contactsRouter = router({
 			if (input.notes) data.notes = input.notes;
 			if (input.companyName) data.companyName = input.companyName;
 			if (input.taxId) data.taxId = input.taxId;
-			if (input.registrationNumber) data.registrationNumber = input.registrationNumber;
+			if (input.registrationNumber)
+				data.registrationNumber = input.registrationNumber;
 			if (input.address) data.address = input.address;
 			if (input.city) data.city = input.city;
 			if (input.state) data.state = input.state;
@@ -264,7 +265,8 @@ export const contactsRouter = router({
 			} = {};
 
 			if (input.type) data.type = input.type;
-			if (input.firstName !== undefined) data.firstName = input.firstName || null;
+			if (input.firstName !== undefined)
+				data.firstName = input.firstName || null;
 			if (input.lastName !== undefined) data.lastName = input.lastName || null;
 			if (input.email !== undefined) data.email = input.email || null;
 			if (input.phone !== undefined) data.phone = input.phone || null;
@@ -275,15 +277,19 @@ export const contactsRouter = router({
 				data.dateOfBirth = null;
 			}
 			if (input.notes !== undefined) data.notes = input.notes || null;
-			if (input.companyName !== undefined) data.companyName = input.companyName || null;
+			if (input.companyName !== undefined)
+				data.companyName = input.companyName || null;
 			if (input.taxId !== undefined) data.taxId = input.taxId || null;
-			if (input.registrationNumber !== undefined) data.registrationNumber = input.registrationNumber || null;
+			if (input.registrationNumber !== undefined)
+				data.registrationNumber = input.registrationNumber || null;
 			if (input.address !== undefined) data.address = input.address || null;
 			if (input.city !== undefined) data.city = input.city || null;
 			if (input.state !== undefined) data.state = input.state || null;
-			if (input.postalCode !== undefined) data.postalCode = input.postalCode || null;
+			if (input.postalCode !== undefined)
+				data.postalCode = input.postalCode || null;
 			if (input.country !== undefined) data.country = input.country || null;
-			if (input.avatarUrl !== undefined) data.avatarUrl = input.avatarUrl || null;
+			if (input.avatarUrl !== undefined)
+				data.avatarUrl = input.avatarUrl || null;
 			if (input.status) data.status = input.status;
 
 			const contact = await prisma.contact.update({
@@ -484,4 +490,3 @@ export const contactsRouter = router({
 			return { contacts: propertyContacts.map((pc) => pc.contact) };
 		}),
 });
-

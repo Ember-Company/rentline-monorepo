@@ -1,463 +1,421 @@
-import type { Route } from "./+types/route";
-import { useState, useMemo } from "react";
+import { Spinner } from "@heroui/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Building2, DollarSign, FileText, Wrench } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { CrudModal } from "@/components/dashboard/crud-modal";
 import {
-	enhancedPropertyDetails,
-	getPropertyWithTenants,
-} from "@/lib/mock-data/enhanced-property-details";
-import { properties } from "@/lib/mock-data/properties";
-import type { PropertyDetail } from "@/lib/mock-data/property-types";
-import { EnhancedPropertyHeader } from "@/components/property/enhanced-property-header";
-import { EnhancedPropertyTabs } from "@/components/property/enhanced-property-tabs";
-import { RentOverviewCardEnhanced } from "@/components/property/rent-overview-card-enhanced";
-import { TenantsCardEnhanced } from "@/components/property/tenants-card-enhanced";
-import { PaymentsTableEnhanced } from "@/components/property/payments-table-enhanced";
-import { TenantSelectionModal } from "@/components/property/tenant-selection-modal";
-import { UnitsSection } from "@/components/property/units-section";
-import { PropertyInfoCard } from "@/components/property/property-info-card";
-import { ContactsTabs } from "@/components/contacts/contacts-tabs";
-import { Card, CardBody, Button } from "@heroui/react";
-import { Plus, MoreVertical } from "lucide-react";
+	ContactLinkModal,
+	ContactsTab,
+	type ExpenseFormData,
+	ExpenseModal,
+	FinancesTab,
+	LeasesTab,
+	type MaintenanceFormData,
+	MaintenanceModal,
+	MaintenanceTab,
+	OverviewTab,
+	type PaymentFormData,
+	PaymentModal,
+	PropertyHeader,
+	UnitsTab,
+} from "@/components/property/detail";
+import { StatCard } from "@/components/ui/stat-card";
+import { formatBRL } from "@/lib/constants/brazil";
+import { useDeleteProperty, useProperty, useUnits } from "@/lib/hooks";
+import { trpc } from "@/utils/trpc";
+import type { Route } from "./+types/route";
 
 export function meta(_args: Route.MetaArgs) {
 	return [
-		{ title: "Property Details - Rentline" },
-		{ name: "description", content: "View detailed property information" },
+		{ title: "Detalhes do Imóvel - Rentline" },
+		{ name: "description", content: "Visualizar detalhes do imóvel" },
 	];
 }
 
-// Mock payments data
-interface Payment {
-	id: string;
-	date: string;
-	category: string;
-	period: string;
-	tenant?: string;
-	notes?: string;
-	status: "paid" | "pending" | "overdue";
-	amount: number;
-}
-
-const generatePayments = (
-	property: PropertyDetail & {
-		tenantDetails?: Array<{ tenant: { name: string } }>;
-	},
-): Payment[] => {
-	if (!property.leases.length) return [];
-
-	const lease = property.leases[0];
-	const payments: Payment[] = [];
-	const startDate = new Date(lease.startDate);
-	const endDate = new Date(lease.endDate);
-	const today = new Date();
-
-	// Generate payments for each month
-	for (
-		let d = new Date(startDate);
-		d <= endDate;
-		d.setMonth(d.getMonth() + 1)
-	) {
-		const paymentDate = new Date(d);
-		paymentDate.setDate(lease.paymentDay);
-
-		if (paymentDate <= endDate) {
-			let status: "paid" | "pending" | "overdue" = "pending";
-			if (paymentDate < today) {
-				status = "paid";
-			} else if (
-				paymentDate < new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
-			) {
-				status = "overdue";
-			}
-
-			payments.push({
-				id: `pay_${paymentDate.toISOString()}`,
-				date: paymentDate.toISOString().split("T")[0],
-				category: "Rent",
-				period: paymentDate.toLocaleDateString("en-US", {
-					day: "numeric",
-					month: "short",
-					year: "numeric",
-				}),
-				tenant:
-					property.tenantDetails && property.tenantDetails.length > 0
-						? property.tenantDetails[0].tenant.name
-						: undefined,
-				notes: "",
-				status,
-				amount: lease.monthlyRent,
-			});
-		}
-	}
-
-	return payments.sort(
-		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-	);
-};
-
 export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 	const navigate = useNavigate();
-	const [activeTab, setActiveTab] = useState("overview");
-	const [activeLeaseId, setActiveLeaseId] = useState<string | undefined>(
-		undefined,
-	);
-	const [isTenantModalOpen, setIsTenantModalOpen] = useState(false);
-	// const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+	const queryClient = useQueryClient();
+	const propertyId = params.id;
 
-	const propertyId = params.id ? Number.parseInt(params.id, 10) : null;
-	const basicProperty = propertyId
-		? properties.find((p) => p.id === propertyId)
-		: null;
-	const detailedProperty = propertyId
-		? enhancedPropertyDetails[propertyId]
-		: null;
+	// UI State
+	const [activeTab, setActiveTab] = useState<string>("overview");
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+	const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+	const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
+	const [isContactLinkModalOpen, setIsContactLinkModalOpen] = useState(false);
+	const [selectedLeaseId, setSelectedLeaseId] = useState<string | null>(null);
 
-	const property = useMemo(() => {
-		if (detailedProperty) {
-			return getPropertyWithTenants(detailedProperty.id);
+	// Data fetching
+	const { data: propertyData, isLoading, error } = useProperty(propertyId);
+	const { data: unitsData, isLoading: isLoadingUnits } = useUnits({
+		propertyId,
+	});
+	const { data: leasesData } = useQuery({
+		...trpc.leases.list.queryOptions({ propertyId }),
+		enabled: !!propertyId,
+	});
+	const { data: paymentsData } = useQuery({
+		...trpc.payments.list.queryOptions({ propertyId, limit: 20 }),
+		enabled: !!propertyId,
+	});
+	const { data: expensesData } = useQuery({
+		...trpc.expenses.list.queryOptions({ propertyId, limit: 20 }),
+		enabled: !!propertyId,
+	});
+	const { data: maintenanceData } = useQuery({
+		...trpc.maintenance.list.queryOptions({ propertyId, limit: 20 }),
+		enabled: !!propertyId,
+	});
+	const { data: propertyContactsData } = useQuery({
+		...trpc.contacts.getByProperty.queryOptions({ propertyId }),
+		enabled: !!propertyId,
+	});
+	const { data: allContactsData } = useQuery({
+		...trpc.contacts.list.queryOptions({}),
+	});
+
+	// Mutations
+	const deleteProperty = useDeleteProperty();
+	const linkContactMutation = useMutation({
+		...trpc.contacts.linkToProperty.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["contacts", "getByProperty"],
+			});
+			toast.success("Contato vinculado com sucesso");
+		},
+		onError: () => toast.error("Erro ao vincular contato"),
+	});
+	const unlinkContactMutation = useMutation({
+		...trpc.contacts.unlinkFromProperty.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["contacts", "getByProperty"],
+			});
+			toast.success("Contato desvinculado com sucesso");
+		},
+		onError: () => toast.error("Erro ao desvincular contato"),
+	});
+	const createPaymentMutation = useMutation({
+		...trpc.payments.create.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["payments"] });
+			toast.success("Pagamento registrado com sucesso");
+			setIsPaymentModalOpen(false);
+		},
+		onError: () => toast.error("Erro ao registrar pagamento"),
+	});
+	const createExpenseMutation = useMutation({
+		...trpc.expenses.create.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["expenses"] });
+			toast.success("Despesa registrada com sucesso");
+			setIsExpenseModalOpen(false);
+		},
+		onError: () => toast.error("Erro ao registrar despesa"),
+	});
+	const createMaintenanceMutation = useMutation({
+		...trpc.maintenance.create.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["maintenance"] });
+			toast.success("Solicitação criada com sucesso");
+			setIsMaintenanceModalOpen(false);
+		},
+		onError: () => toast.error("Erro ao criar solicitação"),
+	});
+
+	// Derived data
+	const property = propertyData?.property;
+	const units = unitsData?.units || [];
+	const leases = leasesData?.leases || [];
+	const payments = paymentsData?.payments || [];
+	const expenses = expensesData?.expenses || [];
+	const maintenanceRequests = maintenanceData?.requests || [];
+	const propertyContacts = propertyContactsData?.contacts || [];
+	const allContacts = allContactsData?.contacts || [];
+
+	// Calculations
+	const occupiedUnits = units.filter((u) => u.status === "occupied").length;
+	const occupancyRate =
+		units.length > 0 ? (occupiedUnits / units.length) * 100 : 0;
+	const activeLeases = leases.filter((l) => l.status === "active").length;
+	const totalMonthlyRent = leases
+		.filter((l) => l.status === "active")
+		.reduce((sum, l) => sum + Number(l.rentAmount), 0);
+	const totalPayments = payments
+		.filter((p) => p.status === "completed")
+		.reduce((sum, p) => sum + Number(p.amount), 0);
+	const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+	const netIncome = totalPayments - totalExpenses;
+	const pendingPayments = payments.filter((p) => p.status === "pending").length;
+
+	const availableContacts = useMemo(() => {
+		const linkedIds = propertyContacts.map((c) => c.id);
+		return allContacts.filter((c) => !linkedIds.includes(c.id));
+	}, [allContacts, propertyContacts]);
+
+	// Handlers
+	const handleDelete = async () => {
+		try {
+			await deleteProperty.mutateAsync({ id: propertyId });
+			toast.success("Imóvel excluído com sucesso");
+			navigate("/dashboard/properties");
+		} catch {
+			toast.error("Erro ao excluir imóvel");
 		}
-		return null;
-	}, [detailedProperty]);
+	};
 
-	// Set default lease if not set
-	useMemo(() => {
-		if (property && !activeLeaseId && property.leases.length > 0) {
-			setActiveLeaseId(property.leases[0].id);
-		}
-	}, [property, activeLeaseId]);
+	const handlePaymentSubmit = (data: PaymentFormData) => {
+		createPaymentMutation.mutate({
+			leaseId: data.leaseId,
+			amount: data.amount,
+			currencyId: "BRL",
+			date: data.date,
+			type: data.type,
+			status: "completed",
+			notes: data.notes,
+		});
+	};
 
-	const activeLease =
-		property?.leases.find((l) => l.id === activeLeaseId) || property?.leases[0];
+	const handleExpenseSubmit = (data: ExpenseFormData) => {
+		createExpenseMutation.mutate({
+			propertyId,
+			amount: data.amount,
+			currencyId: "BRL",
+			date: data.date,
+			category: data.category,
+			description: data.description,
+			vendor: data.vendor,
+		});
+	};
 
-	const payments = useMemo(() => {
-		if (!property) return [];
-		// Use property payments if available, otherwise generate from lease
-		if (property.payments && property.payments.length > 0) {
-			return property.payments as Payment[];
-		}
-		return generatePayments(property) as Payment[];
-	}, [property]);
+	const handleMaintenanceSubmit = (data: MaintenanceFormData) => {
+		createMaintenanceMutation.mutate({
+			unitId: data.unitId || units[0]?.id || "",
+			title: data.title,
+			description: data.description,
+			priority: data.priority,
+		});
+	};
 
-	const expenses = property?.expenses || [];
-
-	if (!property) {
+	// Loading & Error states
+	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-96">
-				<div className="text-center">
-					<h2 className="text-2xl font-bold text-gray-900 mb-2">
-						Property Not Found
-					</h2>
-					<p className="text-gray-600 mb-4">
-						The property you're looking for doesn't exist.
-					</p>
-					<button
-						type="button"
-						onClick={() => navigate("/dashboard/properties")}
-						className="text-primary hover:underline"
-					>
-						Back to Properties
-					</button>
-				</div>
+			<div className="flex h-96 items-center justify-center">
+				<Spinner size="lg" />
 			</div>
 		);
 	}
 
-	const handleAddTenant = () => {
-		setIsTenantModalOpen(true);
-	};
+	if (error || !property) {
+		return (
+			<div className="flex h-96 flex-col items-center justify-center gap-4">
+				<p className="text-gray-500">Imóvel não encontrado</p>
+				<button
+					type="button"
+					onClick={() => navigate("/dashboard/properties")}
+					className="text-primary hover:underline"
+				>
+					Voltar para lista
+				</button>
+			</div>
+		);
+	}
 
-	const handleSelectTenant = (_tenantId: string, _unitId?: string) => {
-		// In real app, this would create a property-tenant relationship
-		toast.success("Tenant added to property successfully");
-		// Refresh property data would happen here
-	};
-
-	const handleEditLease = () => {
-		if (activeLease) {
-			navigate(
-				`/dashboard/properties/${property.id}/lease/${activeLease.id}/edit`,
-			);
-		}
-	};
-
-	const handleAddPayment = () => {
-		toast.info("Add payment functionality coming soon");
-	};
-
-	const handleAddExpense = () => {
-		toast.info("Add expense functionality coming soon");
-	};
-
-	const handleAddUnit = () => {
-		toast.info("Add unit functionality coming soon");
-	};
-
-	const handleAddLease = () => {
-		navigate(`/dashboard/properties/${property.id}/lease/new`);
-	};
-
-	const renderTabContent = () => {
-		switch (activeTab) {
-			case "overview":
-				return (
-					<div className="space-y-6">
-						{/* Property Information Card - Show for all property types */}
-						<PropertyInfoCard property={property} />
-
-						{/* Units Section - Show for apartments/condominiums */}
-						{(property.type === "apartments" || property.type === "houses") && property.units && (
-							<UnitsSection property={property} onAddUnit={handleAddUnit} />
-						)}
-
-						{/* Rent Overview and Tenants */}
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							<RentOverviewCardEnhanced
-								property={property}
-								lease={activeLease}
-								onEditLease={handleAddLease}
-							/>
-							<TenantsCardEnhanced
-								property={property}
-								tenantDetails={property.tenantDetails || []}
-								onAddTenant={handleAddTenant}
-								hasActiveLease={!!activeLease}
-							/>
-						</div>
-
-						{/* Payments Table */}
-						<PaymentsTableEnhanced
-							property={property}
-							payments={payments}
-							expenses={expenses}
-							onAddPayment={handleAddPayment}
-							onAddExpense={handleAddExpense}
-						/>
-					</div>
-				);
-
-			case "contacts":
-				return (
-					<div className="space-y-6">
-						<ContactsTabs propertyId={property.id.toString()} />
-					</div>
-				);
-
-			case "documents":
-				return (
-					<Card className="border border-gray-200 shadow-sm">
-						<CardBody className="p-6">
-							<div className="flex items-center justify-between mb-6">
-								<h3 className="text-lg font-semibold text-gray-900">Documents</h3>
-								<Button
-									size="sm"
-									color="primary"
-									startContent={<Plus className="h-4 w-4" />}
-									onPress={() => toast.info("Upload document functionality coming soon")}
-								>
-									Upload Document
-								</Button>
-							</div>
-							{property.documents.length === 0 ? (
-								<div className="text-center py-12">
-									<p className="text-gray-500 mb-2">No documents uploaded</p>
-									<Button
-										size="sm"
-										variant="light"
-										onPress={() => toast.info("Upload document functionality coming soon")}
-									>
-										Upload your first document
-									</Button>
-								</div>
-							) : (
-								<div className="space-y-2">
-									{property.documents.map((doc) => (
-										<div
-											key={doc.id}
-											className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary-50/50 transition-colors cursor-pointer"
-										>
-											<div className="flex items-center gap-3 flex-1">
-												<div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-													<span className="text-gray-600 text-lg">📄</span>
-												</div>
-												<div className="flex-1">
-													<p className="text-sm font-medium text-gray-900">{doc.name}</p>
-													<p className="text-xs text-gray-500">{doc.type} • {formatDate(doc.uploadedAt)}</p>
-												</div>
-											</div>
-											<Button
-												isIconOnly
-												variant="light"
-												size="sm"
-												onPress={() => toast.info("Document actions coming soon")}
-											>
-												<MoreVertical className="h-4 w-4" />
-											</Button>
-										</div>
-									))}
-								</div>
-							)}
-						</CardBody>
-					</Card>
-				);
-
-			case "mileage-reminders":
-				return (
-					<div className="space-y-6">
-						{property.type === "land" && (
-							<Card className="border border-gray-200 shadow-sm">
-								<CardBody className="p-6">
-									<div className="flex items-center justify-between mb-6">
-										<h3 className="text-lg font-semibold text-gray-900">Mileage</h3>
-										<Button
-											size="sm"
-											color="primary"
-											startContent={<Plus className="h-4 w-4" />}
-											onPress={() => toast.info("Add mileage functionality coming soon")}
-										>
-											Add Mileage
-										</Button>
-									</div>
-									{property.mileage && property.mileage.length > 0 ? (
-										<div className="space-y-3">
-											{property.mileage.map((m) => (
-												<div
-													key={m.id}
-													className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary-50/50 transition-colors"
-												>
-													<div className="flex-1">
-														<p className="font-semibold text-gray-900">{m.mileage} miles</p>
-														<p className="text-sm text-gray-500">{formatDate(m.date)}</p>
-														{m.notes && (
-															<p className="text-sm text-gray-600 mt-1">{m.notes}</p>
-														)}
-													</div>
-													<Button
-														isIconOnly
-														variant="light"
-														size="sm"
-														onPress={() => toast.info("Mileage actions coming soon")}
-													>
-														<MoreVertical className="h-4 w-4" />
-													</Button>
-												</div>
-											))}
-										</div>
-									) : (
-										<div className="text-center py-12">
-											<p className="text-gray-500 mb-2">No mileage records</p>
-											<Button
-												size="sm"
-												variant="light"
-												onPress={() => toast.info("Add mileage functionality coming soon")}
-											>
-												Add your first record
-											</Button>
-										</div>
-									)}
-								</CardBody>
-							</Card>
-						)}
-						<Card className="border border-gray-200 shadow-sm">
-							<CardBody className="p-6">
-								<div className="flex items-center justify-between mb-6">
-									<h3 className="text-lg font-semibold text-gray-900">Reminders</h3>
-									<Button
-										size="sm"
-										color="primary"
-										startContent={<Plus className="h-4 w-4" />}
-										onPress={() => toast.info("Add reminder functionality coming soon")}
-									>
-										Add Reminder
-									</Button>
-								</div>
-								{property.reminders.length === 0 ? (
-									<div className="text-center py-12">
-										<p className="text-gray-500 mb-2">No reminders set</p>
-										<Button
-											size="sm"
-											variant="light"
-											onPress={() => toast.info("Add reminder functionality coming soon")}
-										>
-											Create your first reminder
-										</Button>
-									</div>
-								) : (
-									<div className="space-y-3">
-										{property.reminders.map((reminder) => (
-											<div
-												key={reminder.id}
-												className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary-50/50 transition-colors"
-											>
-												<div className="flex items-center gap-3 flex-1">
-													<input
-														type="checkbox"
-														checked={reminder.completed}
-														onChange={() => toast.info("Toggle reminder functionality coming soon")}
-														className="w-4 h-4 cursor-pointer rounded border-gray-300 text-primary focus:ring-primary"
-													/>
-													<div className="flex-1">
-														<p className={`font-medium ${reminder.completed ? "text-gray-400 line-through" : "text-gray-900"}`}>
-															{reminder.title}
-														</p>
-														<p className="text-sm text-gray-500">
-															{formatDate(reminder.date)}
-														</p>
-														{reminder.notes && (
-															<p className="text-sm text-gray-600 mt-1">
-																{reminder.notes}
-															</p>
-														)}
-													</div>
-												</div>
-												<Button
-													isIconOnly
-													variant="light"
-													size="sm"
-													onPress={() => toast.info("Reminder actions coming soon")}
-												>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</div>
-										))}
-									</div>
-								)}
-							</CardBody>
-						</Card>
-					</div>
-				);
-
-			case "other":
-				return (
-					<div className="space-y-6">
-						<PropertyInfoCard property={property} />
-					</div>
-				);
-
-			default:
-				return null;
-		}
-	};
+	const tabs = [
+		{ key: "overview", label: "Visão Geral" },
+		...(property.type === "apartment_building" || property.type === "office"
+			? [{ key: "units", label: `Unidades (${units.length})` }]
+			: []),
+		{ key: "leases", label: `Contratos (${leases.length})` },
+		{ key: "finances", label: "Financeiro" },
+		{ key: "maintenance", label: `Manutenção (${maintenanceRequests.length})` },
+		{ key: "contacts", label: `Contatos (${propertyContacts.length})` },
+	];
 
 	return (
-		<div className="space-y-6">
-			<EnhancedPropertyHeader
+		<div className="space-y-6 pb-12">
+			<PropertyHeader
 				property={property}
-				activeLeaseId={activeLeaseId}
-				onLeaseChange={setActiveLeaseId}
-				onAddClick={() => toast.info("Add functionality coming soon")}
+				onDelete={() => setIsDeleteModalOpen(true)}
 			/>
 
-			<EnhancedPropertyTabs activeTab={activeTab} onTabChange={setActiveTab} />
+			{/* Quick Stats */}
+			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+				{(property.type === "apartment_building" ||
+					property.type === "office") && (
+					<StatCard
+						title="Ocupação"
+						value={`${occupancyRate.toFixed(0)}%`}
+						subtitle={`${occupiedUnits}/${units.length} unidades`}
+						icon={Building2}
+						color="blue"
+					/>
+				)}
+				<StatCard
+					title="Contratos Ativos"
+					value={activeLeases}
+					subtitle={`de ${leases.length} total`}
+					icon={FileText}
+					color="green"
+				/>
+				<StatCard
+					title="Receita Mensal"
+					value={formatBRL(totalMonthlyRent)}
+					subtitle="contratos ativos"
+					icon={DollarSign}
+					color="green"
+				/>
+				<StatCard
+					title="Manutenções"
+					value={
+						maintenanceRequests.filter((m) => m.status !== "closed").length
+					}
+					subtitle="pendentes"
+					icon={Wrench}
+					color="yellow"
+				/>
+			</div>
 
-			{renderTabContent()}
+			{/* Tabs Navigation */}
+			<div className="flex gap-1 overflow-x-auto border-gray-200 border-b">
+				{tabs.map((tab) => (
+					<button
+						key={tab.key}
+						type="button"
+						onClick={() => setActiveTab(tab.key)}
+						className={`whitespace-nowrap px-4 py-2 font-medium text-sm transition-colors ${
+							activeTab === tab.key
+								? "border-primary border-b-2 text-primary"
+								: "text-gray-600 hover:text-gray-900"
+						}`}
+					>
+						{tab.label}
+					</button>
+				))}
+			</div>
 
-			{/* Tenant Selection Modal */}
-			<TenantSelectionModal
-				isOpen={isTenantModalOpen}
-				onClose={() => setIsTenantModalOpen(false)}
-				property={property}
-				onSelectTenant={handleSelectTenant}
+			{/* Tab Content */}
+			{activeTab === "overview" && (
+				<OverviewTab
+					property={property}
+					payments={payments}
+					expenses={expenses}
+					propertyContacts={propertyContacts}
+					totalPayments={totalPayments}
+					totalExpenses={totalExpenses}
+					netIncome={netIncome}
+					onAddPayment={() => setIsPaymentModalOpen(true)}
+					onAddExpense={() => setIsExpenseModalOpen(true)}
+					onLinkContact={() => setIsContactLinkModalOpen(true)}
+					onUnlinkContact={(contactId) =>
+						unlinkContactMutation.mutate({ propertyId, contactId })
+					}
+				/>
+			)}
+
+			{activeTab === "units" && (
+				<UnitsTab
+					propertyId={propertyId}
+					units={units}
+					isLoading={isLoadingUnits}
+				/>
+			)}
+
+			{activeTab === "leases" && (
+				<LeasesTab
+					propertyId={propertyId}
+					leases={leases}
+					onRecordPayment={(leaseId) => {
+						setSelectedLeaseId(leaseId);
+						setIsPaymentModalOpen(true);
+					}}
+				/>
+			)}
+
+			{activeTab === "finances" && (
+				<FinancesTab
+					payments={payments}
+					expenses={expenses}
+					totalPayments={totalPayments}
+					totalExpenses={totalExpenses}
+					netIncome={netIncome}
+					pendingPayments={pendingPayments}
+					onAddPayment={() => setIsPaymentModalOpen(true)}
+					onAddExpense={() => setIsExpenseModalOpen(true)}
+				/>
+			)}
+
+			{activeTab === "maintenance" && (
+				<MaintenanceTab
+					maintenanceRequests={maintenanceRequests}
+					onAddRequest={() => setIsMaintenanceModalOpen(true)}
+				/>
+			)}
+
+			{activeTab === "contacts" && (
+				<ContactsTab
+					propertyContacts={propertyContacts}
+					onLinkContact={() => setIsContactLinkModalOpen(true)}
+					onUnlinkContact={(contactId) =>
+						unlinkContactMutation.mutate({ propertyId, contactId })
+					}
+				/>
+			)}
+
+			{/* Modals */}
+			<CrudModal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				title="Excluir Imóvel"
+				onDelete={handleDelete}
+				deleteLabel="Excluir"
+				size="md"
+				isLoading={deleteProperty.isPending}
+			>
+				<p>
+					Tem certeza que deseja excluir <strong>{property.name}</strong>? Esta
+					ação não pode ser desfeita.
+				</p>
+			</CrudModal>
+
+			<PaymentModal
+				isOpen={isPaymentModalOpen}
+				onClose={() => {
+					setIsPaymentModalOpen(false);
+					setSelectedLeaseId(null);
+				}}
+				onSubmit={handlePaymentSubmit}
+				isLoading={createPaymentMutation.isPending}
+				leases={leases}
+				selectedLeaseId={selectedLeaseId}
+			/>
+
+			<ExpenseModal
+				isOpen={isExpenseModalOpen}
+				onClose={() => setIsExpenseModalOpen(false)}
+				onSubmit={handleExpenseSubmit}
+				isLoading={createExpenseMutation.isPending}
+			/>
+
+			<MaintenanceModal
+				isOpen={isMaintenanceModalOpen}
+				onClose={() => setIsMaintenanceModalOpen(false)}
+				onSubmit={handleMaintenanceSubmit}
+				isLoading={createMaintenanceMutation.isPending}
+				units={units}
+			/>
+
+			<ContactLinkModal
+				isOpen={isContactLinkModalOpen}
+				onClose={() => setIsContactLinkModalOpen(false)}
+				availableContacts={availableContacts}
+				onLinkContact={(contactId, role) =>
+					linkContactMutation.mutate({ propertyId, contactId, role })
+				}
 			/>
 		</div>
 	);

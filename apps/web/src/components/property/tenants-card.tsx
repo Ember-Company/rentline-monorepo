@@ -1,5 +1,12 @@
-import { Card, CardBody, CardHeader, Button, Avatar, Chip } from "@heroui/react";
-import { Plus, MoreVertical } from "lucide-react";
+import {
+	Avatar,
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Chip,
+} from "@heroui/react";
+import { MoreVertical, Plus } from "lucide-react";
 import type { PropertyDetail } from "@/lib/mock-data/property-details";
 
 type TenantsCardProps = {
@@ -23,14 +30,14 @@ export function TenantsCard({ property, onAddTenant }: TenantsCardProps) {
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex justify-between items-center">
-				<h3 className="text-lg font-semibold text-gray-900">
+			<CardHeader className="flex items-center justify-between">
+				<h3 className="font-semibold text-gray-900 text-lg">
 					Tenants ({property.tenants.length})
 				</h3>
 				<Button
 					size="sm"
 					variant="light"
-					startContent={<Plus className="w-4 h-4" />}
+					startContent={<Plus className="h-4 w-4" />}
 					onPress={onAddTenant}
 				>
 					New
@@ -41,17 +48,13 @@ export function TenantsCard({ property, onAddTenant }: TenantsCardProps) {
 					{property.tenants.map((tenant) => (
 						<div
 							key={tenant.id}
-							className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+							className="flex items-center justify-between rounded-lg border border-gray-200 p-3"
 						>
-							<div className="flex items-center gap-3 flex-1">
-								<Avatar
-									name={tenant.name}
-									size="md"
-									className="w-10 h-10"
-								/>
+							<div className="flex flex-1 items-center gap-3">
+								<Avatar name={tenant.name} size="md" className="h-10 w-10" />
 								<div className="flex-1">
 									<p className="font-semibold text-gray-900">{tenant.name}</p>
-									<p className="text-sm text-gray-600">{tenant.email}</p>
+									<p className="text-gray-600 text-sm">{tenant.email}</p>
 								</div>
 								<Chip
 									size="sm"
@@ -61,17 +64,13 @@ export function TenantsCard({ property, onAddTenant }: TenantsCardProps) {
 									{tenant.status.toUpperCase()}
 								</Chip>
 							</div>
-							<Button
-								isIconOnly
-								variant="light"
-								size="sm"
-							>
-								<MoreVertical className="w-4 h-4" />
+							<Button isIconOnly variant="light" size="sm">
+								<MoreVertical className="h-4 w-4" />
 							</Button>
 						</div>
 					))}
 					{property.tenants.length === 0 && (
-						<p className="text-sm text-gray-500 text-center py-4">
+						<p className="py-4 text-center text-gray-500 text-sm">
 							No tenants assigned
 						</p>
 					)}
@@ -80,4 +79,3 @@ export function TenantsCard({ property, onAddTenant }: TenantsCardProps) {
 		</Card>
 	);
 }
-

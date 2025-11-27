@@ -1,25 +1,25 @@
-import type { Route } from "./+types/route";
 import {
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
 	Input,
-	Button,
 	Select,
 	SelectItem,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
 } from "@heroui/react";
-import { Search, Plus, Download, FileText } from "lucide-react";
+import { Download, FileText, Plus, Search } from "lucide-react";
+import { useState } from "react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { recentTransactions } from "@/lib/mock-data/transactions";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
-import { useState } from "react";
+import type { Route } from "./+types/route";
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -50,11 +50,11 @@ export default function PaymentsPage() {
 					<>
 						<Button
 							variant="bordered"
-							startContent={<Download className="w-4 h-4" />}
+							startContent={<Download className="h-4 w-4" />}
 						>
 							Export
 						</Button>
-						<Button color="primary" startContent={<Plus className="w-4 h-4" />}>
+						<Button color="primary" startContent={<Plus className="h-4 w-4" />}>
 							Record Payment
 						</Button>
 					</>
@@ -62,10 +62,10 @@ export default function PaymentsPage() {
 			/>
 
 			<Card className="border border-gray-200 shadow-sm">
-				<CardHeader className="flex justify-between items-center">
+				<CardHeader className="flex items-center justify-between">
 					<div>
-						<h2 className="text-xl font-semibold">All Payments</h2>
-						<p className="text-sm text-gray-600">
+						<h2 className="font-semibold text-xl">All Payments</h2>
+						<p className="text-gray-600 text-sm">
 							{filteredPayments.length} payments found
 						</p>
 					</div>
@@ -74,7 +74,7 @@ export default function PaymentsPage() {
 							placeholder="Search payments..."
 							value={searchQuery}
 							onValueChange={setSearchQuery}
-							startContent={<Search className="w-4 h-4" />}
+							startContent={<Search className="h-4 w-4" />}
 							classNames={{
 								input: "text-sm",
 								inputWrapper: "bg-gray-50 border-gray-200 max-w-xs",
@@ -118,7 +118,7 @@ export default function PaymentsPage() {
 										</span>
 									</TableCell>
 									<TableCell>
-										<span className="text-sm text-gray-600">
+										<span className="text-gray-600 text-sm">
 											{formatDate(payment.date)}
 										</span>
 									</TableCell>
@@ -140,7 +140,7 @@ export default function PaymentsPage() {
 									</TableCell>
 									<TableCell>
 										<Button size="sm" variant="light" isIconOnly>
-											<FileText className="w-4 h-4" />
+											<FileText className="h-4 w-4" />
 										</Button>
 									</TableCell>
 								</TableRow>

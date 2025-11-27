@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ContactsList } from "./contacts-list";
 
 interface ContactsTabsProps {
@@ -12,7 +12,9 @@ export function ContactsTabs({
 	activeTab: controlledActiveTab,
 	onTabChange: controlledOnTabChange,
 }: ContactsTabsProps) {
-	const [internalActiveTab, setInternalActiveTab] = useState<"tenant" | "agent" | "owner">("tenant");
+	const [internalActiveTab, setInternalActiveTab] = useState<
+		"tenant" | "agent" | "owner"
+	>("tenant");
 
 	const activeTab = controlledActiveTab ?? internalActiveTab;
 	const setActiveTab = controlledOnTabChange ?? setInternalActiveTab;
@@ -20,22 +22,26 @@ export function ContactsTabs({
 	return (
 		<div className="space-y-6">
 			{/* Tabs */}
-			<div className="border-b border-gray-200">
+			<div className="border-gray-200 border-b">
 				<div className="flex items-center gap-8">
 					{(["tenant", "agent", "owner"] as const).map((tab) => (
 						<button
 							key={tab}
 							type="button"
 							onClick={() => setActiveTab(tab)}
-							className={`relative px-1 py-4 text-sm font-medium transition-colors capitalize ${
+							className={`relative px-1 py-4 font-medium text-sm capitalize transition-colors ${
 								activeTab === tab
 									? "text-primary"
 									: "text-gray-600 hover:text-gray-900"
 							}`}
 						>
-							{tab === "tenant" ? "Tenants" : tab === "agent" ? "Agents" : "Owners"}
+							{tab === "tenant"
+								? "Tenants"
+								: tab === "agent"
+									? "Agents"
+									: "Owners"}
 							{activeTab === tab && (
-								<span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+								<span className="absolute right-0 bottom-0 left-0 h-0.5 bg-primary" />
 							)}
 						</button>
 					))}
@@ -47,4 +53,3 @@ export function ContactsTabs({
 		</div>
 	);
 }
-

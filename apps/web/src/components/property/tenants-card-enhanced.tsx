@@ -1,5 +1,15 @@
-import { Card, CardBody, Button, Avatar, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
-import { Plus, MoreVertical } from "lucide-react";
+import {
+	Avatar,
+	Button,
+	Card,
+	CardBody,
+	Chip,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
+} from "@heroui/react";
+import { MoreVertical, Plus } from "lucide-react";
 import type { PropertyDetail } from "@/lib/mock-data/property-types";
 import type { TenantEntity } from "@/lib/mock-data/tenants-entities";
 
@@ -37,10 +47,10 @@ export function TenantsCardEnhanced({
 	};
 
 	return (
-		<Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+		<Card className="border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
 			<CardBody className="p-6">
-				<div className="flex items-center justify-between mb-4">
-					<h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+				<div className="mb-4 flex items-center justify-between">
+					<h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">
 						Tenants ({tenantDetails.length})
 					</h3>
 					<Button
@@ -57,8 +67,8 @@ export function TenantsCardEnhanced({
 
 				<div className="space-y-3">
 					{tenantDetails.length === 0 ? (
-						<div className="text-center py-8">
-							<p className="text-sm text-gray-500 mb-4">
+						<div className="py-8 text-center">
+							<p className="mb-4 text-gray-500 text-sm">
 								{hasActiveLease
 									? "No tenants assigned"
 									: "Create a lease first to add tenants"}
@@ -78,19 +88,19 @@ export function TenantsCardEnhanced({
 						tenantDetails.map(({ propertyTenant, tenant }) => (
 							<div
 								key={propertyTenant.id}
-								className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+								className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-50"
 							>
-								<div className="flex items-center gap-3 flex-1 min-w-0">
+								<div className="flex min-w-0 flex-1 items-center gap-3">
 									<Avatar
 										name={tenant.avatar || tenant.name}
-										className="bg-orange-100 text-orange-600 font-semibold"
+										className="bg-orange-100 font-semibold text-orange-600"
 										size="sm"
 									/>
-									<div className="flex-1 min-w-0">
-										<p className="text-sm font-medium text-gray-900 truncate">
+									<div className="min-w-0 flex-1">
+										<p className="truncate font-medium text-gray-900 text-sm">
 											{tenant.name}
 										</p>
-										<p className="text-xs text-gray-500 truncate">
+										<p className="truncate text-gray-500 text-xs">
 											{tenant.email}
 										</p>
 									</div>
@@ -129,4 +139,3 @@ export function TenantsCardEnhanced({
 		</Card>
 	);
 }
-

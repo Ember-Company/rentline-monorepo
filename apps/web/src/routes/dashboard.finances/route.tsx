@@ -1,10 +1,30 @@
-import type { Route } from "./+types/route";
-import { Card, CardBody, CardHeader, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, Select, SelectItem } from "@heroui/react";
-import { Search, Download, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { MetricCard } from "@/components/dashboard/metric-card";
-import { formatCurrency } from "@/lib/utils/format";
+import {
+	Button,
+	Card,
+	CardBody,
+	CardHeader,
+	Input,
+	Select,
+	SelectItem,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@heroui/react";
+import {
+	DollarSign,
+	Download,
+	Search,
+	TrendingDown,
+	TrendingUp,
+} from "lucide-react";
 import { useState } from "react";
+import { MetricCard } from "@/components/dashboard/metric-card";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { formatCurrency } from "@/lib/utils/format";
+import type { Route } from "./+types/route";
 
 type FinancialRecord = {
 	id: number;
@@ -87,14 +107,17 @@ export default function FinancesPage() {
 				title="Finances"
 				subtitle="Financial overview and transaction records"
 				actions={
-					<Button variant="bordered" startContent={<Download className="w-4 h-4" />}>
+					<Button
+						variant="bordered"
+						startContent={<Download className="h-4 w-4" />}
+					>
 						Export Report
 					</Button>
 				}
 			/>
 
 			{/* Summary Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
 				<MetricCard
 					title="Total Income"
 					value={totalIncome}
@@ -105,12 +128,12 @@ export default function FinancesPage() {
 					value={totalExpenses}
 					trend={{ percentage: 4, label: "Than last month" }}
 				/>
-				<div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+				<div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 					<div className="flex items-start justify-between">
 						<div className="flex-1">
-							<p className="text-sm text-gray-600 mb-2">Net Profit</p>
+							<p className="mb-2 text-gray-600 text-sm">Net Profit</p>
 							<p
-								className={`text-2xl font-bold mb-3 ${
+								className={`mb-3 font-bold text-2xl ${
 									netProfit >= 0 ? "text-green-600" : "text-red-600"
 								}`}
 							>
@@ -122,12 +145,13 @@ export default function FinancesPage() {
 								}`}
 							>
 								{netProfit >= 0 ? (
-									<TrendingUp className="w-4 h-4" />
+									<TrendingUp className="h-4 w-4" />
 								) : (
-									<TrendingDown className="w-4 h-4" />
+									<TrendingDown className="h-4 w-4" />
 								)}
 								<span>
-									{Math.abs(((netProfit / totalIncome) * 100).toFixed(1))}% margin
+									{Math.abs(((netProfit / totalIncome) * 100).toFixed(1))}%
+									margin
 								</span>
 							</div>
 						</div>
@@ -136,10 +160,10 @@ export default function FinancesPage() {
 			</div>
 
 			<Card className="border border-gray-200 shadow-sm">
-				<CardHeader className="flex justify-between items-center">
+				<CardHeader className="flex items-center justify-between">
 					<div>
-						<h2 className="text-xl font-semibold">Financial Records</h2>
-						<p className="text-sm text-gray-600">
+						<h2 className="font-semibold text-xl">Financial Records</h2>
+						<p className="text-gray-600 text-sm">
 							{filteredRecords.length} records found
 						</p>
 					</div>
@@ -148,7 +172,7 @@ export default function FinancesPage() {
 							placeholder="Search records..."
 							value={searchQuery}
 							onValueChange={setSearchQuery}
-							startContent={<Search className="w-4 h-4" />}
+							startContent={<Search className="h-4 w-4" />}
 							classNames={{
 								input: "text-sm",
 								inputWrapper: "bg-gray-50 border-gray-200 max-w-xs",
@@ -182,7 +206,7 @@ export default function FinancesPage() {
 							{filteredRecords.map((record) => (
 								<TableRow key={record.id}>
 									<TableCell>
-										<span className="text-sm text-gray-600">{record.date}</span>
+										<span className="text-gray-600 text-sm">{record.date}</span>
 									</TableCell>
 									<TableCell>
 										<span className="font-medium">{record.category}</span>
@@ -196,7 +220,9 @@ export default function FinancesPage() {
 									<TableCell>
 										<span
 											className={`font-semibold ${
-												record.type === "income" ? "text-green-600" : "text-red-600"
+												record.type === "income"
+													? "text-green-600"
+													: "text-red-600"
 											}`}
 										>
 											{record.type === "expense" ? "-" : "+"}
@@ -205,13 +231,14 @@ export default function FinancesPage() {
 									</TableCell>
 									<TableCell>
 										<span
-											className={`text-sm px-2 py-1 rounded ${
+											className={`rounded px-2 py-1 text-sm ${
 												record.type === "income"
 													? "bg-green-100 text-green-700"
 													: "bg-red-100 text-red-700"
 											}`}
 										>
-											{record.type.charAt(0).toUpperCase() + record.type.slice(1)}
+											{record.type.charAt(0).toUpperCase() +
+												record.type.slice(1)}
 										</span>
 									</TableCell>
 								</TableRow>
@@ -223,4 +250,3 @@ export default function FinancesPage() {
 		</div>
 	);
 }
-

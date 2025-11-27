@@ -21,20 +21,24 @@ export function PortfolioSummary({
 	return (
 		<Card>
 			<CardHeader>
-				<h2 className="text-xl font-semibold">Portfolio Summary</h2>
+				<h2 className="font-semibold text-xl">Portfolio Summary</h2>
 			</CardHeader>
 			<CardBody className="space-y-4">
-				<div className="flex justify-between items-center">
-					<span className="text-sm text-muted-foreground">Monthly Income</span>
+				<div className="flex items-center justify-between">
+					<span className="text-muted-foreground text-sm">Monthly Income</span>
 					<span className="font-semibold">{formatCurrency(monthlyIncome)}</span>
 				</div>
-				<div className="flex justify-between items-center">
-					<span className="text-sm text-muted-foreground">Monthly Expenses</span>
-					<span className="font-semibold">{formatCurrency(monthlyExpenses)}</span>
+				<div className="flex items-center justify-between">
+					<span className="text-muted-foreground text-sm">
+						Monthly Expenses
+					</span>
+					<span className="font-semibold">
+						{formatCurrency(monthlyExpenses)}
+					</span>
 				</div>
-				<div className="flex justify-between items-center pt-2 border-t">
-					<span className="text-sm font-medium">Net Cash Flow</span>
-					<span className="text-lg font-bold text-success">
+				<div className="flex items-center justify-between border-t pt-2">
+					<span className="font-medium text-sm">Net Cash Flow</span>
+					<span className="font-bold text-lg text-success">
 						{formatCurrency(netCashFlow)}
 					</span>
 				</div>
@@ -42,7 +46,7 @@ export function PortfolioSummary({
 					<div className="pt-2">
 						<div className="flex items-center gap-2 text-sm">
 							<TrendingUp
-								className={`w-4 h-4 ${
+								className={`h-4 w-4 ${
 									trend.isPositive ? "text-success" : "text-danger"
 								}`}
 							/>
@@ -60,4 +64,3 @@ export function PortfolioSummary({
 		</Card>
 	);
 }
-

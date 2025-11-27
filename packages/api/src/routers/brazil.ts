@@ -1,7 +1,7 @@
 import prisma from "@rentline/db";
-import { publicProcedure, router } from "../index";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { publicProcedure, router } from "../index";
 
 const mapearPorte = (porte?: string): string => {
 	if (!porte) return "";

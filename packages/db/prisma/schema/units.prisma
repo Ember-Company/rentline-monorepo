@@ -1,18 +1,41 @@
 model Unit {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property    Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Basic info
   unitNumber  String
-  type        String   // apartment, office, misc
+  name        String?   // Optional friendly name (e.g., "Corner Suite", "Penthouse")
+  type        String    // apartment, office, retail, storage, parking
+  floor       Int?
+  
+  // Physical characteristics
   bedrooms    Int?
   bathrooms   Decimal?
-  area        Decimal? // e.g. sqft or m2
-  status      String   @default("available") // available, occupied, maintenance
+  area        Decimal?  // sqft or m2
+  
+  // Status
+  status      String    @default("available") // available, occupied, maintenance, reserved
+  
+  // Financial
   rentAmount  Decimal?
+  depositAmount Decimal?
   currencyId  String?
   currency    Currency? @relation(fields: [currencyId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  
+  // Features
+  features    String?   // JSON array
+  amenities   String?   // JSON array
+  description String?
+  
+  // Images
+  coverImage  String?
+  images      String?   // JSON array
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
   // Relations
   applications        Application[]
   leases              Lease[]
@@ -22,7 +45,7 @@ model Unit {
 
   @@index([propertyId])
   @@index([status])
+  @@index([type])
   @@index([currencyId])
   @@map("unit")
 }
-

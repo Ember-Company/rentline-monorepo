@@ -1,8 +1,8 @@
-import { Card, CardBody, Button, Chip } from "@heroui/react";
-import { Plus, Home } from "lucide-react";
+import { Button, Card, CardBody, Chip } from "@heroui/react";
+import { Home, Plus } from "lucide-react";
 import { Link } from "react-router";
-import { formatCurrency } from "@/lib/utils/format";
 import type { PropertyDetail } from "@/lib/mock-data/property-types";
+import { formatCurrency } from "@/lib/utils/format";
 
 interface UnitsSectionProps {
 	property: PropertyDetail;
@@ -14,8 +14,8 @@ export function UnitsSection({ property, onAddUnit }: UnitsSectionProps) {
 		return (
 			<Card className="border border-gray-200 shadow-sm">
 				<CardBody className="p-6">
-					<div className="flex items-center justify-between mb-6">
-						<h3 className="text-lg font-semibold text-gray-900">Units/Rooms</h3>
+					<div className="mb-6 flex items-center justify-between">
+						<h3 className="font-semibold text-gray-900 text-lg">Units/Rooms</h3>
 						<Button
 							size="sm"
 							color="primary"
@@ -25,12 +25,12 @@ export function UnitsSection({ property, onAddUnit }: UnitsSectionProps) {
 							New
 						</Button>
 					</div>
-					<div className="text-center py-12">
-						<div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-							<Home className="w-8 h-8 text-gray-400" />
+					<div className="py-12 text-center">
+						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+							<Home className="h-8 w-8 text-gray-400" />
 						</div>
-						<p className="text-gray-600 font-medium mb-2">No units added</p>
-						<p className="text-sm text-gray-500 mb-4">
+						<p className="mb-2 font-medium text-gray-600">No units added</p>
+						<p className="mb-4 text-gray-500 text-sm">
 							Start by adding units to this property
 						</p>
 						<Button
@@ -67,8 +67,8 @@ export function UnitsSection({ property, onAddUnit }: UnitsSectionProps) {
 	return (
 		<Card className="border border-gray-200 shadow-sm">
 			<CardBody className="p-6">
-				<div className="flex items-center justify-between mb-6">
-					<h3 className="text-lg font-semibold text-gray-900">
+				<div className="mb-6 flex items-center justify-between">
+					<h3 className="font-semibold text-gray-900 text-lg">
 						Units/Rooms ({property.units.length})
 					</h3>
 					<Button
@@ -80,22 +80,24 @@ export function UnitsSection({ property, onAddUnit }: UnitsSectionProps) {
 						New
 					</Button>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{property.units.map((unit) => (
 						<Link
 							key={unit.id}
 							to={`/dashboard/properties/${property.id}/units/${unit.id}`}
 							className="block"
 						>
-							<div className="border border-gray-200 rounded-lg p-4 hover:border-primary hover:shadow-md transition-all cursor-pointer h-full">
-								<div className="flex items-start justify-between mb-3">
+							<div className="h-full cursor-pointer rounded-lg border border-gray-200 p-4 transition-all hover:border-primary hover:shadow-md">
+								<div className="mb-3 flex items-start justify-between">
 									<div className="flex items-center gap-2">
-										<div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
-											<Home className="w-5 h-5 text-primary-600" />
+										<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100">
+											<Home className="h-5 w-5 text-primary-600" />
 										</div>
 										<div>
-											<p className="font-semibold text-gray-900">Apt. {unit.unitNumber}</p>
-											<p className="text-xs text-gray-500">{unit.type}</p>
+											<p className="font-semibold text-gray-900">
+												Apt. {unit.unitNumber}
+											</p>
+											<p className="text-gray-500 text-xs">{unit.type}</p>
 										</div>
 									</div>
 									<Chip
@@ -122,10 +124,13 @@ export function UnitsSection({ property, onAddUnit }: UnitsSectionProps) {
 									)}
 									{unit.squareFeet && (
 										<p className="text-gray-600">
-											<span className="font-medium">{unit.squareFeet.toLocaleString()}</span> sq ft
+											<span className="font-medium">
+												{unit.squareFeet.toLocaleString()}
+											</span>{" "}
+											sq ft
 										</p>
 									)}
-									<p className="text-gray-900 font-semibold mt-2">
+									<p className="mt-2 font-semibold text-gray-900">
 										{formatCurrency(unit.rent, property.currency)}
 									</p>
 								</div>

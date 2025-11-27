@@ -1,39 +1,39 @@
-import { Link } from "react-router";
 import { Button } from "@heroui/react";
 import { LogIn } from "lucide-react";
+import { Link } from "react-router";
 
 export function Navbar() {
 	return (
-		<nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+		<nav className="sticky top-0 z-50 border-gray-200 border-b bg-white">
 			<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex items-center justify-between h-16">
+				<div className="flex h-16 items-center justify-between">
 					{/* Logo */}
 					<Link to="/" className="flex items-center gap-2">
-						<div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-							<div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-								<div className="w-2.5 h-2.5 rounded-full bg-white" />
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+							<div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+								<div className="h-2.5 w-2.5 rounded-full bg-white" />
 							</div>
 						</div>
-						<span className="text-xl font-bold text-gray-900">Rentline</span>
+						<span className="font-bold text-gray-900 text-xl">Rentline</span>
 					</Link>
 
 					{/* Navigation Links */}
-					<div className="hidden md:flex items-center gap-6">
+					<div className="hidden items-center gap-6 md:flex">
 						<Link
 							to="/#features"
-							className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+							className="font-medium text-gray-700 text-sm transition-colors hover:text-primary"
 						>
 							Features
 						</Link>
 						<Link
 							to="/#pricing"
-							className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+							className="font-medium text-gray-700 text-sm transition-colors hover:text-primary"
 						>
 							Pricing
 						</Link>
 						<Link
 							to="/#about"
-							className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+							className="font-medium text-gray-700 text-sm transition-colors hover:text-primary"
 						>
 							About
 						</Link>
@@ -44,7 +44,7 @@ export function Navbar() {
 						as={Link}
 						to="/auth/login"
 						color="primary"
-						startContent={<LogIn className="w-4 h-4" />}
+						startContent={<LogIn className="h-4 w-4" />}
 					>
 						Sign In
 					</Button>
@@ -53,4 +53,3 @@ export function Navbar() {
 		</nav>
 	);
 }
-

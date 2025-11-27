@@ -1,8 +1,14 @@
-import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
-import { Building2, ChevronDown, Plus, Check } from "lucide-react";
+import {
+	Button,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
+} from "@heroui/react";
+import { Building2, Check, ChevronDown, Plus } from "lucide-react";
+import { useState } from "react";
 import { useOrganizations } from "@/hooks/use-organization-management";
 import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
 import { CreateOrganizationModal } from "./CreateOrganizationModal";
 
 export function OrganizationSwitcher() {
@@ -27,7 +33,7 @@ export function OrganizationSwitcher() {
 			<>
 				<Button
 					color="primary"
-					startContent={<Plus className="w-4 h-4" />}
+					startContent={<Plus className="h-4 w-4" />}
 					onPress={() => setIsCreateModalOpen(true)}
 				>
 					Create Organization
@@ -47,8 +53,8 @@ export function OrganizationSwitcher() {
 					<Button
 						variant="light"
 						className="text-gray-600"
-						startContent={<Building2 className="w-4 h-4" />}
-						endContent={<ChevronDown className="w-4 h-4" />}
+						startContent={<Building2 className="h-4 w-4" />}
+						endContent={<ChevronDown className="h-4 w-4" />}
 						isLoading={isSwitching}
 					>
 						{currentOrg?.name || "Select Organization"}
@@ -70,23 +76,23 @@ export function OrganizationSwitcher() {
 							key={org.id}
 							startContent={
 								currentOrgId === org.id ? (
-									<Check className="w-4 h-4 text-primary" />
+									<Check className="h-4 w-4 text-primary" />
 								) : (
-									<div className="w-4 h-4" />
+									<div className="h-4 w-4" />
 								)
 							}
 						>
 							<div className="flex flex-col">
 								<span className="font-medium">{org.name}</span>
 								{org.slug && (
-									<span className="text-xs text-gray-500">{org.slug}</span>
+									<span className="text-gray-500 text-xs">{org.slug}</span>
 								)}
 							</div>
 						</DropdownItem>
 					))}
 					<DropdownItem
 						key="create"
-						startContent={<Plus className="w-4 h-4" />}
+						startContent={<Plus className="h-4 w-4" />}
 						className="text-primary"
 					>
 						Create New Organization
@@ -100,4 +106,3 @@ export function OrganizationSwitcher() {
 		</>
 	);
 }
-

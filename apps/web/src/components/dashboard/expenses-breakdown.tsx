@@ -24,32 +24,32 @@ export function ExpensesBreakdown({
 		<Card>
 			<CardHeader>
 				<div>
-					<h2 className="text-xl font-semibold">{title}</h2>
-					<p className="text-sm text-muted-foreground">{subtitle}</p>
+					<h2 className="font-semibold text-xl">{title}</h2>
+					<p className="text-muted-foreground text-sm">{subtitle}</p>
 				</div>
 			</CardHeader>
 			<CardBody>
 				<div className="space-y-4">
 					{expenses.map((expense, index) => (
 						<div key={index} className="space-y-2">
-							<div className="flex justify-between items-center">
-								<span className="text-sm font-medium">{expense.category}</span>
-								<span className="text-sm font-semibold">
+							<div className="flex items-center justify-between">
+								<span className="font-medium text-sm">{expense.category}</span>
+								<span className="font-semibold text-sm">
 									{formatCurrency(expense.amount)}
 								</span>
 							</div>
-							<div className="w-full bg-default-100 rounded-full h-2">
+							<div className="h-2 w-full rounded-full bg-default-100">
 								<div
-									className="bg-primary h-2 rounded-full transition-all"
+									className="h-2 rounded-full bg-primary transition-all"
 									style={{ width: `${expense.percentage}%` }}
 								/>
 							</div>
 						</div>
 					))}
-					<div className="pt-4 border-t">
-						<div className="flex justify-between items-center">
+					<div className="border-t pt-4">
+						<div className="flex items-center justify-between">
 							<span className="font-semibold">Total Expenses</span>
-							<span className="text-lg font-bold">{formatCurrency(total)}</span>
+							<span className="font-bold text-lg">{formatCurrency(total)}</span>
 						</div>
 					</div>
 				</div>
@@ -57,4 +57,3 @@ export function ExpensesBreakdown({
 		</Card>
 	);
 }
-

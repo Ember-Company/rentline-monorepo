@@ -1,7 +1,7 @@
 model PaymentMethod {
   id   String @id @default(uuid())
-  name String // Stripe, Pix, BankTransfer
-  type String
+  name String // Stripe, Pix, BankTransfer, Cash, Check
+  type String // online, manual
   // Relations
   leases   Lease[]
   payments Payment[]
@@ -28,14 +28,14 @@ model PaymentPlan {
 }
 
 model Subscription {
-  id            String      @id @default(uuid())
+  id            String       @id @default(uuid())
   agencyId      String
   organization  Organization @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   paymentPlanId String
-  paymentPlan   PaymentPlan @relation(fields: [paymentPlanId], references: [id], onDelete: Cascade)
+  paymentPlan   PaymentPlan  @relation(fields: [paymentPlanId], references: [id], onDelete: Cascade)
   startDate     DateTime
   endDate       DateTime?
-  status        String      @default("active") // active, canceled, expired
+  status        String       @default("active") // active, canceled, expired
 
   @@index([agencyId])
   @@index([paymentPlanId])
@@ -44,22 +44,41 @@ model Subscription {
 }
 
 model Payment {
-  id              String        @id @default(uuid())
+  id              String         @id @default(uuid())
   leaseId         String
-  lease           Lease         @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  lease           Lease          @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  
+  // Amount
   amount          Decimal
   currencyId      String
-  currency        Currency      @relation(fields: [currencyId], references: [id])
+  currency        Currency       @relation(fields: [currencyId], references: [id])
+  
+  // Payment method
   paymentMethodId String?
   paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
-  transactionId  String?       // from Stripe/Pix/etc.
-  status          String        @default("pending") // pending, completed, failed
-  date            DateTime      @default(now())
-  type            String        // rent, deposit, fee, refund
-  reference       String?
+  
+  // Transaction details
+  transactionId   String?        // from Stripe/Pix/etc.
+  reference       String?        // Internal reference number
+  
+  // Type and status
+  type            String         // rent, deposit, fee, refund, pet_deposit, security_deposit, late_fee
+  status          String         @default("pending") // pending, completed, failed, refunded
+  
+  // Invoice association
   invoiceId       String?
-  invoice         Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
-  createdAt       DateTime      @default(now())
+  invoice         Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  
+  // Dates
+  date            DateTime       @default(now()) // Payment date
+  periodStart     DateTime?      // Rent period start
+  periodEnd       DateTime?      // Rent period end
+  
+  // Notes
+  notes           String?
+  
+  // Timestamps
+  createdAt       DateTime       @default(now())
 
   @@index([leaseId])
   @@index([currencyId])
@@ -70,4 +89,3 @@ model Payment {
   @@index([paymentMethodId])
   @@map("payment")
 }
-

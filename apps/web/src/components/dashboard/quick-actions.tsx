@@ -1,11 +1,11 @@
-import { Card, CardBody, CardHeader, Button } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader } from "@heroui/react";
 import {
-	DollarSign,
-	Home,
-	Users,
 	AlertCircle,
+	DollarSign,
 	FileText,
+	Home,
 	Settings,
+	Users,
 } from "lucide-react";
 
 type QuickAction = {
@@ -45,7 +45,7 @@ export function QuickActions({
 	return (
 		<Card>
 			<CardHeader>
-				<h2 className="text-xl font-semibold">{title}</h2>
+				<h2 className="font-semibold text-xl">{title}</h2>
 			</CardHeader>
 			<CardBody className="space-y-2">
 				{actions.map((action, index) => {
@@ -55,7 +55,7 @@ export function QuickActions({
 							key={index}
 							variant="bordered"
 							className="w-full justify-start"
-							startContent={<Icon className="w-4 h-4" />}
+							startContent={<Icon className="h-4 w-4" />}
 							onPress={action.onClick}
 						>
 							{action.label}
@@ -66,4 +66,3 @@ export function QuickActions({
 		</Card>
 	);
 }
-

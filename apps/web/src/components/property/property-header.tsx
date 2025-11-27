@@ -1,9 +1,8 @@
-import { Button } from "@heroui/react";
-import { ArrowLeft, Edit, Download, Share2, Plus } from "lucide-react";
+import { Button, Chip } from "@heroui/react";
+import { ArrowLeft, Download, Edit, Plus, Share2 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { formatDate } from "@/lib/utils/format";
-import { Chip } from "@heroui/react";
 import type { PropertyDetail } from "@/lib/mock-data/property-details";
+import { formatDate } from "@/lib/utils/format";
 
 type PropertyHeaderProps = {
 	property: PropertyDetail;
@@ -54,10 +53,10 @@ export function PropertyHeader({
 	return (
 		<div className="mb-6">
 			{/* Back button and actions */}
-			<div className="flex items-center justify-between mb-4">
+			<div className="mb-4 flex items-center justify-between">
 				<Button
 					variant="light"
-					startContent={<ArrowLeft className="w-4 h-4" />}
+					startContent={<ArrowLeft className="h-4 w-4" />}
 					onPress={() => navigate("/dashboard/properties")}
 				>
 					Back to properties
@@ -69,7 +68,7 @@ export function PropertyHeader({
 						onPress={onEdit}
 						aria-label="Edit property"
 					>
-						<Edit className="w-4 h-4" />
+						<Edit className="h-4 w-4" />
 					</Button>
 					<Button
 						isIconOnly
@@ -77,7 +76,7 @@ export function PropertyHeader({
 						onPress={onDownload}
 						aria-label="Download"
 					>
-						<Download className="w-4 h-4" />
+						<Download className="h-4 w-4" />
 					</Button>
 					<Button
 						isIconOnly
@@ -85,11 +84,11 @@ export function PropertyHeader({
 						onPress={onShare}
 						aria-label="Share"
 					>
-						<Share2 className="w-4 h-4" />
+						<Share2 className="h-4 w-4" />
 					</Button>
 					<Button
 						color="primary"
-						startContent={<Plus className="w-4 h-4" />}
+						startContent={<Plus className="h-4 w-4" />}
 						onPress={onAddProperty}
 					>
 						Add new property
@@ -98,10 +97,12 @@ export function PropertyHeader({
 			</div>
 
 			{/* Property title and status */}
-			<div className="flex items-start justify-between mb-2">
+			<div className="mb-2 flex items-start justify-between">
 				<div>
-					<div className="flex items-center gap-3 mb-2">
-						<h1 className="text-3xl font-bold text-gray-900">{property.name}</h1>
+					<div className="mb-2 flex items-center gap-3">
+						<h1 className="font-bold text-3xl text-gray-900">
+							{property.name}
+						</h1>
 						<Chip
 							color={getStatusColor(property.status)}
 							variant="flat"
@@ -111,9 +112,10 @@ export function PropertyHeader({
 						</Chip>
 					</div>
 					<p className="text-gray-600 text-lg">
-						{property.address}, {property.city}, {property.state} {property.postalCode}
+						{property.address}, {property.city}, {property.state}{" "}
+						{property.postalCode}
 					</p>
-					<p className="text-gray-500 text-sm mt-1">
+					<p className="mt-1 text-gray-500 text-sm">
 						Last Update: {formatDate(property.lastUpdate)}
 					</p>
 				</div>
@@ -121,4 +123,3 @@ export function PropertyHeader({
 		</div>
 	);
 }
-

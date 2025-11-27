@@ -49,27 +49,27 @@ export interface PropertyDetail {
 	postalCode: string;
 	country: string;
 	description?: string;
-	
+
 	// Property-specific fields
 	squareFeet?: number;
 	bedrooms?: number;
 	bathrooms?: number;
 	lotSize?: number; // For land
 	floors?: number; // For offices/houses
-	
+
 	// Financial
 	price?: number; // For sale
 	monthlyRent?: number; // For rent
 	currency: string;
-	
+
 	// Status
 	status: "occupied" | "vacant" | "maintenance" | "for-sale" | "sold";
-	
+
 	// Relationships
 	leases: Lease[];
 	tenants: PropertyTenant[];
 	units?: PropertyUnit[]; // For apartments
-	
+
 	// Financial records
 	payments: Array<{
 		id: string;
@@ -90,7 +90,7 @@ export interface PropertyDetail {
 		amount: number;
 		status: "paid" | "pending";
 	}>;
-	
+
 	// Metadata
 	images: string[];
 	documents: Array<{
@@ -120,9 +120,8 @@ export interface PropertyDetail {
 		notes?: string;
 		completed: boolean;
 	}>;
-	
+
 	// Dates
 	listedOn: string;
 	lastUpdate: string;
 }
-

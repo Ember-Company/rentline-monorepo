@@ -1,7 +1,7 @@
-import { Card, CardBody, CardHeader, Chip, Button } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader, Chip } from "@heroui/react";
 import { Plus } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
 import type { PropertyDetail } from "@/lib/mock-data/property-details";
+import { formatCurrency, formatDate } from "@/lib/utils/format";
 
 type RentOverviewCardProps = {
 	property: PropertyDetail;
@@ -23,7 +23,7 @@ export function RentOverviewCard({
 	return (
 		<Card className="border border-gray-200 shadow-sm">
 			<CardHeader>
-				<h3 className="text-lg font-semibold text-gray-900">Rent overview</h3>
+				<h3 className="font-semibold text-gray-900 text-lg">Rent overview</h3>
 			</CardHeader>
 			<CardBody>
 				{overduePayment && (
@@ -32,15 +32,12 @@ export function RentOverviewCard({
 					</Chip>
 				)}
 				<div className="mb-2">
-					<p className="text-3xl font-bold text-gray-900">
+					<p className="font-bold text-3xl text-gray-900">
 						{formatCurrency(overduePayment?.amount || property.rent)}
 					</p>
 				</div>
-				<p className="text-sm text-gray-600">
-					Due {nextDueDate}
-				</p>
+				<p className="text-gray-600 text-sm">Due {nextDueDate}</p>
 			</CardBody>
 		</Card>
 	);
 }
-

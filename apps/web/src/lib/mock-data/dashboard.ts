@@ -29,4 +29,3 @@ export const expensesByCategory = [
 	{ category: "Property Taxes", amount: 3600, percentage: 15 },
 	{ category: "Utilities", amount: 1200, percentage: 5 },
 ];
-

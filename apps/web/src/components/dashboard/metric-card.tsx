@@ -1,4 +1,12 @@
-import { Card, CardBody, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
+import {
+	Button,
+	Card,
+	CardBody,
+	Dropdown,
+	DropdownItem,
+	DropdownMenu,
+	DropdownTrigger,
+} from "@heroui/react";
 import { ArrowUp, MoreVertical } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
 
@@ -17,12 +25,12 @@ export function MetricCard({ title, value, trend }: MetricCardProps) {
 			<CardBody className="p-6">
 				<div className="flex items-start justify-between">
 					<div className="flex-1">
-						<p className="text-sm text-gray-600 mb-2">{title}</p>
-						<p className="text-2xl font-bold text-gray-900 mb-3">
+						<p className="mb-2 text-gray-600 text-sm">{title}</p>
+						<p className="mb-3 font-bold text-2xl text-gray-900">
 							{formatCurrency(value)}
 						</p>
-						<div className="flex items-center gap-1 text-sm text-green-600">
-							<ArrowUp className="w-4 h-4" />
+						<div className="flex items-center gap-1 text-green-600 text-sm">
+							<ArrowUp className="h-4 w-4" />
 							<span>
 								{trend.percentage}% {trend.label}
 							</span>
@@ -36,7 +44,7 @@ export function MetricCard({ title, value, trend }: MetricCardProps) {
 								size="sm"
 								className="text-gray-400"
 							>
-								<MoreVertical className="w-4 h-4" />
+								<MoreVertical className="h-4 w-4" />
 							</Button>
 						</DropdownTrigger>
 						<DropdownMenu aria-label="Card actions">
@@ -49,4 +57,3 @@ export function MetricCard({ title, value, trend }: MetricCardProps) {
 		</Card>
 	);
 }
-

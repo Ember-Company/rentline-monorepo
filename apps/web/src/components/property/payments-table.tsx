@@ -1,25 +1,25 @@
 import {
+	Button,
 	Card,
 	CardBody,
 	CardHeader,
-	Table,
-	TableHeader,
-	TableColumn,
-	TableBody,
-	TableRow,
-	TableCell,
 	Chip,
 	Input,
-	Button,
 	Select,
 	SelectItem,
-	Tabs,
 	Tab,
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+	Tabs,
 } from "@heroui/react";
-import { Search, Plus, MoreVertical } from "lucide-react";
+import { MoreVertical, Plus, Search } from "lucide-react";
 import { useState } from "react";
-import { formatCurrency, formatDate } from "@/lib/utils/format";
 import type { PropertyDetail } from "@/lib/mock-data/property-details";
+import { formatCurrency, formatDate } from "@/lib/utils/format";
 
 type PaymentsTableProps = {
 	property: PropertyDetail;
@@ -52,7 +52,7 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex justify-between items-center">
+			<CardHeader className="flex items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Tabs
 						selectedKey={activeTab}
@@ -66,7 +66,7 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 				<div className="flex items-center gap-2">
 					<Input
 						placeholder="Search..."
-						startContent={<Search className="w-4 h-4 text-gray-400" />}
+						startContent={<Search className="h-4 w-4 text-gray-400" />}
 						value={searchQuery}
 						onValueChange={setSearchQuery}
 						className="w-64"
@@ -88,7 +88,7 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 							<Button
 								color="primary"
 								size="sm"
-								startContent={<Plus className="w-4 h-4" />}
+								startContent={<Plus className="h-4 w-4" />}
 								onPress={onAddPayment}
 							>
 								New
@@ -99,7 +99,7 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 						<Button
 							color="primary"
 							size="sm"
-							startContent={<Plus className="w-4 h-4" />}
+							startContent={<Plus className="h-4 w-4" />}
 							onPress={onAddPayment}
 						>
 							New
@@ -150,19 +150,15 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 											{formatCurrency(payment.amount)}
 										</TableCell>
 										<TableCell>
-											<Button
-												isIconOnly
-												variant="light"
-												size="sm"
-											>
-												<MoreVertical className="w-4 h-4" />
+											<Button isIconOnly variant="light" size="sm">
+												<MoreVertical className="h-4 w-4" />
 											</Button>
 										</TableCell>
 									</TableRow>
 								))}
 							</TableBody>
 						</Table>
-						<div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+						<div className="mt-4 flex items-center justify-between text-gray-600 text-sm">
 							<span>Rows per page: 10</span>
 							<span>
 								1-{filteredPayments.length} of {filteredPayments.length}
@@ -213,7 +209,7 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 									</TableCell>
 									<TableCell>
 										<Button isIconOnly variant="light" size="sm">
-											<MoreVertical className="w-4 h-4" />
+											<MoreVertical className="h-4 w-4" />
 										</Button>
 									</TableCell>
 								</TableRow>
@@ -225,4 +221,3 @@ export function PaymentsTable({ property, onAddPayment }: PaymentsTableProps) {
 		</Card>
 	);
 }
-
