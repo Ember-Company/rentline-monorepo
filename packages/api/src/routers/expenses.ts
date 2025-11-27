@@ -2,6 +2,7 @@ import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { getActiveOrganization } from "../utils/organization";
 
 const expenseCategoryEnum = z.enum([
 	"maintenance",
@@ -34,12 +35,6 @@ const expenseInputSchema = z.object({
 	isTaxDeductible: z.boolean().default(false),
 });
 
-// Helper to get user's organization
-async function getUserOrganization(userId: string) {
-	return await prisma.member.findFirst({
-		where: { userId },
-	});
-}
 
 export const expensesRouter = router({
 	// List expenses with filtering
@@ -59,20 +54,7 @@ export const expensesRouter = router({
 				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const where: Parameters<typeof prisma.expense.findMany>[0]["where"] = {
 				property: { organizationId: member.organizationId },
@@ -128,20 +110,7 @@ export const expensesRouter = router({
 	getById: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const expense = await prisma.expense.findFirst({
 				where: {
@@ -177,20 +146,7 @@ export const expensesRouter = router({
 	create: protectedProcedure
 		.input(expenseInputSchema)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify property belongs to organization
 			const property = await prisma.property.findFirst({
@@ -258,20 +214,7 @@ export const expensesRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.expense.findFirst({
 				where: {
@@ -309,20 +252,7 @@ export const expensesRouter = router({
 	delete: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.expense.findFirst({
 				where: {
@@ -357,20 +287,7 @@ export const expensesRouter = router({
 				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const baseWhere: Parameters<typeof prisma.expense.findMany>[0]["where"] =
 				{

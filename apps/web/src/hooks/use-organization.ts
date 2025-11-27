@@ -19,38 +19,25 @@ type OrganizationData = {
 
 export function useCreateOrganization() {
 	const createOrganization = async (data: OrganizationData) => {
-		// Build metadata to store additional fields that better-auth might not accept directly
-		const metadata: Record<string, unknown> = {
-			...(data.metadata || {}),
-		};
+		console.log("Creating organization with data:", data);
 
-		// Add custom fields to metadata
-		if (data.address) metadata.address = data.address;
-		if (data.city) metadata.city = data.city;
-		if (data.state) metadata.state = data.state;
-		if (data.postalCode) metadata.postalCode = data.postalCode;
-		if (data.country) metadata.country = data.country;
-		if (data.phone) metadata.phone = data.phone;
-		if (data.email) metadata.email = data.email;
-		if (data.website) metadata.website = data.website;
-		if (data.cnpj) metadata.cnpj = data.cnpj;
-		if (data.type) metadata.type = data.type;
-
-		// Create payload with only the fields that better-auth definitely accepts
-		const payload = {
+		// Pass all fields directly - they are configured in the schema with input: true
+		const { data: organization, error } = await authClient.organization.create({
 			name: data.name,
 			slug: data.slug,
 			...(data.logo && { logo: data.logo }),
-			...(Object.keys(metadata).length > 0 && { metadata }),
-		};
-
-		console.log(
-			"Creating organization with payload:",
-			JSON.stringify(payload, null, 2),
-		);
-
-		const { data: organization, error } =
-			await authClient.organization.create(payload);
+			...(data.address && { address: data.address }),
+			...(data.city && { city: data.city }),
+			...(data.state && { state: data.state }),
+			...(data.postalCode && { postalCode: data.postalCode }),
+			...(data.country && { country: data.country }),
+			...(data.phone && { phone: data.phone }),
+			...(data.email && { email: data.email }),
+			...(data.website && { website: data.website }),
+			...(data.cnpj && { cnpj: data.cnpj }),
+			...(data.type && { type: data.type }),
+			...(data.metadata && { metadata: data.metadata }),
+		});
 
 		if (error) {
 			console.error("Organization creation error:", error);

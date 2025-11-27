@@ -1,5 +1,7 @@
+export * from "./create-lease-modal";
 export * from "./expiring-leases-alert";
 export * from "./invoice-modal";
+export * from "./lease-actions-menu";
 export * from "./lease-renew-modal";
 export * from "./lease-terminate-modal";
 export * from "./leases-filters";

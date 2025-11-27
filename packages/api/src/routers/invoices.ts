@@ -2,6 +2,7 @@ import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { getActiveOrganization } from "../utils/organization";
 
 const invoiceStatusEnum = z.enum([
 	"pending",
@@ -30,12 +31,6 @@ const invoiceInputSchema = z.object({
 	status: invoiceStatusEnum.default("pending"),
 });
 
-// Helper to get user's organization
-async function getUserOrganization(userId: string) {
-	return await prisma.member.findFirst({
-		where: { userId },
-	});
-}
 
 // Generate next invoice number
 async function generateInvoiceNumber(organizationId: string): Promise<string> {
@@ -82,13 +77,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const where: Parameters<typeof prisma.invoice.findMany>[0]["where"] = {
 				lease: {
@@ -187,13 +176,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const invoice = await prisma.invoice.findFirst({
 				where: {
@@ -251,13 +234,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify lease belongs to organization
 			const lease = await prisma.lease.findFirst({
@@ -326,13 +303,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify lease
 			const lease = await prisma.lease.findFirst({
@@ -406,13 +377,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.invoice.findFirst({
 				where: {
@@ -473,13 +438,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.invoice.findFirst({
 				where: {
@@ -543,13 +502,7 @@ export const invoicesRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.invoice.findFirst({
 				where: {
@@ -593,7 +546,7 @@ export const invoicesRouter = router({
 			});
 		}
 
-		const member = await getUserOrganization(ctx.session.user.id);
+		const member = await getActiveOrganization(ctx);
 		if (!member) {
 			throw new TRPCError({
 				code: "FORBIDDEN",

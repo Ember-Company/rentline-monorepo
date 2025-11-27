@@ -13,29 +13,29 @@
 		"Inter", "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
 		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-	/* Custom Primary Color - Orange */
-	--color-primary-50: #fff4e6;
-	--color-primary-100: #ffe6cc;
-	--color-primary-200: #ffcc99;
-	--color-primary-300: #ffb366;
-	--color-primary-400: #ff9933;
-	--color-primary-500: #fb790e;
-	--color-primary-600: #e66a0c;
-	--color-primary-700: #cc5b0a;
-	--color-primary-800: #b34c08;
-	--color-primary-900: #993d06;
+	/* Primary Color - Green (main brand color) */
+	--color-primary-50: #ECFDF5;
+	--color-primary-100: #D1FAE5;
+	--color-primary-200: #A7F3D0;
+	--color-primary-300: #6EE7B7;
+	--color-primary-400: #34D399;
+	--color-primary-500: #10B981;
+	--color-primary-600: #059669;
+	--color-primary-700: #047857;
+	--color-primary-800: #065F46;
+	--color-primary-900: #064E3B;
 
-	/* Custom Secondary Color - Teal */
-	--color-secondary-50: #e8f5f3;
-	--color-secondary-100: #d1ebe7;
-	--color-secondary-200: #a3d7cf;
-	--color-secondary-300: #75c3b7;
-	--color-secondary-400: #47af9f;
-	--color-secondary-500: #549f93;
-	--color-secondary-600: #4a8f84;
-	--color-secondary-700: #407f75;
-	--color-secondary-800: #366f66;
-	--color-secondary-900: #2c5f57;
+	/* Secondary Color - Orange (accent color) */
+	--color-secondary-50: #FFF4E6;
+	--color-secondary-100: #FFE6CC;
+	--color-secondary-200: #FFCC99;
+	--color-secondary-300: #FFB366;
+	--color-secondary-400: #FF9933;
+	--color-secondary-500: #FB790E;
+	--color-secondary-600: #E66A0C;
+	--color-secondary-700: #CC5B0A;
+	--color-secondary-800: #B34C08;
+	--color-secondary-900: #993D06;
 }
 
 /* Compact mode - reduce spacing throughout the app */
@@ -80,18 +80,18 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-	background: #d1d5db;
+	background: hsl(var(--heroui-default-300));
 	border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: #9ca3af;
+	background: hsl(var(--heroui-default-400));
 }
 
 .dark ::-webkit-scrollbar-thumb {
-	background: #4b5563;
+	background: hsl(var(--heroui-default-600));
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-	background: #6b7280;
+	background: hsl(var(--heroui-default-500));
 }

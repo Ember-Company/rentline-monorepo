@@ -9,10 +9,12 @@ import {
 	DropdownTrigger,
 	Input,
 	Kbd,
+	Spinner,
 } from "@heroui/react";
 import {
 	Bell,
 	Building2,
+	Check,
 	ChevronDown,
 	LogOut,
 	Plus,
@@ -22,12 +24,14 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { authClient } from "@/lib/auth-client";
+import { useOrganizations } from "@/hooks/use-organization-management";
 import { ThemeCustomizer } from "../theme/theme-customizer";
 import { useCustomTheme } from "../theme-provider";
 
 export function DashboardHeader() {
 	const { data: session } = authClient.useSession();
 	const { sidebarCollapsed } = useCustomTheme();
+	const { organizations, switchOrganization, isSwitching } = useOrganizations();
 	const navigate = useNavigate();
 
 	const handleSignOut = async () => {
@@ -38,11 +42,20 @@ export function DashboardHeader() {
 		});
 	};
 
-	// Get active organization from session
-	const activeOrg = session?.user?.activeOrganizationId
-		? // Could fetch org details here
-			{ name: "Minha Empresa", slug: "minha-empresa" }
-		: null;
+	// Get active organization - check both possible locations
+	const currentOrgId =
+		(session?.user as { activeOrganizationId?: string })?.activeOrganizationId ||
+		(session?.session as { activeOrganizationId?: string })?.activeOrganizationId;
+	const currentOrg = organizations.find((org) => org.id === currentOrgId);
+
+	const handleSwitchOrg = async (orgId: string) => {
+		if (orgId === currentOrgId) return;
+		try {
+			await switchOrganization(orgId);
+		} catch {
+			// Error handled in hook
+		}
+	};
 
 	return (
 		<header
@@ -192,48 +205,79 @@ export function DashboardHeader() {
 				</Dropdown>
 
 				{/* Organization Switcher */}
-				{activeOrg && (
-					<Dropdown placement="bottom-end">
-						<DropdownTrigger>
-							<Button
-								variant="light"
-								size="sm"
-								className="hidden gap-2 px-2 lg:flex"
+				<Dropdown placement="bottom-end">
+					<DropdownTrigger>
+						<Button
+							variant="light"
+							size="sm"
+							className="hidden gap-2 px-2 lg:flex"
+							isLoading={isSwitching}
+						>
+							<div className="flex h-6 w-6 items-center justify-center rounded bg-primary-100 dark:bg-primary-900/30">
+								<Building2 className="h-3 w-3 text-primary" />
+							</div>
+							<span className="max-w-[100px] truncate text-xs font-medium">
+								{currentOrg?.name || "Organização"}
+							</span>
+							<ChevronDown className="h-3 w-3 text-gray-400" />
+						</Button>
+					</DropdownTrigger>
+					<DropdownMenu
+						aria-label="Organizações"
+						className="w-64"
+						onAction={(key) => {
+							if (key === "settings") {
+								navigate("/dashboard/settings");
+							} else if (key === "new") {
+								navigate("/onboarding/organization");
+							} else if (typeof key === "string" && key.startsWith("org-")) {
+								handleSwitchOrg(key.replace("org-", ""));
+							}
+						}}
+					>
+						<DropdownSection title="Organização Ativa" showDivider>
+							{organizations.length > 0 ? (
+								organizations.map((org) => (
+									<DropdownItem
+										key={`org-${org.id}`}
+										startContent={
+											<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
+												<Building2 className="h-4 w-4 text-primary" />
+											</div>
+										}
+										endContent={
+											org.id === currentOrgId && (
+												<Check className="h-4 w-4 text-primary" />
+											)
+										}
+										description={org.slug}
+										className={org.id === currentOrgId ? "bg-primary-50 dark:bg-primary-900/10" : ""}
+									>
+										{org.name}
+									</DropdownItem>
+								))
+							) : (
+								<DropdownItem key="empty" isReadOnly className="text-gray-500">
+									Nenhuma organização
+								</DropdownItem>
+							)}
+						</DropdownSection>
+						<DropdownSection>
+							<DropdownItem
+								key="settings"
+								startContent={<Settings className="h-4 w-4" />}
 							>
-								<div className="flex h-6 w-6 items-center justify-center rounded bg-primary-100 dark:bg-primary-900/30">
-									<Building2 className="h-3 w-3 text-primary" />
-								</div>
-								<span className="max-w-[100px] truncate text-xs font-medium">
-									{activeOrg.name}
-								</span>
-								<ChevronDown className="h-3 w-3 text-gray-400" />
-							</Button>
-						</DropdownTrigger>
-						<DropdownMenu aria-label="Organizações">
-							<DropdownSection title="Organização Ativa">
-								<DropdownItem
-									key="current"
-									startContent={
-										<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100">
-											<Building2 className="h-4 w-4 text-primary" />
-										</div>
-									}
-								>
-									<p className="font-medium">{activeOrg.name}</p>
-									<p className="text-xs text-gray-500">{activeOrg.slug}</p>
-								</DropdownItem>
-							</DropdownSection>
-							<DropdownSection>
-								<DropdownItem
-									key="manage"
-									onPress={() => navigate("/dashboard/settings")}
-								>
-									Gerenciar Organização
-								</DropdownItem>
-							</DropdownSection>
-						</DropdownMenu>
-					</Dropdown>
-				)}
+								Configurações da Organização
+							</DropdownItem>
+							<DropdownItem
+								key="new"
+								startContent={<Plus className="h-4 w-4" />}
+							>
+								Criar Nova Organização
+							</DropdownItem>
+						</DropdownSection>
+					</DropdownMenu>
+				</Dropdown>
 
 				{/* User Menu */}
 				<Dropdown placement="bottom-end">

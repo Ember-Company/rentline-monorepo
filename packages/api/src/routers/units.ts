@@ -2,6 +2,7 @@ import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { getActiveOrganization } from "../utils/organization";
 
 const unitTypeEnum = z.enum([
 	"apartment",
@@ -42,12 +43,6 @@ const unitInputSchema = z.object({
 	status: unitStatusEnum.default("available"),
 });
 
-// Helper to get user's organization
-async function getUserOrganization(userId: string) {
-	return await prisma.member.findFirst({
-		where: { userId },
-	});
-}
 
 export const unitsRouter = router({
 	// List units (optionally by property)
@@ -72,13 +67,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const where: {
 				property: { organizationId: string };
@@ -171,13 +160,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const unit = await prisma.unit.findFirst({
 				where: {
@@ -252,13 +235,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify property belongs to organization
 			const property = await prisma.property.findFirst({
@@ -336,13 +313,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.unit.findFirst({
 				where: {
@@ -408,13 +379,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.unit.findFirst({
 				where: {
@@ -476,13 +441,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const property = await prisma.property.findFirst({
 				where: {
@@ -526,13 +485,7 @@ export const unitsRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.unit.findFirst({
 				where: {

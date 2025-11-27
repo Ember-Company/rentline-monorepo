@@ -1,6 +1,6 @@
 import { Button, Input, Select, SelectItem } from "@heroui/react";
 import { useForm } from "@tanstack/react-form";
-import { ArrowRight, Building, Loader2, MapPin } from "lucide-react";
+import { ArrowRight, Building2, MapPin } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -92,56 +92,38 @@ export default function OrganizationStep() {
 				{/* Company Name */}
 				<form.Field name="name">
 					{(field) => (
-						<div className="space-y-1.5">
-							<label
-								htmlFor={field.name}
-								className="font-medium text-gray-700 text-sm"
-							>
-								Nome da empresa <span className="text-red-500">*</span>
-							</label>
-							<Input
-								id={field.name}
-								placeholder="Ex: Imobiliária São Paulo"
-								value={field.state.value}
-								onBlur={field.handleBlur}
-								onValueChange={handleNameChange}
-								startContent={<Building className="h-4 w-4 text-gray-400" />}
-								classNames={{
-									inputWrapper:
-										"border-gray-300 bg-white hover:border-gray-400 focus-within:border-primary",
-								}}
-								isInvalid={field.state.meta.errors.length > 0}
-								errorMessage={field.state.meta.errors[0]?.message}
-							/>
-						</div>
+						<Input
+							label="Nome da empresa"
+							placeholder="Ex: Imobiliária São Paulo"
+							value={field.state.value}
+							onBlur={field.handleBlur}
+							onValueChange={handleNameChange}
+							startContent={<Building2 className="h-4 w-4 text-gray-400" />}
+							isRequired
+							isInvalid={field.state.meta.errors.length > 0}
+							errorMessage={field.state.meta.errors[0]?.message}
+							labelPlacement="outside"
+						/>
 					)}
 				</form.Field>
 
 				{/* Slug */}
 				<form.Field name="slug">
 					{(field) => (
-						<div className="space-y-1.5">
-							<label
-								htmlFor={field.name}
-								className="font-medium text-gray-700 text-sm"
-							>
-								Identificador único <span className="text-red-500">*</span>
-							</label>
+						<div className="space-y-2">
 							<Input
-								id={field.name}
+								label="Identificador único"
 								placeholder="ex: imobiliaria-sao-paulo"
 								value={field.state.value}
 								onBlur={field.handleBlur}
 								onValueChange={(value) => field.handleChange(value)}
 								description="Usado na URL do seu painel"
-								classNames={{
-									inputWrapper:
-										"border-gray-300 bg-white hover:border-gray-400 focus-within:border-primary",
-								}}
+								isRequired
 								isInvalid={field.state.meta.errors.length > 0}
 								errorMessage={field.state.meta.errors[0]?.message}
+								labelPlacement="outside"
 							/>
-							<p className="text-gray-500 text-xs">
+							<p className="text-xs text-gray-500">
 								rentline.com.br/
 								<span className="font-medium text-primary">
 									{field.state.value || "sua-empresa"}
@@ -155,67 +137,47 @@ export default function OrganizationStep() {
 				<div className="grid grid-cols-2 gap-4">
 					<form.Field name="city">
 						{(field) => (
-							<div className="space-y-1.5">
-								<label
-									htmlFor={field.name}
-									className="font-medium text-gray-700 text-sm"
-								>
-									Cidade <span className="text-red-500">*</span>
-								</label>
-								<Input
-									id={field.name}
-									placeholder="São Paulo"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onValueChange={(value) => field.handleChange(value)}
-									startContent={<MapPin className="h-4 w-4 text-gray-400" />}
-									classNames={{
-										inputWrapper:
-											"border-gray-300 bg-white hover:border-gray-400 focus-within:border-primary",
-									}}
-									isInvalid={field.state.meta.errors.length > 0}
-									errorMessage={field.state.meta.errors[0]?.message}
-								/>
-							</div>
+							<Input
+								label="Cidade"
+								placeholder="São Paulo"
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onValueChange={(value) => field.handleChange(value)}
+								startContent={<MapPin className="h-4 w-4 text-gray-400" />}
+								isRequired
+								isInvalid={field.state.meta.errors.length > 0}
+								errorMessage={field.state.meta.errors[0]?.message}
+								labelPlacement="outside"
+							/>
 						)}
 					</form.Field>
 
 					<form.Field name="state">
 						{(field) => (
-							<div className="space-y-1.5">
-								<label
-									htmlFor={field.name}
-									className="font-medium text-gray-700 text-sm"
-								>
-									Estado <span className="text-red-500">*</span>
-								</label>
-								<Select
-									id={field.name}
-									placeholder="Selecione"
-									selectedKeys={field.state.value ? [field.state.value] : []}
-									onSelectionChange={(keys) => {
-										const value = Array.from(keys)[0] as string;
-										field.handleChange(value);
-									}}
-									classNames={{
-										trigger:
-											"border-gray-300 bg-white hover:border-gray-400 focus-within:border-primary",
-									}}
-									isInvalid={field.state.meta.errors.length > 0}
-									errorMessage={field.state.meta.errors[0]?.message}
-								>
-									{BRAZILIAN_STATES.map((state) => (
-										<SelectItem key={state.value}>{state.label}</SelectItem>
-									))}
-								</Select>
-							</div>
+							<Select
+								label="Estado"
+								placeholder="Selecione"
+								selectedKeys={field.state.value ? [field.state.value] : []}
+								onSelectionChange={(keys) => {
+									const value = Array.from(keys)[0] as string;
+									field.handleChange(value);
+								}}
+								isRequired
+								isInvalid={field.state.meta.errors.length > 0}
+								errorMessage={field.state.meta.errors[0]?.message}
+								labelPlacement="outside"
+							>
+								{BRAZILIAN_STATES.map((state) => (
+									<SelectItem key={state.value}>{state.label}</SelectItem>
+								))}
+							</Select>
 						)}
 					</form.Field>
 				</div>
 
 				{/* Submit */}
 				<div className="flex items-center justify-between pt-4">
-					<p className="text-gray-500 text-sm">
+					<p className="text-sm text-gray-500">
 						Campos com <span className="text-red-500">*</span> são obrigatórios
 					</p>
 					<form.Subscribe>

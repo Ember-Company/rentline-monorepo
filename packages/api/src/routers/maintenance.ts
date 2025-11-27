@@ -2,6 +2,7 @@ import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { getActiveOrganization } from "../utils/organization";
 
 const maintenanceStatusEnum = z.enum(["open", "in_progress", "closed"]);
 const maintenancePriorityEnum = z.enum(["low", "medium", "high", "urgent"]);
@@ -15,12 +16,6 @@ const maintenanceInputSchema = z.object({
 	assignedTo: z.string().optional(),
 });
 
-// Helper to get user's organization
-async function getUserOrganization(userId: string) {
-	return await prisma.member.findFirst({
-		where: { userId },
-	});
-}
 
 export const maintenanceRouter = router({
 	// List maintenance requests
@@ -46,13 +41,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const where: Parameters<
 				typeof prisma.maintenanceRequest.findMany
@@ -121,13 +110,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const request = await prisma.maintenanceRequest.findFirst({
 				where: {
@@ -181,13 +164,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify unit belongs to organization
 			const unit = await prisma.unit.findFirst({
@@ -247,13 +224,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.maintenanceRequest.findFirst({
 				where: {
@@ -301,13 +272,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.maintenanceRequest.findFirst({
 				where: {
@@ -347,13 +312,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const baseWhere: Parameters<
 				typeof prisma.maintenanceRequest.findMany
@@ -411,13 +370,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.maintenanceRequest.findFirst({
 				where: {
@@ -463,13 +416,7 @@ export const maintenanceRouter = router({
 				});
 			}
 
-			const member = await getUserOrganization(ctx.session.user.id);
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const existing = await prisma.maintenanceRequest.findFirst({
 				where: {

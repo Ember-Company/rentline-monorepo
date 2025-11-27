@@ -9,14 +9,8 @@ import {
 	type ReactNode,
 } from "react";
 
-// Theme accent types
-export type ThemeAccent =
-	| "blue"
-	| "violet"
-	| "emerald"
-	| "amber"
-	| "rose"
-	| "slate";
+// Theme accent types - using green as primary (emerald) and orange as secondary
+export type ThemeAccent = "emerald" | "amber";
 
 interface CustomThemeConfig {
 	accent: ThemeAccent;
@@ -36,19 +30,15 @@ const CustomThemeContext = createContext<CustomThemeContextValue | null>(null);
 const STORAGE_KEY = "rentline-custom-theme";
 
 const defaultConfig: CustomThemeConfig = {
-	accent: "blue",
+	accent: "emerald", // Green as default primary
 	compactMode: false,
 	sidebarCollapsed: false,
 };
 
-// Accent color CSS variables
+// Accent color CSS variables - Green (primary) and Orange (secondary)
 const accentColors: Record<ThemeAccent, { primary: string; primaryForeground: string }> = {
-	blue: { primary: "221 83% 53%", primaryForeground: "210 40% 98%" },
-	violet: { primary: "262 83% 58%", primaryForeground: "270 40% 98%" },
-	emerald: { primary: "160 84% 39%", primaryForeground: "152 40% 98%" },
-	amber: { primary: "38 92% 50%", primaryForeground: "48 40% 98%" },
-	rose: { primary: "350 89% 60%", primaryForeground: "355 40% 98%" },
-	slate: { primary: "215 20% 45%", primaryForeground: "210 40% 98%" },
+	emerald: { primary: "160 84% 39%", primaryForeground: "152 40% 98%" }, // Green
+	amber: { primary: "38 92% 50%", primaryForeground: "48 40% 98%" }, // Orange
 };
 
 function CustomThemeProvider({ children }: { children: ReactNode }) {
@@ -66,19 +56,16 @@ function CustomThemeProvider({ children }: { children: ReactNode }) {
 	});
 
 	// Apply custom CSS variables
+	// Note: HeroUI handles theme colors automatically, but we keep this for any custom overrides
 	useEffect(() => {
 		const root = document.documentElement;
-		const accent = accentColors[config.accent];
-
-		root.style.setProperty("--heroui-primary", accent.primary);
-		root.style.setProperty("--heroui-primary-foreground", accent.primaryForeground);
 
 		if (config.compactMode) {
 			root.classList.add("compact");
 		} else {
 			root.classList.remove("compact");
 		}
-	}, [config.accent, config.compactMode]);
+	}, [config.compactMode]);
 
 	// Persist to localStorage
 	useEffect(() => {

@@ -1,14 +1,12 @@
 import {
-	Avatar,
 	Button,
 	Card,
 	CardBody,
 	CardHeader,
 	Chip,
-	Dropdown,
-	DropdownItem,
-	DropdownMenu,
-	DropdownTrigger,
+	Input,
+	Select,
+	SelectItem,
 	Table,
 	TableBody,
 	TableCell,
@@ -16,9 +14,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@heroui/react";
-import { DollarSign, MoreVertical, Pencil, Plus } from "lucide-react";
+import { Building2, FileText, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatBRL } from "@/lib/constants/brazil";
+import { useDeleteLease } from "@/lib/hooks/use-leases";
+import { LeaseActionsMenu } from "@/components/leases/lease-actions-menu";
+import type { LeaseStatus } from "@/components/leases/types";
 import type { Lease } from "../types";
 import { getLeaseStatusColor, getLeaseStatusLabel } from "../utils";
 
@@ -28,48 +30,180 @@ interface LeasesTabProps {
 	onRecordPayment: (leaseId: string) => void;
 }
 
+const statusOptions: { value: LeaseStatus | "all"; label: string }[] = [
+	{ value: "all", label: "Todos" },
+	{ value: "active", label: "Ativos" },
+	{ value: "pending", label: "Pendentes" },
+	{ value: "draft", label: "Rascunhos" },
+	{ value: "expired", label: "Expirados" },
+	{ value: "terminated", label: "Encerrados" },
+];
+
 export function LeasesTab({
 	propertyId,
 	leases,
 	onRecordPayment,
 }: LeasesTabProps) {
 	const navigate = useNavigate();
+	const [searchQuery, setSearchQuery] = useState("");
+	const [statusFilter, setStatusFilter] = useState<LeaseStatus | "all">("all");
+
+	// Filter leases
+	const filteredLeases = useMemo(() => {
+		return leases.filter((lease) => {
+			// Status filter
+			if (statusFilter !== "all" && lease.status !== statusFilter) {
+				return false;
+			}
+
+			// Search filter
+			if (searchQuery) {
+				const query = searchQuery.toLowerCase();
+				const matchesTenant =
+					lease.tenantContact?.firstName?.toLowerCase().includes(query) ||
+					lease.tenantContact?.lastName?.toLowerCase().includes(query) ||
+					lease.tenantContact?.email?.toLowerCase().includes(query);
+				const matchesUnit = lease.unit?.unitNumber?.toLowerCase().includes(query);
+
+				if (!matchesTenant && !matchesUnit) return false;
+			}
+
+			return true;
+		});
+	}, [leases, searchQuery, statusFilter]);
+
+	const activeLeases = leases.filter((l) => l.status === "active").length;
+	const pendingLeases = leases.filter((l) => l.status === "pending").length;
+	const inactiveLeases = leases.filter(
+		(l) => l.status === "expired" || l.status === "terminated"
+	).length;
 
 	return (
-		<Card className="border border-gray-200 shadow-sm">
-			<CardHeader className="flex items-center justify-between border-gray-100 border-b bg-gray-50/50 px-6 py-4">
-				<h3 className="font-semibold text-gray-900 text-lg">
-					Contratos de Locação
-				</h3>
-				<Button
-					color="primary"
-					size="sm"
-					startContent={<Plus className="h-4 w-4" />}
-					onPress={() =>
-						navigate(`/dashboard/properties/${propertyId}/lease/new`)
-					}
-				>
-					Novo Contrato
-				</Button>
-			</CardHeader>
-			<CardBody className="p-0">
-				{leases.length === 0 ? (
-					<EmptyState
-						message="Nenhum contrato cadastrado"
-						actionLabel="Criar primeiro contrato"
-						onAction={() =>
+		<div className="space-y-6">
+			{/* Stats Cards */}
+			<div className="grid grid-cols-3 gap-4">
+				<Card className="border border-gray-200 dark:border-gray-700">
+					<CardBody className="p-4">
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="text-sm text-gray-500">Contratos Ativos</p>
+								<p className="text-2xl font-bold text-gray-900 dark:text-white">
+									{activeLeases}
+								</p>
+							</div>
+							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
+								<FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
+							</div>
+						</div>
+					</CardBody>
+				</Card>
+
+				<Card className="border border-gray-200 dark:border-gray-700">
+					<CardBody className="p-4">
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="text-sm text-gray-500">Pendentes</p>
+								<p className="text-2xl font-bold text-gray-900 dark:text-white">
+									{pendingLeases}
+								</p>
+							</div>
+							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/20">
+								<FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+							</div>
+						</div>
+					</CardBody>
+				</Card>
+
+				<Card className="border border-gray-200 dark:border-gray-700">
+					<CardBody className="p-4">
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="text-sm text-gray-500">Inativos</p>
+								<p className="text-2xl font-bold text-gray-900 dark:text-white">
+									{inactiveLeases}
+								</p>
+							</div>
+							<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+								<FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+							</div>
+						</div>
+					</CardBody>
+				</Card>
+			</div>
+
+			{/* Leases Table */}
+			<Card className="border border-gray-200 shadow-sm dark:border-gray-700">
+				<CardHeader className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800/50">
+					<h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+						Contratos de Locação ({filteredLeases.length})
+					</h3>
+					<Button
+						color="primary"
+						size="sm"
+						startContent={<Plus className="h-4 w-4" />}
+						onPress={() =>
 							navigate(`/dashboard/properties/${propertyId}/lease/new`)
 						}
-					/>
-				) : (
-					<LeasesTable
-						propertyId={propertyId}
-						leases={leases}
-						onRecordPayment={onRecordPayment}
-					/>
-				)}
-			</CardBody>
-		</Card>
+					>
+						Novo Contrato
+					</Button>
+				</CardHeader>
+				<CardBody className="p-0">
+					{leases.length === 0 ? (
+						<EmptyState
+							message="Nenhum contrato cadastrado para este imóvel"
+							actionLabel="Criar primeiro contrato"
+							onAction={() =>
+								navigate(`/dashboard/properties/${propertyId}/lease/new`)
+							}
+						/>
+					) : (
+						<>
+							{/* Filters */}
+							<div className="border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+								<div className="flex flex-col gap-4 sm:flex-row">
+									<Input
+										placeholder="Buscar por inquilino ou unidade..."
+										value={searchQuery}
+										onValueChange={setSearchQuery}
+										startContent={<Search className="h-4 w-4 text-gray-400" />}
+										className="flex-1"
+										size="sm"
+									/>
+									<Select
+										placeholder="Filtrar por status"
+										selectedKeys={[statusFilter]}
+										onSelectionChange={(keys) =>
+											setStatusFilter(Array.from(keys)[0] as LeaseStatus | "all")
+										}
+										className="w-full sm:w-48"
+										size="sm"
+									>
+										{statusOptions.map((option) => (
+											<SelectItem key={option.value}>{option.label}</SelectItem>
+										))}
+									</Select>
+								</div>
+							</div>
+
+							{filteredLeases.length === 0 ? (
+								<div className="py-12 text-center">
+									<p className="text-gray-500">
+										Nenhum contrato encontrado com os filtros aplicados
+									</p>
+								</div>
+							) : (
+								<LeasesTable
+									propertyId={propertyId}
+									leases={filteredLeases}
+									onRecordPayment={onRecordPayment}
+								/>
+							)}
+						</>
+					)}
+				</CardBody>
+			</Card>
+		</div>
 	);
 }
 
@@ -94,43 +228,45 @@ function LeasesTable({
 				<TableColumn>PERÍODO</TableColumn>
 				<TableColumn>ALUGUEL</TableColumn>
 				<TableColumn>STATUS</TableColumn>
-				<TableColumn width={50}>AÇÕES</TableColumn>
+				<TableColumn width={80}>AÇÕES</TableColumn>
 			</TableHeader>
 			<TableBody>
 				{leases.map((lease) => (
-					<TableRow key={lease.id} className="hover:bg-gray-50">
+					<TableRow
+						key={lease.id}
+						className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+						onClick={() => navigate(`/dashboard/leases/${lease.id}`)}
+					>
 						<TableCell>
 							<div className="flex items-center gap-3">
-								<Avatar
-									name={lease.tenantContact?.firstName || "?"}
-									size="sm"
-								/>
+								<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+									{lease.tenantContact?.firstName?.[0] || "?"}
+								</div>
 								<div>
-									<p className="font-medium text-gray-900">
-										{lease.tenantContact?.firstName}{" "}
-										{lease.tenantContact?.lastName}
+									<p className="font-medium text-gray-900 dark:text-white">
+										{lease.tenantContact?.firstName} {lease.tenantContact?.lastName}
 									</p>
-									<p className="text-gray-500 text-xs">
+									<p className="text-xs text-gray-500">
 										{lease.tenantContact?.email}
 									</p>
 								</div>
 							</div>
 						</TableCell>
-						<TableCell className="text-gray-600">
+						<TableCell className="text-gray-600 dark:text-gray-400">
 							{lease.unit?.unitNumber || "Imóvel todo"}
 						</TableCell>
 						<TableCell>
-							<p className="text-gray-900 text-sm">
+							<p className="text-sm text-gray-900 dark:text-white">
 								{new Date(lease.startDate).toLocaleDateString("pt-BR")}
 							</p>
-							<p className="text-gray-500 text-xs">
+							<p className="text-xs text-gray-500">
 								até{" "}
 								{lease.endDate
 									? new Date(lease.endDate).toLocaleDateString("pt-BR")
 									: "Indeterminado"}
 							</p>
 						</TableCell>
-						<TableCell className="font-medium text-gray-900">
+						<TableCell className="font-medium text-gray-900 dark:text-white">
 							{formatBRL(Number(lease.rentAmount))}/mês
 						</TableCell>
 						<TableCell>
@@ -142,57 +278,20 @@ function LeasesTable({
 								{getLeaseStatusLabel(lease.status)}
 							</Chip>
 						</TableCell>
-						<TableCell>
-							<LeaseActions
-								leaseId={lease.id}
-								propertyId={propertyId}
+						<TableCell onClick={(e) => e.stopPropagation()}>
+							<LeaseActionsMenu
+								lease={lease}
 								onEdit={() =>
-									navigate(
-										`/dashboard/properties/${propertyId}/lease/${lease.id}/edit`,
-									)
+									navigate(`/dashboard/leases/${lease.id}/edit`)
 								}
 								onRecordPayment={() => onRecordPayment(lease.id)}
+								showViewDetails={false}
 							/>
 						</TableCell>
 					</TableRow>
 				))}
 			</TableBody>
 		</Table>
-	);
-}
-
-interface LeaseActionsProps {
-	leaseId: string;
-	propertyId: string;
-	onEdit: () => void;
-	onRecordPayment: () => void;
-}
-
-function LeaseActions({ onEdit, onRecordPayment }: LeaseActionsProps) {
-	return (
-		<Dropdown>
-			<DropdownTrigger>
-				<Button isIconOnly variant="light" size="sm">
-					<MoreVertical className="h-4 w-4" />
-				</Button>
-			</DropdownTrigger>
-			<DropdownMenu aria-label="Ações">
-				<DropdownItem
-					key="edit"
-					startContent={<Pencil className="h-4 w-4" />}
-					onPress={onEdit}
-				>
-					Editar
-				</DropdownItem>
-				<DropdownItem
-					key="payment"
-					startContent={<DollarSign className="h-4 w-4" />}
-					onPress={onRecordPayment}
-				>
-					Registrar pagamento
-				</DropdownItem>
-			</DropdownMenu>
-		</Dropdown>
 	);
 }
 
@@ -206,9 +305,15 @@ function EmptyState({
 	onAction: () => void;
 }) {
 	return (
-		<div className="py-12 text-center">
-			<p className="text-gray-500">{message}</p>
-			<Button className="mt-4" variant="light" onPress={onAction}>
+		<div className="flex flex-col items-center justify-center py-12">
+			<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+				<Building2 className="h-8 w-8 text-gray-400" />
+			</div>
+			<p className="mb-2 font-medium text-gray-900 dark:text-white">{message}</p>
+			<p className="mb-6 text-sm text-gray-500">
+				Crie um contrato para começar a gerenciar locações deste imóvel.
+			</p>
+			<Button color="primary" variant="flat" onPress={onAction}>
 				{actionLabel}
 			</Button>
 		</div>

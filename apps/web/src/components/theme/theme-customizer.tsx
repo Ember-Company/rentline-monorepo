@@ -15,12 +15,8 @@ const themeModes = [
 ] as const;
 
 const accentColors: { value: ThemeAccent; label: string; color: string }[] = [
-	{ value: "blue", label: "Azul", color: "bg-blue-500" },
-	{ value: "violet", label: "Violeta", color: "bg-violet-500" },
-	{ value: "emerald", label: "Esmeralda", color: "bg-emerald-500" },
-	{ value: "amber", label: "Âmbar", color: "bg-amber-500" },
-	{ value: "rose", label: "Rosa", color: "bg-rose-500" },
-	{ value: "slate", label: "Cinza", color: "bg-slate-500" },
+	{ value: "emerald", label: "Verde", color: "bg-primary" }, // Green (primary)
+	{ value: "amber", label: "Laranja", color: "bg-secondary" }, // Orange (secondary)
 ];
 
 export function ThemeCustomizer() {
@@ -66,10 +62,10 @@ export function ThemeCustomizer() {
 
 					{/* Accent Color */}
 					<div>
-						<p className="mb-2 font-medium text-gray-700 text-xs uppercase tracking-wider dark:text-gray-300">
+						<p className="mb-2 font-medium text-default-foreground text-xs uppercase tracking-wider">
 							Cor de destaque
 						</p>
-						<div className="grid grid-cols-6 gap-2">
+						<div className="grid grid-cols-2 gap-2">
 							{accentColors.map((item) => {
 								const isActive = accent === item.value;
 								return (
@@ -90,12 +86,12 @@ export function ThemeCustomizer() {
 					</div>
 
 					{/* Compact Mode */}
-					<div className="flex items-center justify-between rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+					<div className="flex items-center justify-between rounded-lg border border-default-200 p-3">
 						<div>
-							<p className="font-medium text-gray-900 text-sm dark:text-gray-100">
+							<p className="font-medium text-foreground text-sm">
 								Modo Compacto
 							</p>
-							<p className="text-gray-500 text-xs dark:text-gray-400">
+							<p className="text-default-foreground text-xs">
 								Reduz espaçamentos
 							</p>
 						</div>

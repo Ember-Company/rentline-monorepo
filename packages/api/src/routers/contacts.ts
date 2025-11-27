@@ -2,6 +2,7 @@ import prisma from "@rentline/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { getActiveOrganization } from "../utils/organization";
 
 const contactInputSchema = z.object({
 	type: z.enum(["tenant", "agent", "owner"]),
@@ -37,25 +38,7 @@ export const contactsRouter = router({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			// Get user's organization
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-				include: { organization: true },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const where: {
 				organizationId: string;
@@ -94,23 +77,7 @@ export const contactsRouter = router({
 	getById: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const contact = await prisma.contact.findFirst({
 				where: {
@@ -132,23 +99,7 @@ export const contactsRouter = router({
 	create: protectedProcedure
 		.input(contactInputSchema)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const data: {
 				organizationId: string;
@@ -210,23 +161,7 @@ export const contactsRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify contact belongs to user's organization
 			const existing = await prisma.contact.findFirst({
@@ -303,23 +238,7 @@ export const contactsRouter = router({
 	delete: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify contact belongs to user's organization
 			const existing = await prisma.contact.findFirst({
@@ -353,23 +272,7 @@ export const contactsRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			// Verify property belongs to user's organization
 			const property = await prisma.property.findFirst({
@@ -414,23 +317,7 @@ export const contactsRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			await prisma.propertyContact.deleteMany({
 				where: {
@@ -450,23 +337,7 @@ export const contactsRouter = router({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
-			if (!ctx.session?.user?.id) {
-				throw new TRPCError({
-					code: "UNAUTHORIZED",
-					message: "User not authenticated",
-				});
-			}
-
-			const member = await prisma.member.findFirst({
-				where: { userId: ctx.session.user.id },
-			});
-
-			if (!member) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "User is not a member of any organization",
-				});
-			}
+			const member = await getActiveOrganization(ctx);
 
 			const where: {
 				propertyId: string;

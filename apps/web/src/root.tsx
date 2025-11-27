@@ -52,7 +52,8 @@ export default function App() {
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider
 				attribute="class"
-				defaultTheme="dark"
+				defaultTheme="light"
+				enableSystem
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>

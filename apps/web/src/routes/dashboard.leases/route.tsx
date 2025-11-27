@@ -2,10 +2,10 @@ import { Button } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
 import { toast } from "sonner";
 import {
 	type LeaseData,
+	CreateLeaseModal,
 	LeaseRenewModal,
 	type LeaseStatus,
 	LeasesFilters,
@@ -33,6 +33,7 @@ export default function LeasesPage() {
 	const [typeFilter, setTypeFilter] = useState<LeaseType | "all">("all");
 
 	// Modal state
+	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 	const [renewLease, setRenewLease] = useState<LeaseData | null>(null);
 	const [terminateLease, setTerminateLease] = useState<LeaseData | null>(null);
 
@@ -147,16 +148,17 @@ export default function LeasesPage() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="font-bold text-2xl text-gray-900">Contratos</h1>
+					<h1 className="font-bold text-2xl text-gray-900 dark:text-white">
+						Contratos
+					</h1>
 					<p className="text-gray-500 text-sm">
 						Gerencie todos os contratos de locação da sua organização
 					</p>
 				</div>
 				<Button
-					as={Link}
-					to="/dashboard/properties"
 					color="primary"
 					startContent={<Plus className="h-4 w-4" />}
+					onPress={() => setIsCreateModalOpen(true)}
 				>
 					Novo Contrato
 				</Button>
@@ -200,11 +202,10 @@ export default function LeasesPage() {
 						permitem gerenciar inquilinos, cobranças e pagamentos.
 					</p>
 					<Button
-						as={Link}
-						to="/dashboard/properties"
 						color="primary"
 						className="mt-6"
 						startContent={<Plus className="h-4 w-4" />}
+						onPress={() => setIsCreateModalOpen(true)}
 					>
 						Criar Primeiro Contrato
 					</Button>
@@ -212,6 +213,11 @@ export default function LeasesPage() {
 			)}
 
 			{/* Modals */}
+			<CreateLeaseModal
+				isOpen={isCreateModalOpen}
+				onClose={() => setIsCreateModalOpen(false)}
+			/>
+
 			<LeaseRenewModal
 				isOpen={!!renewLease}
 				onClose={() => setRenewLease(null)}
