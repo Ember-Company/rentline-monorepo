@@ -1,0 +1,86 @@
+model Sale {
+  id                      String    @id @default(uuid())
+  
+  // Property/Unit association - a sale can be for a whole property OR a specific unit
+  propertyId              String?
+  property                Property? @relation("PropertySale", fields: [propertyId], references: [id], onDelete: Cascade)
+  unitId                  String?
+  unit                    Unit?     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  
+  // Buyer association - can be User or Contact
+  buyerId                 String?   // user.id
+  buyer                   User?     @relation("SaleBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerContactId          String?   // contact.id (alternative to user)
+  buyerContact            Contact?  @relation("SaleBuyerContact", fields: [buyerContactId], references: [id], onDelete: SetNull)
+  
+  // Sale terms
+  saleType                String    @default("purchase") // purchase, installment, rent_to_own
+  contractDate             DateTime
+  closingDate              DateTime?
+  possessionDate           DateTime? // When buyer takes possession
+  
+  // Financial terms
+  askingPrice              Decimal   // Original asking price
+  salePrice                Decimal   // Agreed sale price
+  downPayment              Decimal?  // Down payment amount
+  downPaymentDate           DateTime?
+  financingAmount           Decimal? // Amount being financed
+  financingTerm             Int?     // Number of months/years for financing
+  interestRate              Decimal? // Interest rate if financing
+  monthlyPayment           Decimal?  // Monthly payment if installment sale
+  
+  currencyId               String
+  currency                 Currency  @relation(fields: [currencyId], references: [id])
+  
+  // Additional costs
+  closingCosts             Decimal? // Total closing costs
+  taxes                    Decimal? // Property taxes
+  transferFees             Decimal? // Transfer fees
+  otherFees                String?  // JSON: [{ description, amount }]
+  
+  // Status
+  status                   String    @default("pending") // pending, under_contract, closed, cancelled, failed
+  contractStatus           String?   // draft, signed, executed
+  
+  // Conditions and contingencies
+  inspectionContingency    Boolean   @default(true)
+  financingContingency     Boolean   @default(true)
+  appraisalContingency     Boolean   @default(false)
+  homeSaleContingency      Boolean   @default(false)
+  contingencyDeadline      DateTime?
+  
+  // Important dates
+  offerDate                DateTime?
+  acceptanceDate           DateTime?
+  inspectionDate           DateTime?
+  appraisalDate            DateTime?
+  finalWalkthroughDate     DateTime?
+  
+  // Documents and notes
+  contractDocumentUrl      String?
+  notes                    String?
+  terms                    String?   // Additional terms text
+  
+  // Commission (for real estate agents)
+  agentCommission          Decimal?
+  agentCommissionPercent   Decimal?
+  
+  // Timestamps
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  
+  // Relations
+  documents                Document[]
+  payments                 Payment[] // For installment sales, down payments, closing costs
+  
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([buyerId])
+  @@index([buyerContactId])
+  @@index([status])
+  @@index([currencyId])
+  @@index([contractDate])
+  @@index([closingDate])
+  @@map("sale")
+}
+

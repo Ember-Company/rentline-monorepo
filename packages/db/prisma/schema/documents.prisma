@@ -4,13 +4,15 @@ model Document {
   user        User?    @relation("DocumentUser", fields: [userId], references: [id], onDelete: SetNull)
   leaseId     String?
   lease       Lease?   @relation(fields: [leaseId], references: [id], onDelete: SetNull)
+  saleId      String?
+  sale        Sale?    @relation(fields: [saleId], references: [id], onDelete: SetNull)
   expenseId   String?   @unique
   expense     Expense?  @relation("ExpenseReceipt")
   propertyId  String?
   property    Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
   unitId      String?
   unit        Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
-  type        String   // lease_agreement, receipt, id_proof, etc.
+  type        String   // lease_agreement, purchase_agreement, receipt, id_proof, etc.
   url         String
   uploadedBy  String
   uploader    User     @relation("DocumentUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
@@ -18,6 +20,7 @@ model Document {
 
   @@index([userId])
   @@index([leaseId])
+  @@index([saleId])
   @@index([expenseId])
   @@index([propertyId])
   @@index([unitId])

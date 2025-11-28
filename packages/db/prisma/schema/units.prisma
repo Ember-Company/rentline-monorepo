@@ -15,11 +15,17 @@ model Unit {
   area        Decimal?  // sqft or m2
   
   // Status
-  status      String    @default("available") // available, occupied, maintenance, reserved
+  status      String    @default("available") // available, occupied, maintenance, reserved, sold
+  category    String    @default("rent") // rent, sale, both - determines if unit can be rented/sold
   
-  // Financial
+  // Financial - Rent
   rentAmount  Decimal?
   depositAmount Decimal?
+  
+  // Financial - Sale
+  salePrice   Decimal?  // Asking price for sale
+  purchasePrice Decimal? // Actual purchase price (when sold)
+  
   currencyId  String?
   currency    Currency? @relation(fields: [currencyId], references: [id])
   
@@ -39,6 +45,7 @@ model Unit {
   // Relations
   applications        Application[]
   leases              Lease[]
+  sales                Sale[]
   maintenanceRequests MaintenanceRequest[]
   expenses            Expense[]
   documents           Document[]

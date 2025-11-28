@@ -13,6 +13,16 @@ const leaseStatusEnum = z.enum([
 ]);
 const leaseTypeEnum = z.enum(["fixed", "month_to_month", "annual"]);
 
+const additionalChargeSchema = z.object({
+	description: z.string(),
+	amount: z.number().positive(),
+});
+
+const lateFeeTierSchema = z.object({
+	daysLate: z.number().int().positive(),
+	amount: z.number().positive(),
+});
+
 const leaseInputSchema = z.object({
 	// Property/Unit - one is required
 	propertyId: z.string().optional(),
@@ -30,15 +40,36 @@ const leaseInputSchema = z.object({
 	depositAmount: z.number().optional(),
 	currencyId: z.string(),
 	paymentDueDay: z.number().int().min(1).max(28).default(1),
-	// Late fees
-	lateFeeType: z.enum(["percentage", "fixed"]).optional(),
-	lateFeeAmount: z.number().optional(),
-	lateFeePercentage: z.number().optional(),
+	paymentFrequency: z.enum([
+		"standalone",
+		"one_time",
+		"weekly",
+		"biweekly",
+		"four_weeks",
+		"monthly",
+		"two_months",
+		"quarterly",
+		"four_months",
+		"five_months",
+		"bi_annually",
+		"eighteen_months",
+		"twenty_four_months",
+		"yearly",
+	]).default("monthly"),
+	// Pro-rata
+	proRataEnabled: z.boolean().default(false),
+	proRataAmount: z.number().optional(),
+	// Additional charges
+	additionalCharges: z.array(additionalChargeSchema).optional(),
+	// Late fees - now supports multiple tiers
+	lateFees: z.array(lateFeeTierSchema).optional(),
 	gracePeriodDays: z.number().int().optional(),
 	// Additional fees
 	petDeposit: z.number().optional(),
 	securityDeposit: z.number().optional(),
 	lastMonthRent: z.number().optional(),
+	// Furnishing
+	furnishing: z.enum(["furnished", "unfurnished", "partially_furnished"]).optional(),
 	// Status
 	status: leaseStatusEnum.default("draft"),
 	terms: z.string().optional(),
@@ -48,6 +79,13 @@ const leaseInputSchema = z.object({
 	renewalNoticeDays: z.number().int().optional(),
 	// Notification
 	notificationChannel: z.enum(["email", "sms", "both"]).optional(),
+	// Reminder settings
+	leaseExpiryReminderEnabled: z.boolean().default(false),
+	leaseExpiryReminderDays: z.number().int().optional(),
+	rentReminderEnabled: z.boolean().default(false),
+	rentOverdueReminderEnabled: z.boolean().default(false),
+	// Renter's insurance
+	requireRentersInsurance: z.boolean().default(false),
 });
 
 
@@ -360,23 +398,44 @@ export const leasesRouter = router({
 					endDate: input.endDate ? new Date(input.endDate) : null,
 					moveInDate: input.moveInDate ? new Date(input.moveInDate) : null,
 					moveOutDate: input.moveOutDate ? new Date(input.moveOutDate) : null,
+					// Financial
 					rentAmount: input.rentAmount,
 					depositAmount: input.depositAmount,
 					currencyId: input.currencyId,
 					paymentDueDay: input.paymentDueDay,
-					lateFeeType: input.lateFeeType,
-					lateFeeAmount: input.lateFeeAmount,
-					lateFeePercentage: input.lateFeePercentage,
+					paymentFrequency: input.paymentFrequency,
+					// Pro-rata
+					proRataEnabled: input.proRataEnabled,
+					proRataAmount: input.proRataAmount,
+					// Additional charges (JSON)
+					additionalCharges: input.additionalCharges
+						? JSON.stringify(input.additionalCharges)
+						: null,
+					// Late fees (JSON array)
+					lateFees: input.lateFees ? JSON.stringify(input.lateFees) : null,
 					gracePeriodDays: input.gracePeriodDays,
+					// Additional fees
 					petDeposit: input.petDeposit,
 					securityDeposit: input.securityDeposit,
 					lastMonthRent: input.lastMonthRent,
+					// Furnishing
+					furnishing: input.furnishing,
+					// Status and notes
 					status: input.status,
 					terms: input.terms,
 					notes: input.notes,
+					// Renewal
 					autoRenew: input.autoRenew,
 					renewalNoticeDays: input.renewalNoticeDays,
+					// Notification
 					notificationChannel: input.notificationChannel,
+					// Reminder settings
+					leaseExpiryReminderEnabled: input.leaseExpiryReminderEnabled,
+					leaseExpiryReminderDays: input.leaseExpiryReminderDays,
+					rentReminderEnabled: input.rentReminderEnabled,
+					rentOverdueReminderEnabled: input.rentOverdueReminderEnabled,
+					// Renter's insurance
+					requireRentersInsurance: input.requireRentersInsurance,
 				},
 				include: {
 					property: { select: { id: true, name: true } },
@@ -424,18 +483,40 @@ export const leasesRouter = router({
 				});
 			}
 
-			const { id, startDate, endDate, moveInDate, moveOutDate, ...rest } =
-				input;
+			const {
+				id,
+				startDate,
+				endDate,
+				moveInDate,
+				moveOutDate,
+				additionalCharges,
+				lateFees,
+				...rest
+			} = input;
+
+			const updateData: Parameters<typeof prisma.lease.update>[0]["data"] = {
+				...rest,
+				startDate: startDate ? new Date(startDate) : undefined,
+				endDate: endDate ? new Date(endDate) : undefined,
+				moveInDate: moveInDate ? new Date(moveInDate) : undefined,
+				moveOutDate: moveOutDate ? new Date(moveOutDate) : undefined,
+				// Handle JSON fields
+				additionalCharges: additionalCharges
+					? JSON.stringify(additionalCharges)
+					: undefined,
+				lateFees: lateFees ? JSON.stringify(lateFees) : undefined,
+			};
+
+			// Remove undefined values
+			Object.keys(updateData).forEach((key) => {
+				if (updateData[key as keyof typeof updateData] === undefined) {
+					delete updateData[key as keyof typeof updateData];
+				}
+			});
 
 			const lease = await prisma.lease.update({
 				where: { id },
-				data: {
-					...rest,
-					startDate: startDate ? new Date(startDate) : undefined,
-					endDate: endDate ? new Date(endDate) : undefined,
-					moveInDate: moveInDate ? new Date(moveInDate) : undefined,
-					moveOutDate: moveOutDate ? new Date(moveOutDate) : undefined,
-				},
+				data: updateData,
 				include: {
 					property: { select: { id: true, name: true } },
 					unit: { select: { id: true, unitNumber: true } },

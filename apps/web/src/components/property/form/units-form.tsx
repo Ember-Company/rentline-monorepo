@@ -22,8 +22,10 @@ export interface UnitFormData {
 	bedrooms: string;
 	bathrooms: string;
 	area: string;
+	category: "rent" | "sale" | "both";
 	rentAmount: string;
 	depositAmount: string;
+	salePrice: string;
 }
 
 export function createEmptyUnit(): UnitFormData {
@@ -37,8 +39,10 @@ export function createEmptyUnit(): UnitFormData {
 		bedrooms: "",
 		bathrooms: "",
 		area: "",
+		category: "rent",
 		rentAmount: "",
 		depositAmount: "",
+		salePrice: "",
 	};
 }
 
@@ -211,7 +215,30 @@ function UnitCard({
 					}}
 				/>
 			</div>
-			<div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-5">
+
+			{/* Category Selection */}
+			<div className="mt-3">
+				<Select
+					size="sm"
+					label="Disponibilidade"
+					description="Alugar, vender ou ambos"
+					selectedKeys={[unit.category]}
+					onSelectionChange={(keys) =>
+						onUpdate("category", Array.from(keys)[0] as string)
+					}
+					isDisabled={isDisabled}
+					classNames={{
+						trigger: "border-gray-200 bg-white hover:border-gray-300",
+					}}
+				>
+					<SelectItem key="rent">Apenas Aluguel</SelectItem>
+					<SelectItem key="sale">Apenas Venda</SelectItem>
+					<SelectItem key="both">Aluguel e Venda</SelectItem>
+				</Select>
+			</div>
+
+			{/* Physical Characteristics */}
+			<div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
 				<Input
 					size="sm"
 					type="number"
@@ -248,30 +275,55 @@ function UnitCard({
 						inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
 					}}
 				/>
-				<Input
-					size="sm"
-					type="number"
-					label="Aluguel (R$)"
-					placeholder="0,00"
-					value={unit.rentAmount}
-					onValueChange={(v) => onUpdate("rentAmount", v)}
-					isDisabled={isDisabled}
-					classNames={{
-						inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
-					}}
-				/>
-				<Input
-					size="sm"
-					type="number"
-					label="Depósito (R$)"
-					placeholder="0,00"
-					value={unit.depositAmount}
-					onValueChange={(v) => onUpdate("depositAmount", v)}
-					isDisabled={isDisabled}
-					classNames={{
-						inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
-					}}
-				/>
+			</div>
+
+			{/* Financial Fields - Conditional based on category */}
+			<div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+				{(unit.category === "rent" || unit.category === "both") && (
+					<>
+						<Input
+							size="sm"
+							type="number"
+							label="Aluguel Mensal (R$)"
+							placeholder="0,00"
+							value={unit.rentAmount}
+							onValueChange={(v) => onUpdate("rentAmount", v)}
+							isDisabled={isDisabled}
+							startContent={<span className="text-gray-400 text-sm">R$</span>}
+							classNames={{
+								inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
+							}}
+						/>
+						<Input
+							size="sm"
+							type="number"
+							label="Depósito (R$)"
+							placeholder="0,00"
+							value={unit.depositAmount}
+							onValueChange={(v) => onUpdate("depositAmount", v)}
+							isDisabled={isDisabled}
+							startContent={<span className="text-gray-400 text-sm">R$</span>}
+							classNames={{
+								inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
+							}}
+						/>
+					</>
+				)}
+				{(unit.category === "sale" || unit.category === "both") && (
+					<Input
+						size="sm"
+						type="number"
+						label="Preço de Venda (R$)"
+						placeholder="0,00"
+						value={unit.salePrice}
+						onValueChange={(v) => onUpdate("salePrice", v)}
+						isDisabled={isDisabled}
+						startContent={<span className="text-gray-400 text-sm">R$</span>}
+						classNames={{
+							inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
+						}}
+					/>
+				)}
 			</div>
 		</div>
 	);

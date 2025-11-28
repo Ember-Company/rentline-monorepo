@@ -16,7 +16,10 @@ const unitStatusEnum = z.enum([
 	"occupied",
 	"maintenance",
 	"reserved",
+	"sold",
 ]);
+
+const unitCategoryEnum = z.enum(["rent", "sale", "both"]);
 
 const unitInputSchema = z.object({
 	propertyId: z.string(),
@@ -28,9 +31,14 @@ const unitInputSchema = z.object({
 	bedrooms: z.number().int().optional(),
 	bathrooms: z.number().optional(),
 	area: z.number().optional(),
-	// Financial
+	// Category - determines if unit can be rented/sold
+	category: unitCategoryEnum.default("rent"),
+	// Financial - Rent
 	rentAmount: z.number().optional(),
 	depositAmount: z.number().optional(),
+	// Financial - Sale
+	salePrice: z.number().optional(), // Asking price for sale
+	purchasePrice: z.number().optional(), // Actual purchase price (when sold)
 	currencyId: z.string().optional(),
 	// Features
 	features: z.array(z.string()).optional(),
@@ -53,6 +61,7 @@ export const unitsRouter = router({
 					propertyId: z.string().optional(),
 					type: unitTypeEnum.optional(),
 					status: unitStatusEnum.optional(),
+					category: unitCategoryEnum.optional(),
 					search: z.string().optional(),
 					limit: z.number().int().min(1).max(100).default(50),
 					offset: z.number().int().min(0).default(0),
@@ -74,6 +83,7 @@ export const unitsRouter = router({
 				propertyId?: string;
 				type?: string;
 				status?: string;
+				category?: string;
 				OR?: Array<{
 					unitNumber?: { contains: string; mode: "insensitive" };
 					name?: { contains: string; mode: "insensitive" };
@@ -85,6 +95,7 @@ export const unitsRouter = router({
 			if (input?.propertyId) where.propertyId = input.propertyId;
 			if (input?.type) where.type = input.type;
 			if (input?.status) where.status = input.status;
+			if (input?.category) where.category = input.category;
 
 			if (input?.search) {
 				where.OR = [
@@ -121,6 +132,8 @@ export const unitsRouter = router({
 						},
 						_count: {
 							select: {
+								leases: true,
+								sales: true,
 								maintenanceRequests: true,
 								expenses: true,
 							},
@@ -133,14 +146,28 @@ export const unitsRouter = router({
 				prisma.unit.count({ where }),
 			]);
 
-			const transformedUnits = units.map((u) => ({
-				...u,
-				features: u.features ? JSON.parse(u.features) : [],
-				amenities: u.amenities ? JSON.parse(u.amenities) : [],
-				images: u.images ? JSON.parse(u.images) : [],
-				activeLease: u.leases[0] || null,
-				tenant: u.leases[0]?.tenantContact || null,
-			}));
+			// Calculate active lease/sale for each unit
+			const transformedUnits = await Promise.all(
+				units.map(async (u) => {
+					const activeLease = u.leases[0] || null;
+					const activeSale = await prisma.sale.findFirst({
+						where: {
+							unitId: u.id,
+							status: { in: ["pending", "under_contract"] },
+						},
+					});
+
+					return {
+						...u,
+						features: u.features ? JSON.parse(u.features) : [],
+						amenities: u.amenities ? JSON.parse(u.amenities) : [],
+						images: u.images ? JSON.parse(u.images) : [],
+						activeLease,
+						activeSale: activeSale || null,
+						tenant: activeLease?.tenantContact || null,
+					};
+				}),
+			);
 
 			return {
 				units: transformedUnits,
@@ -220,6 +247,7 @@ export const unitsRouter = router({
 					amenities: unit.amenities ? JSON.parse(unit.amenities) : [],
 					images: unit.images ? JSON.parse(unit.images) : [],
 					activeLease: unit.leases.find((l) => l.status === "active") || null,
+					activeSale: unit.sales.find((s) => s.status === "pending" || s.status === "under_contract") || null,
 				},
 			};
 		}),
@@ -267,6 +295,56 @@ export const unitsRouter = router({
 				});
 			}
 
+			// Get or ensure default currency exists
+			let currencyId = input.currencyId;
+			if (!currencyId) {
+				const orgSettings = await prisma.organizationSettings.findFirst({
+					where: { organizationId: member.organizationId },
+					include: { currency: true },
+				});
+				currencyId = orgSettings?.currencyId || "BRL";
+			}
+
+			// Ensure currency exists
+			const currency = await prisma.currency.findUnique({
+				where: { id: currencyId },
+			});
+
+			if (!currency) {
+				if (currencyId === "BRL") {
+					await prisma.currency.upsert({
+						where: { id: "BRL" },
+						update: {},
+						create: {
+							id: "BRL",
+							name: "Real Brasileiro",
+							symbol: "R$",
+						},
+					});
+				} else {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Currency ${currencyId} does not exist`,
+					});
+				}
+			}
+
+			// Validate: if category is "rent", salePrice should not be set
+			// if category is "sale", rentAmount should not be set
+			if (input.category === "rent" && input.salePrice) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Units with category 'rent' cannot have a sale price",
+				});
+			}
+
+			if (input.category === "sale" && input.rentAmount) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Units with category 'sale' cannot have a rent amount",
+				});
+			}
+
 			const unit = await prisma.unit.create({
 				data: {
 					propertyId: input.propertyId,
@@ -277,9 +355,14 @@ export const unitsRouter = router({
 					bedrooms: input.bedrooms,
 					bathrooms: input.bathrooms,
 					area: input.area,
-					rentAmount: input.rentAmount,
-					depositAmount: input.depositAmount,
-					currencyId: input.currencyId,
+					category: input.category,
+					// Financial - Rent
+					rentAmount: input.category !== "sale" ? input.rentAmount : null,
+					depositAmount: input.category !== "sale" ? input.depositAmount : null,
+					// Financial - Sale
+					salePrice: input.category !== "rent" ? input.salePrice : null,
+					purchasePrice: input.purchasePrice, // Only set when actually sold
+					currencyId,
 					features: input.features ? JSON.stringify(input.features) : null,
 					amenities: input.amenities ? JSON.stringify(input.amenities) : null,
 					description: input.description,
@@ -347,16 +430,89 @@ export const unitsRouter = router({
 				}
 			}
 
+			// Determine final category
+			const finalCategory = input.category ?? existing.category;
+
+			// Validate: if category is "rent", salePrice should not be set
+			// if category is "sale", rentAmount should not be set
+			if (finalCategory === "rent" && input.salePrice) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Units with category 'rent' cannot have a sale price",
+				});
+			}
+
+			if (finalCategory === "sale" && input.rentAmount) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Units with category 'sale' cannot have a rent amount",
+				});
+			}
+
+			// Handle currency
+			let currencyId = input.currencyId;
+			if (currencyId) {
+				const currency = await prisma.currency.findUnique({
+					where: { id: currencyId },
+				});
+				if (!currency) {
+					if (currencyId === "BRL") {
+						await prisma.currency.upsert({
+							where: { id: "BRL" },
+							update: {},
+							create: {
+								id: "BRL",
+								name: "Real Brasileiro",
+								symbol: "R$",
+							},
+						});
+					} else {
+						throw new TRPCError({
+							code: "BAD_REQUEST",
+							message: `Currency ${currencyId} does not exist`,
+						});
+					}
+				}
+			}
+
 			const { id, features, amenities, images, ...rest } = input;
+
+			// Build update data
+			const updateData: Parameters<typeof prisma.unit.update>[0]["data"] = {
+				...rest,
+				features: features ? JSON.stringify(features) : undefined,
+				amenities: amenities ? JSON.stringify(amenities) : undefined,
+				images: images ? JSON.stringify(images) : undefined,
+				currencyId,
+				// For rent-only: clear sale prices
+				// For sale-only: clear rent amounts
+				// For both: allow both
+				rentAmount:
+					finalCategory === "sale"
+						? null
+						: finalCategory === "rent"
+							? rest.rentAmount
+							: rest.rentAmount,
+				depositAmount:
+					finalCategory === "sale" ? null : rest.depositAmount,
+				salePrice:
+					finalCategory === "rent"
+						? null
+						: finalCategory === "sale"
+							? rest.salePrice
+							: rest.salePrice,
+			};
+
+			// Remove undefined values
+			Object.keys(updateData).forEach((key) => {
+				if (updateData[key as keyof typeof updateData] === undefined) {
+					delete updateData[key as keyof typeof updateData];
+				}
+			});
 
 			const unit = await prisma.unit.update({
 				where: { id },
-				data: {
-					...rest,
-					features: features ? JSON.stringify(features) : undefined,
-					amenities: amenities ? JSON.stringify(amenities) : undefined,
-					images: images ? JSON.stringify(images) : undefined,
-				},
+				data: updateData,
 				include: {
 					property: {
 						select: { id: true, name: true },

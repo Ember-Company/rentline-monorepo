@@ -4,6 +4,7 @@ import type { PropertyCategory } from "@/lib/types/api";
 
 interface FinancialFormProps {
 	category: PropertyCategory;
+	propertyType: "apartment_building" | "house" | "office" | "land";
 	monthlyRent: string;
 	askingPrice: string;
 	onMonthlyRentChange: (value: string) => void;
@@ -13,14 +14,17 @@ interface FinancialFormProps {
 
 export function FinancialForm({
 	category,
+	propertyType,
 	monthlyRent,
 	askingPrice,
 	onMonthlyRentChange,
 	onAskingPriceChange,
 	isDisabled,
 }: FinancialFormProps) {
-	const showRentFields = category === "rent" || category === "both";
-	const showSaleFields = category === "sale" || category === "both";
+	// For apartments: prices go on units, not property
+	const isApartment = propertyType === "apartment_building";
+	const showRentFields = !isApartment && (category === "rent" || category === "both");
+	const showSaleFields = !isApartment && (category === "sale" || category === "both");
 
 	return (
 		<Card className="border border-gray-200 shadow-sm">
@@ -38,36 +42,45 @@ export function FinancialForm({
 				</div>
 			</CardHeader>
 			<CardBody className="space-y-4 p-6">
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-					{showRentFields && (
-						<Input
-							type="number"
-							label="Valor do Aluguel Mensal"
-							placeholder="0,00"
-							value={monthlyRent}
-							onValueChange={onMonthlyRentChange}
-							isDisabled={isDisabled}
-							startContent={<span className="text-gray-400 text-sm">R$</span>}
-							classNames={{
-								inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
-							}}
-						/>
-					)}
-					{showSaleFields && (
-						<Input
-							type="number"
-							label="Valor de Venda"
-							placeholder="0,00"
-							value={askingPrice}
-							onValueChange={onAskingPriceChange}
-							isDisabled={isDisabled}
-							startContent={<span className="text-gray-400 text-sm">R$</span>}
-							classNames={{
-								inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
-							}}
-						/>
-					)}
-				</div>
+				{isApartment ? (
+					<div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
+						<p className="font-medium">💡 Para prédios de apartamentos</p>
+						<p className="mt-1">
+							Os valores de aluguel e venda devem ser definidos nas unidades individuais, não no prédio como um todo.
+						</p>
+					</div>
+				) : (
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+						{showRentFields && (
+							<Input
+								type="number"
+								label="Valor do Aluguel Mensal"
+								placeholder="0,00"
+								value={monthlyRent}
+								onValueChange={onMonthlyRentChange}
+								isDisabled={isDisabled}
+								startContent={<span className="text-gray-400 text-sm">R$</span>}
+								classNames={{
+									inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
+								}}
+							/>
+						)}
+						{showSaleFields && (
+							<Input
+								type="number"
+								label="Valor de Venda"
+								placeholder="0,00"
+								value={askingPrice}
+								onValueChange={onAskingPriceChange}
+								isDisabled={isDisabled}
+								startContent={<span className="text-gray-400 text-sm">R$</span>}
+								classNames={{
+									inputWrapper: "border-gray-200 bg-white hover:border-gray-300",
+								}}
+							/>
+						)}
+					</div>
+				)}
 			</CardBody>
 		</Card>
 	);

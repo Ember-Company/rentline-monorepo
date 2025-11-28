@@ -19,6 +19,7 @@ import {
 	Building2,
 	Calendar,
 	Car,
+	FileText,
 	Plus,
 	Ruler,
 	Unlink,
@@ -40,6 +41,8 @@ interface OverviewTabProps {
 	onAddExpense: () => void;
 	onLinkContact: () => void;
 	onUnlinkContact: (contactId: string) => void;
+	onAddLease?: () => void;
+	onAddTenant?: () => void;
 }
 
 export function OverviewTab({
@@ -54,9 +57,75 @@ export function OverviewTab({
 	onAddExpense,
 	onLinkContact,
 	onUnlinkContact,
+	onAddLease,
+	onAddTenant,
 }: OverviewTabProps) {
 	return (
 		<div className="space-y-6">
+			{/* Quick Actions - Add Lease/Tenant Cards */}
+			{(onAddLease || onAddTenant) && (
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+					{onAddLease && (
+						<Card className="border border-default-200 bg-content1">
+							<CardBody className="p-6">
+								<div className="flex items-start gap-4">
+									<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+										<FileText className="h-6 w-6 text-primary" />
+									</div>
+									<div className="flex-1">
+										<h4 className="mb-2 font-semibold text-foreground">
+											Adicionar Contrato
+										</h4>
+										<p className="mb-4 text-sm text-default-foreground">
+											Comece adicionando seu contrato e comece a rastrear seus
+											pagamentos de aluguel.
+										</p>
+										<p className="mb-4 text-xs text-default-foreground/70">
+											Nenhum upload de documento necessário.
+										</p>
+										<Button
+											color="primary"
+											size="sm"
+											startContent={<Plus className="h-4 w-4" />}
+											onPress={onAddLease}
+										>
+											Adicionar Contrato
+										</Button>
+									</div>
+								</div>
+							</CardBody>
+						</Card>
+					)}
+					{onAddTenant && (
+						<Card className="border border-default-200 bg-content1">
+							<CardBody className="p-6">
+								<div className="flex items-start gap-4">
+									<div className="flex h-12 w-12 items-center justify-center rounded-full bg-default-100">
+										<UserPlus className="h-6 w-6 text-default-foreground" />
+									</div>
+									<div className="flex-1">
+										<h4 className="mb-2 font-semibold text-foreground">
+											Adicionar Inquilino
+										</h4>
+										<p className="mb-4 text-sm text-default-foreground">
+											Adicione um inquilino ao seu contrato.
+										</p>
+										<Button
+											variant="bordered"
+											size="sm"
+											startContent={<UserPlus className="h-4 w-4" />}
+											onPress={onAddTenant}
+										>
+											Adicionar Inquilino
+										</Button>
+									</div>
+								</div>
+							</CardBody>
+						</Card>
+					)}
+				</div>
+			)}
+
 			<PropertyInfoSection property={property} />
 			<FinancialSummarySection
 				property={property}

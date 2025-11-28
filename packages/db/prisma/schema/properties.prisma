@@ -59,6 +59,7 @@ model Property {
   documents      Document[]
   contacts       PropertyContact[]
   leases         Lease[]      @relation("PropertyLease")
+  sales          Sale[]        @relation("PropertySale")
 
   @@index([landlordId])
   @@index([organizationId])

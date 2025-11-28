@@ -256,40 +256,97 @@ export const propertiesRouter = router({
 				});
 			}
 
+			// Validate: apartments should not have direct rent/sale prices (those go on units)
+			if (input.type === "apartment_building") {
+				if (input.monthlyRent || input.askingPrice) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Apartment buildings should have rent/sale prices on units, not the property itself",
+					});
+				}
+			}
+
+			// Get or ensure default currency exists (BRL for Brazil)
+			let currencyId = input.currencyId;
+			if (!currencyId) {
+				// Try to get default currency from organization or use BRL
+				const orgSettings = await prisma.organizationSettings.findFirst({
+					where: { organizationId: member.organizationId },
+					include: { currency: true },
+				});
+				currencyId = orgSettings?.currencyId || "BRL";
+			}
+
+			// Ensure currency exists, create if it doesn't
+			const currency = await prisma.currency.findUnique({
+				where: { id: currencyId },
+			});
+
+			if (!currency) {
+				// Create default BRL currency if it doesn't exist
+				if (currencyId === "BRL") {
+					await prisma.currency.upsert({
+						where: { id: "BRL" },
+						update: {},
+						create: {
+							id: "BRL",
+							name: "Real Brasileiro",
+							symbol: "R$",
+						},
+					});
+				} else {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Currency ${currencyId} does not exist`,
+					});
+				}
+			}
+
+			// For apartments: don't set monthlyRent/askingPrice on property
+			// For houses/offices: these are the actual rent/sale prices
+			// For land: only askingPrice (sale price)
+			const propertyData: Parameters<typeof prisma.property.create>[0]["data"] = {
+				organizationId: member.organizationId,
+				landlordId: ctx.session.user.id,
+				name: input.name,
+				type: input.type,
+				category: input.category,
+				status: input.status,
+				address: input.address,
+				city: input.city,
+				state: input.state,
+				postalCode: input.postalCode,
+				country: input.country,
+				latitude: input.latitude,
+				longitude: input.longitude,
+				description: input.description,
+				features: input.features ? JSON.stringify(input.features) : null,
+				amenities: input.amenities ? JSON.stringify(input.amenities) : null,
+				totalArea: input.totalArea,
+				usableArea: input.usableArea,
+				lotSize: input.lotSize,
+				floors: input.floors,
+				yearBuilt: input.yearBuilt,
+				parkingSpaces: input.parkingSpaces,
+				// For houses/single units (not apartments)
+				bedrooms: input.type !== "apartment_building" ? input.bedrooms : null,
+				bathrooms: input.type !== "apartment_building" ? input.bathrooms : null,
+				purchasePrice: input.purchasePrice,
+				currentValue: input.currentValue,
+				// For apartments: prices go on units, not property
+				// For houses/offices: prices go on property
+				// For land: only askingPrice
+				askingPrice:
+					input.type === "apartment_building" ? null : input.askingPrice,
+				monthlyRent:
+					input.type === "apartment_building" ? null : input.monthlyRent,
+				currencyId,
+				coverImage: input.coverImage,
+				images: input.images ? JSON.stringify(input.images) : null,
+			};
+
 			const property = await prisma.property.create({
-				data: {
-					organizationId: member.organizationId,
-					landlordId: ctx.session.user.id,
-					name: input.name,
-					type: input.type,
-					category: input.category,
-					status: input.status,
-					address: input.address,
-					city: input.city,
-					state: input.state,
-					postalCode: input.postalCode,
-					country: input.country,
-					latitude: input.latitude,
-					longitude: input.longitude,
-					description: input.description,
-					features: input.features ? JSON.stringify(input.features) : null,
-					amenities: input.amenities ? JSON.stringify(input.amenities) : null,
-					totalArea: input.totalArea,
-					usableArea: input.usableArea,
-					lotSize: input.lotSize,
-					floors: input.floors,
-					yearBuilt: input.yearBuilt,
-					parkingSpaces: input.parkingSpaces,
-					bedrooms: input.bedrooms,
-					bathrooms: input.bathrooms,
-					purchasePrice: input.purchasePrice,
-					currentValue: input.currentValue,
-					askingPrice: input.askingPrice,
-					monthlyRent: input.monthlyRent,
-					currencyId: input.currencyId,
-					coverImage: input.coverImage,
-					images: input.images ? JSON.stringify(input.images) : null,
-				},
+				data: propertyData,
 				include: {
 					currency: true,
 				},
@@ -333,16 +390,67 @@ export const propertiesRouter = router({
 				});
 			}
 
+			// Validate: apartments should not have direct rent/sale prices
+			if (finalType === "apartment_building" && (input.monthlyRent || input.askingPrice)) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "Apartment buildings should have rent/sale prices on units, not the property itself",
+				});
+			}
+
 			const { id, features, amenities, images, ...rest } = input;
+
+			// Handle currency
+			let currencyId = rest.currencyId;
+			if (currencyId) {
+				const currency = await prisma.currency.findUnique({
+					where: { id: currencyId },
+				});
+				if (!currency) {
+					if (currencyId === "BRL") {
+						await prisma.currency.upsert({
+							where: { id: "BRL" },
+							update: {},
+							create: {
+								id: "BRL",
+								name: "Real Brasileiro",
+								symbol: "R$",
+							},
+						});
+					} else {
+						throw new TRPCError({
+							code: "BAD_REQUEST",
+							message: `Currency ${currencyId} does not exist`,
+						});
+					}
+				}
+			}
+
+			// For apartments: don't allow setting prices on property
+			const updateData: Parameters<typeof prisma.property.update>[0]["data"] = {
+				...rest,
+				features: features ? JSON.stringify(features) : undefined,
+				amenities: amenities ? JSON.stringify(amenities) : undefined,
+				images: images ? JSON.stringify(images) : undefined,
+				// For apartments: clear prices if trying to set them
+				askingPrice: finalType === "apartment_building" ? null : rest.askingPrice,
+				monthlyRent: finalType === "apartment_building" ? null : rest.monthlyRent,
+				// For apartments: clear bedrooms/bathrooms
+				bedrooms: finalType === "apartment_building" ? null : rest.bedrooms,
+				bathrooms: finalType === "apartment_building" ? null : rest.bathrooms,
+				currencyId,
+			};
+
+			// Remove undefined values
+			Object.keys(updateData).forEach((key) => {
+				if (updateData[key as keyof typeof updateData] === undefined) {
+					delete updateData[key as keyof typeof updateData];
+				}
+			});
 
 			const property = await prisma.property.update({
 				where: { id },
-				data: {
-					...rest,
-					features: features ? JSON.stringify(features) : undefined,
-					amenities: amenities ? JSON.stringify(amenities) : undefined,
-					images: images ? JSON.stringify(images) : undefined,
-				},
+				data: updateData,
 				include: {
 					currency: true,
 				},

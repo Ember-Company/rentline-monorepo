@@ -78,7 +78,8 @@ function UnitsTable({ units }: { units: Unit[] }) {
 				<TableColumn>TIPO</TableColumn>
 				<TableColumn>ÁREA</TableColumn>
 				<TableColumn>QUARTOS</TableColumn>
-				<TableColumn>ALUGUEL</TableColumn>
+				<TableColumn>CATEGORIA</TableColumn>
+				<TableColumn>VALORES</TableColumn>
 				<TableColumn>STATUS</TableColumn>
 				<TableColumn width={50}>AÇÕES</TableColumn>
 			</TableHeader>
@@ -100,8 +101,43 @@ function UnitsTable({ units }: { units: Unit[] }) {
 						<TableCell className="text-gray-600">
 							{unit.bedrooms || "-"}
 						</TableCell>
-						<TableCell className="font-medium text-gray-900">
-							{unit.rentAmount ? formatBRL(Number(unit.rentAmount)) : "-"}
+						<TableCell>
+							<Chip
+								size="sm"
+								variant="flat"
+								color={
+									unit.category === "rent"
+										? "primary"
+										: unit.category === "sale"
+											? "success"
+											: "warning"
+								}
+							>
+								{unit.category === "rent"
+									? "Aluguel"
+									: unit.category === "sale"
+										? "Venda"
+										: "Ambos"}
+							</Chip>
+						</TableCell>
+						<TableCell>
+							<div className="space-y-1">
+								{(unit.category === "rent" || unit.category === "both") &&
+									unit.rentAmount && (
+										<div className="text-gray-600 text-xs">
+											Aluguel: {formatBRL(Number(unit.rentAmount))}
+										</div>
+									)}
+								{(unit.category === "sale" || unit.category === "both") &&
+									unit.salePrice && (
+										<div className="font-medium text-gray-900 text-xs">
+											Venda: {formatBRL(Number(unit.salePrice))}
+										</div>
+									)}
+								{!unit.rentAmount && !unit.salePrice && (
+									<span className="text-gray-400 text-xs">-</span>
+								)}
+							</div>
 						</TableCell>
 						<TableCell>
 							<Chip

@@ -131,10 +131,24 @@ export default function NewPropertyPage() {
 				floors: floors ? Number(floors) : undefined,
 				yearBuilt: yearBuilt ? Number(yearBuilt) : undefined,
 				parkingSpaces: parkingSpaces ? Number(parkingSpaces) : undefined,
-				bedrooms: bedrooms ? Number(bedrooms) : undefined,
-				bathrooms: bathrooms ? Number(bathrooms) : undefined,
-				monthlyRent: monthlyRent ? Number(monthlyRent) : undefined,
-				askingPrice: askingPrice ? Number(askingPrice) : undefined,
+				bedrooms:
+					propertyType !== "apartment_building" && bedrooms
+						? Number(bedrooms)
+						: undefined,
+				bathrooms:
+					propertyType !== "apartment_building" && bathrooms
+						? Number(bathrooms)
+						: undefined,
+				// For apartments: prices go on units, not property
+				// For houses/offices/land: prices go on property
+				monthlyRent:
+					propertyType !== "apartment_building" && monthlyRent
+						? Number(monthlyRent)
+						: undefined,
+				askingPrice:
+					propertyType !== "apartment_building" && askingPrice
+						? Number(askingPrice)
+						: undefined,
 				amenities: selectedAmenities,
 				features: selectedFeatures,
 				currencyId: "BRL",
@@ -153,10 +167,22 @@ export default function NewPropertyPage() {
 							bedrooms: u.bedrooms ? Number(u.bedrooms) : undefined,
 							bathrooms: u.bathrooms ? Number(u.bathrooms) : undefined,
 							area: u.area ? Number(u.area) : undefined,
-							rentAmount: u.rentAmount ? Number(u.rentAmount) : undefined,
-							depositAmount: u.depositAmount
-								? Number(u.depositAmount)
-								: undefined,
+							category: u.category || "rent",
+							// Financial - Rent (only if category allows rent)
+							rentAmount:
+								(u.category === "rent" || u.category === "both") && u.rentAmount
+									? Number(u.rentAmount)
+									: undefined,
+							depositAmount:
+								(u.category === "rent" || u.category === "both") &&
+								u.depositAmount
+									? Number(u.depositAmount)
+									: undefined,
+							// Financial - Sale (only if category allows sale)
+							salePrice:
+								(u.category === "sale" || u.category === "both") && u.salePrice
+									? Number(u.salePrice)
+									: undefined,
 							currencyId: "BRL",
 						})),
 					});
@@ -252,14 +278,17 @@ export default function NewPropertyPage() {
 				/>
 			)}
 
-			<FinancialForm
-				category={category}
-				monthlyRent={monthlyRent}
-				askingPrice={askingPrice}
-				onMonthlyRentChange={setMonthlyRent}
-				onAskingPriceChange={setAskingPrice}
-				isDisabled={isSubmitting}
-			/>
+			{propertyType !== "apartment_building" && (
+				<FinancialForm
+					category={category}
+					propertyType={propertyType}
+					monthlyRent={monthlyRent}
+					askingPrice={askingPrice}
+					onMonthlyRentChange={setMonthlyRent}
+					onAskingPriceChange={setAskingPrice}
+					isDisabled={isSubmitting}
+				/>
+			)}
 
 			{showUnitsSection && (
 				<UnitsFormWithGenerator

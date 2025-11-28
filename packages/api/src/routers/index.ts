@@ -9,6 +9,7 @@ import { maintenanceRouter } from "./maintenance";
 import { organizationsRouter } from "./organizations";
 import { paymentsRouter } from "./payments";
 import { propertiesRouter } from "./properties";
+import { salesRouter } from "./sales";
 import { unitsRouter } from "./units";
 import { userRouter } from "./user";
 
@@ -21,6 +22,7 @@ export const appRouter = router({
 	properties: propertiesRouter,
 	units: unitsRouter,
 	leases: leasesRouter,
+	sales: salesRouter,
 	payments: paymentsRouter,
 	expenses: expensesRouter,
 	maintenance: maintenanceRouter,

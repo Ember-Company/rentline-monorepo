@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatBRL } from "@/lib/constants/brazil";
 import { useDeleteLease } from "@/lib/hooks/use-leases";
-import { LeaseActionsMenu } from "@/components/leases/lease-actions-menu";
+import { LeaseActionsMenu, MultiStepLeaseForm } from "@/components/leases";
 import type { LeaseStatus } from "@/components/leases/types";
 import type { Lease } from "../types";
 import { getLeaseStatusColor, getLeaseStatusLabel } from "../utils";
@@ -47,6 +47,7 @@ export function LeasesTab({
 	const navigate = useNavigate();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<LeaseStatus | "all">("all");
+	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
 	// Filter leases
 	const filteredLeases = useMemo(() => {
@@ -141,9 +142,7 @@ export function LeasesTab({
 						color="primary"
 						size="sm"
 						startContent={<Plus className="h-4 w-4" />}
-						onPress={() =>
-							navigate(`/dashboard/properties/${propertyId}/lease/new`)
-						}
+						onPress={() => setIsCreateModalOpen(true)}
 					>
 						Novo Contrato
 					</Button>
@@ -153,9 +152,7 @@ export function LeasesTab({
 						<EmptyState
 							message="Nenhum contrato cadastrado para este imóvel"
 							actionLabel="Criar primeiro contrato"
-							onAction={() =>
-								navigate(`/dashboard/properties/${propertyId}/lease/new`)
-							}
+							onAction={() => setIsCreateModalOpen(true)}
 						/>
 					) : (
 						<>
@@ -203,6 +200,13 @@ export function LeasesTab({
 					)}
 				</CardBody>
 			</Card>
+
+			{/* Create Lease Modal */}
+			<MultiStepLeaseForm
+				isOpen={isCreateModalOpen}
+				onClose={() => setIsCreateModalOpen(false)}
+				propertyId={propertyId}
+			/>
 		</div>
 	);
 }

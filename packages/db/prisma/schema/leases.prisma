@@ -26,17 +26,26 @@ model Lease {
   currencyId              String
   currency                Currency  @relation(fields: [currencyId], references: [id])
   paymentDueDay           Int       @default(1) // Day of month rent is due (1-28)
+  paymentFrequency        String    @default("monthly") // weekly, biweekly, monthly, quarterly, yearly, etc.
   
-  // Late fees
-  lateFeeType             String?   // percentage, fixed
-  lateFeeAmount           Decimal?
-  lateFeePercentage       Decimal?
+  // Pro-rata payment
+  proRataEnabled          Boolean   @default(false)
+  proRataAmount           Decimal?
+  
+  // Additional charges/rent components (JSON array)
+  additionalCharges       String?   // JSON: [{ description, amount }]
+  
+  // Late fees - now supports multiple tiers (JSON array)
+  lateFees                String?   // JSON: [{ daysLate, amount }]
   gracePeriodDays         Int?      @default(5)
   
   // Additional fees
   petDeposit              Decimal?
   securityDeposit         Decimal?
   lastMonthRent           Decimal?
+  
+  // Furnishing
+  furnishing              String?   // furnished, unfurnished, partially_furnished
   
   // Payment preferences
   preferredPaymentMethodId String?
@@ -53,6 +62,15 @@ model Lease {
   
   // Notification preferences
   notificationChannel     String?   // email, sms, both
+  
+  // Reminder settings
+  leaseExpiryReminderEnabled Boolean @default(false)
+  leaseExpiryReminderDays    Int?    // Days before expiry to send reminder
+  rentReminderEnabled        Boolean @default(false)
+  rentOverdueReminderEnabled Boolean @default(false)
+  
+  // Renter's insurance
+  requireRentersInsurance  Boolean  @default(false)
   
   // Timestamps
   createdAt               DateTime  @default(now())

@@ -45,8 +45,10 @@ model Subscription {
 
 model Payment {
   id              String         @id @default(uuid())
-  leaseId         String
-  lease           Lease          @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  leaseId         String?
+  lease           Lease?         @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  saleId          String?
+  sale            Sale?          @relation(fields: [saleId], references: [id], onDelete: Cascade)
   
   // Amount
   amount          Decimal
@@ -62,7 +64,7 @@ model Payment {
   reference       String?        // Internal reference number
   
   // Type and status
-  type            String         // rent, deposit, fee, refund, pet_deposit, security_deposit, late_fee
+  type            String         // rent, deposit, fee, refund, pet_deposit, security_deposit, late_fee, down_payment, installment, closing_costs
   status          String         @default("pending") // pending, completed, failed, refunded
   
   // Invoice association
@@ -81,6 +83,7 @@ model Payment {
   createdAt       DateTime       @default(now())
 
   @@index([leaseId])
+  @@index([saleId])
   @@index([currencyId])
   @@index([status])
   @@index([date])

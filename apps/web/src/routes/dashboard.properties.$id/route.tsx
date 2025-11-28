@@ -21,6 +21,7 @@ import {
 	PropertyHeader,
 	UnitsTab,
 } from "@/components/property/detail";
+import { MultiStepLeaseForm } from "@/components/leases";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatBRL } from "@/lib/constants/brazil";
 import { useDeleteProperty, useProperty, useUnits } from "@/lib/hooks";
@@ -46,6 +47,7 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 	const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 	const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
 	const [isContactLinkModalOpen, setIsContactLinkModalOpen] = useState(false);
+	const [isCreateLeaseModalOpen, setIsCreateLeaseModalOpen] = useState(false);
 	const [selectedLeaseId, setSelectedLeaseId] = useState<string | null>(null);
 
 	// Data fetching
@@ -314,6 +316,8 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 					onUnlinkContact={(contactId) =>
 						unlinkContactMutation.mutate({ propertyId, contactId })
 					}
+					onAddLease={() => setIsCreateLeaseModalOpen(true)}
+					onAddTenant={() => setIsContactLinkModalOpen(true)}
 				/>
 			)}
 
@@ -416,6 +420,13 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 				onLinkContact={(contactId, role) =>
 					linkContactMutation.mutate({ propertyId, contactId, role })
 				}
+			/>
+
+			{/* Create Lease Modal */}
+			<MultiStepLeaseForm
+				isOpen={isCreateLeaseModalOpen}
+				onClose={() => setIsCreateLeaseModalOpen(false)}
+				propertyId={propertyId}
 			/>
 		</div>
 	);

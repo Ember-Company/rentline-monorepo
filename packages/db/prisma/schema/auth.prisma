@@ -31,6 +31,7 @@ model User {
   applications         Application[] @relation("ApplicationApplicant")
   applicationsReviewed Application[] @relation("ApplicationReviewer")
   leasesAsTenant       Lease[] @relation("LeaseTenant")
+  salesAsBuyer         Sale[]  @relation("SaleBuyer")
   maintenanceRequests  MaintenanceRequest[] @relation("MaintenanceRequester")
   maintenanceAssigned  MaintenanceRequest[] @relation("MaintenanceAssignee")
   expensesPaid         Expense[] @relation("ExpensePaidBy")

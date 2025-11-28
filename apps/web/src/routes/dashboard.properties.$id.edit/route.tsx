@@ -94,10 +94,16 @@ export default function EditPropertyPage({ params }: Route.ComponentProps) {
 			setFloors(property.floors?.toString() || "");
 			setYearBuilt(property.yearBuilt?.toString() || "");
 			setParkingSpaces(property.parkingSpaces?.toString() || "");
-			setBedrooms(property.bedrooms?.toString() || "");
-			setBathrooms(property.bathrooms?.toString() || "");
-			setMonthlyRent(property.monthlyRent?.toString() || "");
-			setAskingPrice(property.askingPrice?.toString() || "");
+			// Only set bedrooms/bathrooms if not an apartment building
+			if (property.type !== "apartment_building") {
+				setBedrooms(property.bedrooms?.toString() || "");
+				setBathrooms(property.bathrooms?.toString() || "");
+			}
+			// Only set prices if not an apartment building
+			if (property.type !== "apartment_building") {
+				setMonthlyRent(property.monthlyRent?.toString() || "");
+				setAskingPrice(property.askingPrice?.toString() || "");
+			}
 			setSelectedAmenities(property.amenities || []);
 			setSelectedFeatures(property.features || []);
 			setIsInitialized(true);
@@ -121,8 +127,10 @@ export default function EditPropertyPage({ params }: Route.ComponentProps) {
 				bedrooms: u.bedrooms?.toString() || "",
 				bathrooms: u.bathrooms?.toString() || "",
 				area: u.area?.toString() || "",
+				category: (u.category as "rent" | "sale" | "both") || "rent",
 				rentAmount: u.rentAmount?.toString() || "",
 				depositAmount: u.depositAmount?.toString() || "",
+				salePrice: u.salePrice?.toString() || "",
 			}));
 			setUnits(existingUnits.length > 0 ? existingUnits : [createEmptyUnit()]);
 		}
@@ -179,10 +187,24 @@ export default function EditPropertyPage({ params }: Route.ComponentProps) {
 				floors: floors ? Number(floors) : undefined,
 				yearBuilt: yearBuilt ? Number(yearBuilt) : undefined,
 				parkingSpaces: parkingSpaces ? Number(parkingSpaces) : undefined,
-				bedrooms: bedrooms ? Number(bedrooms) : undefined,
-				bathrooms: bathrooms ? Number(bathrooms) : undefined,
-				monthlyRent: monthlyRent ? Number(monthlyRent) : undefined,
-				askingPrice: askingPrice ? Number(askingPrice) : undefined,
+				bedrooms:
+					propertyType !== "apartment_building" && bedrooms
+						? Number(bedrooms)
+						: undefined,
+				bathrooms:
+					propertyType !== "apartment_building" && bathrooms
+						? Number(bathrooms)
+						: undefined,
+				// For apartments: prices go on units, not property
+				// For houses/offices/land: prices go on property
+				monthlyRent:
+					propertyType !== "apartment_building" && monthlyRent
+						? Number(monthlyRent)
+						: undefined,
+				askingPrice:
+					propertyType !== "apartment_building" && askingPrice
+						? Number(askingPrice)
+						: undefined,
 				amenities: selectedAmenities,
 				features: selectedFeatures,
 				currencyId: "BRL",
@@ -202,10 +224,24 @@ export default function EditPropertyPage({ params }: Route.ComponentProps) {
 						bedrooms: unit.bedrooms ? Number(unit.bedrooms) : undefined,
 						bathrooms: unit.bathrooms ? Number(unit.bathrooms) : undefined,
 						area: unit.area ? Number(unit.area) : undefined,
-						rentAmount: unit.rentAmount ? Number(unit.rentAmount) : undefined,
-						depositAmount: unit.depositAmount
-							? Number(unit.depositAmount)
-							: undefined,
+						category: unit.category || "rent",
+						// Financial - Rent (only if category allows rent)
+						rentAmount:
+							(unit.category === "rent" || unit.category === "both") &&
+							unit.rentAmount
+								? Number(unit.rentAmount)
+								: undefined,
+						depositAmount:
+							(unit.category === "rent" || unit.category === "both") &&
+							unit.depositAmount
+								? Number(unit.depositAmount)
+								: undefined,
+						// Financial - Sale (only if category allows sale)
+						salePrice:
+							(unit.category === "sale" || unit.category === "both") &&
+							unit.salePrice
+								? Number(unit.salePrice)
+								: undefined,
 						currencyId: "BRL",
 					};
 					if (unit.isNew) {
@@ -324,14 +360,17 @@ export default function EditPropertyPage({ params }: Route.ComponentProps) {
 				/>
 			)}
 
-			<FinancialForm
-				category={category}
-				monthlyRent={monthlyRent}
-				askingPrice={askingPrice}
-				onMonthlyRentChange={setMonthlyRent}
-				onAskingPriceChange={setAskingPrice}
-				isDisabled={isSubmitting}
-			/>
+			{propertyType !== "apartment_building" && (
+				<FinancialForm
+					category={category}
+					propertyType={propertyType}
+					monthlyRent={monthlyRent}
+					askingPrice={askingPrice}
+					onMonthlyRentChange={setMonthlyRent}
+					onAskingPriceChange={setAskingPrice}
+					isDisabled={isSubmitting}
+				/>
+			)}
 
 			{showUnitsSection && (
 				<UnitsForm
