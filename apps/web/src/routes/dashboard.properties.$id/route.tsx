@@ -101,6 +101,13 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 		},
 		onError: () => toast.error("Erro ao desvincular contato"),
 	});
+	const createContactMutation = useMutation({
+		...trpc.contacts.create.mutationOptions(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["contacts"] });
+		},
+		onError: () => toast.error("Erro ao criar contato"),
+	});
 	const createPaymentMutation = useMutation({
 		...trpc.payments.create.mutationOptions(),
 		onSuccess: () => {
@@ -227,16 +234,29 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 		);
 	}
 
+	// Determine if this is a building with units or a single property
+	const isBuilding = property.type === "apartment_building" || property.type === "office";
+	
+	// Type-aware tab structure
 	const tabs = [
 		{ key: "overview", label: "Visão Geral" },
-		...(property.type === "apartment_building" || property.type === "office"
+		// Buildings: show Units tab prominently after overview
+		...(isBuilding
 			? [{ key: "units", label: `Unidades (${units.length})` }]
 			: []),
-		{ key: "leases", label: `Contratos (${leases.length})` },
+		// Single properties: show Leases tab directly after overview
+		...(!isBuilding
+			? [{ key: "leases", label: `Contratos (${leases.length})` }]
+			: []),
 		{ key: "finances", label: "Financeiro" },
 		{ key: "maintenance", label: `Manutenção (${maintenanceRequests.length})` },
 		{ key: "contacts", label: `Contatos (${propertyContacts.length})` },
+		// Buildings: show Leases aggregated at the end (all units' leases)
+		...(isBuilding
+			? [{ key: "leases", label: `Todos os Contratos (${leases.length})` }]
+			: []),
 	];
+
 
 	return (
 		<div className="space-y-6 pb-12">
@@ -247,8 +267,7 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 
 			{/* Quick Stats */}
 			<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-				{(property.type === "apartment_building" ||
-					property.type === "office") && (
+				{isBuilding && (
 					<StatCard
 						title="Ocupação"
 						value={`${occupancyRate.toFixed(0)}%`}
@@ -306,18 +325,11 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 					property={property}
 					payments={payments}
 					expenses={expenses}
-					propertyContacts={propertyContacts}
 					totalPayments={totalPayments}
 					totalExpenses={totalExpenses}
 					netIncome={netIncome}
 					onAddPayment={() => setIsPaymentModalOpen(true)}
 					onAddExpense={() => setIsExpenseModalOpen(true)}
-					onLinkContact={() => setIsContactLinkModalOpen(true)}
-					onUnlinkContact={(contactId) =>
-						unlinkContactMutation.mutate({ propertyId, contactId })
-					}
-					onAddLease={() => setIsCreateLeaseModalOpen(true)}
-					onAddTenant={() => setIsContactLinkModalOpen(true)}
 				/>
 			)}
 
@@ -420,6 +432,14 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 				onLinkContact={(contactId, role) =>
 					linkContactMutation.mutate({ propertyId, contactId, role })
 				}
+				onCreateContact={async (data) => {
+					const result = await createContactMutation.mutateAsync({
+						...data,
+						type: data.type as "owner" | "tenant" | "agent",
+					});
+					return result.contact.id;
+				}}
+				isCreatingContact={createContactMutation.isPending}
 			/>
 
 			{/* Create Lease Modal */}

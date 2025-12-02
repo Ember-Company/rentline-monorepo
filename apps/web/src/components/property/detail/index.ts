@@ -17,6 +17,9 @@ export { MaintenanceTab } from "./tabs/maintenance-tab";
 // Tabs
 export { OverviewTab } from "./tabs/overview-tab";
 export { UnitsTab } from "./tabs/units-tab";
+// Sections
+export { PropertyInfoSection } from "./sections/property-info-section";
+export { FinancialSummarySection } from "./sections/financial-summary-section";
 export * from "./types";
 // Utilities
 export * from "./utils";

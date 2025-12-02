@@ -5,9 +5,11 @@ import {
 	ModalBody,
 	ModalContent,
 	ModalHeader,
+	Divider,
 } from "@heroui/react";
-import { Link2 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link2, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { QuickContactForm } from "@/components/contacts";
 import type { Contact } from "../types";
 import { getContactTypeLabel } from "../utils";
 
@@ -16,6 +18,14 @@ interface ContactLinkModalProps {
 	onClose: () => void;
 	availableContacts: Contact[];
 	onLinkContact: (contactId: string, role: string) => void;
+	onCreateContact?: (data: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		phone: string;
+		type: string;
+	}) => Promise<string>; // Returns new contact ID
+	isCreatingContact?: boolean;
 }
 
 export function ContactLinkModal({
@@ -23,24 +33,82 @@ export function ContactLinkModal({
 	onClose,
 	availableContacts,
 	onLinkContact,
+	onCreateContact,
+	isCreatingContact,
 }: ContactLinkModalProps) {
-	const navigate = useNavigate();
+	const [isCreatingNew, setIsCreatingNew] = useState(false);
+
+	const handleCreateAndLink = async (data: {
+		firstName: string;
+		lastName: string;
+		email: string;
+		phone: string;
+		type: string;
+	}) => {
+		if (onCreateContact) {
+			const newContactId = await onCreateContact(data);
+			onLinkContact(newContactId, data.type);
+			setIsCreatingNew(false);
+			onClose();
+		}
+	};
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} size="lg">
+		<Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
 			<ModalContent>
-				<ModalHeader>Vincular Contato</ModalHeader>
-				<ModalBody>
-					{availableContacts.length === 0 ? (
-						<EmptyState onNavigate={() => navigate("/dashboard/contacts")} />
+				<ModalHeader className="flex items-center justify-between">
+					<span>Vincular Contato</span>
+					{!isCreatingNew && onCreateContact && (
+						<Button
+							size="sm"
+							color="primary"
+							variant="flat"
+							startContent={<Plus className="h-4 w-4" />}
+							onPress={() => setIsCreatingNew(true)}
+						>
+							Criar Novo
+						</Button>
+					)}
+				</ModalHeader>
+				<ModalBody className="pb-6">
+					{isCreatingNew ? (
+						<div className="space-y-4">
+							<div className="flex items-center justify-between">
+								<h3 className="font-semibold text-gray-900">Criar Novo Contato</h3>
+								<Button
+									isIconOnly
+									size="sm"
+									variant="light"
+									onPress={() => setIsCreatingNew(false)}
+								>
+									<X className="h-4 w-4" />
+								</Button>
+							</div>
+							<QuickContactForm
+								onSubmit={handleCreateAndLink}
+								onCancel={() => setIsCreatingNew(false)}
+								isLoading={isCreatingContact}
+							/>
+						</div>
 					) : (
-						<ContactList
-							contacts={availableContacts}
-							onLinkContact={(contact) => {
-								onLinkContact(contact.id, contact.type);
-								onClose();
-							}}
-						/>
+						<>
+							{availableContacts.length === 0 ? (
+								<EmptyState onCreateNew={() => setIsCreatingNew(true)} />
+							) : (
+								<>
+									<p className="text-gray-600 text-sm">
+										Selecione um contato existente para vincular ao imóvel
+									</p>
+									<ContactList
+										contacts={availableContacts}
+										onLinkContact={(contact) => {
+											onLinkContact(contact.id, contact.type);
+											onClose();
+										}}
+									/>
+								</>
+							)}
+						</>
 					)}
 				</ModalBody>
 			</ModalContent>
@@ -48,12 +116,20 @@ export function ContactLinkModal({
 	);
 }
 
-function EmptyState({ onNavigate }: { onNavigate: () => void }) {
+function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
 	return (
 		<div className="py-8 text-center">
 			<p className="text-gray-500">Todos os contatos já estão vinculados</p>
-			<Button className="mt-4" onPress={onNavigate}>
-				Gerenciar Contatos
+			<p className="mt-2 text-gray-400 text-sm">
+				Crie um novo contato para vincular a este imóvel
+			</p>
+			<Button
+				className="mt-4"
+				color="primary"
+				startContent={<Plus className="h-4 w-4" />}
+				onPress={onCreateNew}
+			>
+				Criar Novo Contato
 			</Button>
 		</div>
 	);

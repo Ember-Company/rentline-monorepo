@@ -250,3 +250,52 @@ export function getPropertyName(lease: LeaseData): string {
 	}
 	return lease.property?.name || "Imóvel não definido";
 }
+
+// Form wizard types
+export type FormStep = 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface AdditionalCharge {
+	description: string;
+	amount: number;
+}
+
+export interface LateFeeTier {
+	daysLate: number;
+	amount: number;
+}
+
+export interface LeaseContact {
+	contactId: string;
+	role: "owner" | "agent" | "guarantor" | "emergency_contact";
+}
+
+// Form option constants
+export const paymentFrequencyOptions = [
+	{ value: "standalone", label: "Standalone Payments / Airbnb" },
+	{ value: "one_time", label: "One-Time" },
+	{ value: "weekly", label: "Weekly" },
+	{ value: "biweekly", label: "Biweekly" },
+	{ value: "four_weeks", label: "4 Weeks" },
+	{ value: "monthly", label: "Monthly (Calendar Month)" },
+	{ value: "two_months", label: "2 Months" },
+	{ value: "quarterly", label: "Quarterly" },
+	{ value: "four_months", label: "4 Months" },
+	{ value: "five_months", label: "5 Months" },
+	{ value: "bi_annually", label: "Bi-Annually (6 Months)" },
+	{ value: "eighteen_months", label: "18 Months" },
+	{ value: "twenty_four_months", label: "24 Months" },
+	{ value: "yearly", label: "Yearly" },
+];
+
+export const furnishingOptions = [
+	{ value: "furnished", label: "Furnished" },
+	{ value: "unfurnished", label: "Unfurnished" },
+	{ value: "partially_furnished", label: "Partially Furnished" },
+];
+
+export const contactRoleOptions = [
+	{ value: "owner", label: "Owner" },
+	{ value: "agent", label: "Agent" },
+	{ value: "guarantor", label: "Guarantor" },
+	{ value: "emergency_contact", label: "Emergency Contact" },
+];
