@@ -102,18 +102,26 @@ model Organization {
   logo          String?
   createdAt     DateTime     @default(now())
   metadata      String?
+  
+  // Country & Address
+  countryCode   String       @default("BR") // ISO 3166-1 alpha-2
   address       String?
   city          String?
   state         String?
   postalCode    String?
-  country       String?
+  country       String?  // Deprecated, use countryCode
+  
+  // Contact
   phone         String?
   email         String?
   website       String?
+  
+  // Legal
   taxId         String?
   licenseNumber String?
   type          String?      // agency, landlord, property_manager, etc.
-  // CNPJ fields (Brazil)
+  
+  // CNPJ fields (Brazil only)
   cnpj          String?
   razaoSocial   String?
   nomeFantasia  String?
@@ -123,6 +131,7 @@ model Organization {
   inscricaoEstadual String?
   inscricaoMunicipal String?
   // End CNPJ fields
+  
   settingsId    String?      @unique
   settings      OrganizationSettings? @relation(fields: [settingsId], references: [id], onDelete: Cascade)
   members       Member[]
@@ -135,6 +144,7 @@ model Organization {
   @@unique([slug])
   @@index([type])
   @@index([cnpj])
+  @@index([countryCode])
   @@map("organization")
 }
 

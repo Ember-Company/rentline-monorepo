@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { formatBRL } from "@/lib/constants/brazil";
 import { useDeleteLease } from "@/lib/hooks/use-leases";
-import { LeaseActionsMenu, MultiStepLeaseForm } from "@/components/leases";
+import { FullFeaturedLeaseForm, LeaseActionsMenu } from "@/components/leases";
 import type { LeaseStatus } from "@/components/leases/types";
 import type { Lease } from "../types";
 import { getLeaseStatusColor, getLeaseStatusLabel } from "../utils";
@@ -202,7 +202,7 @@ export function LeasesTab({
 			</Card>
 
 			{/* Create Lease Modal */}
-			<MultiStepLeaseForm
+			<FullFeaturedLeaseForm
 				isOpen={isCreateModalOpen}
 				onClose={() => setIsCreateModalOpen(false)}
 				propertyId={propertyId}

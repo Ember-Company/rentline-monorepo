@@ -85,6 +85,18 @@ export default function PropertiesStep() {
 		setProperties(properties.filter((p) => p.id !== id));
 	};
 
+	const handleBack = () => {
+		const existingData = JSON.parse(
+			sessionStorage.getItem("onboarding_data") || "{}",
+		);
+		// If free plan, go back to plans. If paid, go back to payment.
+		if (existingData.plan === "free") {
+			navigate("/onboarding/plan");
+		} else {
+			navigate("/onboarding/payment");
+		}
+	};
+
 	const handleNext = () => {
 		// Validate properties if any exist
 		if (properties.length > 0) {
@@ -118,7 +130,7 @@ export default function PropertiesStep() {
 			title="Seus Imóveis"
 			description="Adicione os imóveis que você administra. Você pode adicionar mais imóveis depois no painel."
 		>
-			<div className="space-y-6">
+			<div className="space-y-6 max-w-2xl mx-auto">
 				{/* Properties List */}
 				{properties.length > 0 && (
 					<div className="space-y-4">
@@ -209,8 +221,8 @@ export default function PropertiesStep() {
 				{/* Add Property Button */}
 				<Button
 					variant="bordered"
-					className="w-full border-dashed"
-					startContent={<Plus className="h-4 w-4" />}
+					className="w-full border-dashed border-2 h-16"
+					startContent={<Plus className="h-5 w-5" />}
 					onPress={handleAddProperty}
 				>
 					Adicionar imóvel
@@ -231,7 +243,9 @@ export default function PropertiesStep() {
 					<Button
 						variant="light"
 						startContent={<ArrowLeft className="h-4 w-4" />}
-						onPress={() => navigate("/onboarding/branding")}
+						onPress={handleBack}
+						size="lg"
+						className="font-medium text-gray-500 hover:text-gray-900"
 					>
 						Voltar
 					</Button>
@@ -240,6 +254,8 @@ export default function PropertiesStep() {
 						endContent={<ArrowRight className="h-4 w-4" />}
 						onPress={handleNext}
 						isLoading={isSubmitting}
+						size="lg"
+						className="font-bold px-8 shadow-lg shadow-primary/20"
 					>
 						{properties.length === 0 ? "Pular" : "Continuar"}
 					</Button>

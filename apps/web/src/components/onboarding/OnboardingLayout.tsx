@@ -193,9 +193,9 @@ export function OnboardingLayout({
 
 			{/* Main Content */}
 			<main className="flex flex-1 flex-col">
-				<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 lg:flex-row lg:gap-12 lg:py-12">
+				<div className="mx-auto flex w-full max-w-5/6 flex-1 flex-col px-4 py-8 lg:flex-row lg:gap-12 lg:py-12">
 					{/* Left side - Form */}
-					<div className="flex flex-1 flex-col lg:max-w-md">
+					<div className="flex flex-1 flex-col lg:max-w-5xl">
 						{/* Step indicator for desktop */}
 						<div className="mb-6 hidden lg:block">
 							<div className="flex items-center gap-2">

@@ -34,7 +34,7 @@ export default function PaymentStep() {
 			sessionStorage.setItem("onboarding_data", JSON.stringify(onboardingData));
 
 			toast.success("Payment method saved");
-			navigate("/onboarding/complete");
+			navigate("/onboarding/properties");
 		} catch (error) {
 			toast.error("Failed to save payment method");
 		} finally {
@@ -48,37 +48,65 @@ export default function PaymentStep() {
 			description="Select your preferred payment method for subscription billing. You can update this anytime in settings."
 			showProgress={true}
 		>
-			<div className="space-y-6">
-				<RadioGroup value={selectedMethod} onValueChange={setSelectedMethod}>
-					<Radio value="stripe">Stripe (Credit Card)</Radio>
-					<Radio value="pix">Pix (Brazil)</Radio>
-					<Radio value="bank_transfer">Bank Transfer</Radio>
+			<div className="space-y-6 max-w-2xl mx-auto">
+				<RadioGroup 
+					value={selectedMethod} 
+					onValueChange={setSelectedMethod}
+					classNames={{
+						wrapper: "gap-4"
+					}}
+				>
+					<Radio 
+						value="stripe"
+						classNames={{
+							base: "m-0 bg-white hover:bg-gray-50 border-2 border-gray-200 data-[selected=true]:border-primary p-4 rounded-xl cursor-pointer transition-all w-full max-w-full",
+							wrapper: "group-data-[selected=true]:border-primary",
+							labelWrapper: "ml-2",
+							label: "font-semibold text-gray-900"
+						}}
+					>
+						<div className="flex flex-col">
+							<span>Credit Card (Stripe)</span>
+							<span className="text-xs text-gray-500 font-normal">Secure payment via Stripe</span>
+						</div>
+					</Radio>
+					<Radio 
+						value="pix"
+						classNames={{
+							base: "m-0 bg-white hover:bg-gray-50 border-2 border-gray-200 data-[selected=true]:border-primary p-4 rounded-xl cursor-pointer transition-all w-full max-w-full",
+							wrapper: "group-data-[selected=true]:border-primary",
+							labelWrapper: "ml-2",
+							label: "font-semibold text-gray-900"
+						}}
+					>
+						<div className="flex flex-col">
+							<span>Pix (Brazil)</span>
+							<span className="text-xs text-gray-500 font-normal">Instant payment via QR Code</span>
+						</div>
+					</Radio>
+					<Radio 
+						value="bank_transfer"
+						classNames={{
+							base: "m-0 bg-white hover:bg-gray-50 border-2 border-gray-200 data-[selected=true]:border-primary p-4 rounded-xl cursor-pointer transition-all w-full max-w-full",
+							wrapper: "group-data-[selected=true]:border-primary",
+							labelWrapper: "ml-2",
+							label: "font-semibold text-gray-900"
+						}}
+					>
+						<div className="flex flex-col">
+							<span>Bank Transfer</span>
+							<span className="text-xs text-gray-500 font-normal">Manual transfer instructions</span>
+						</div>
+					</Radio>
 				</RadioGroup>
 
-				<div className="flex justify-between gap-3 pt-4">
-					<Button
-						variant="light"
-						startContent={<ArrowLeft className="h-4 w-4" />}
-						onPress={() => navigate("/onboarding/plan")}
-					>
-						Back
-					</Button>
-					<Button
-						color="primary"
-						endContent={<ChevronRight className="h-4 w-4" />}
-						onPress={handleNext}
-						isLoading={isSubmitting}
-					>
-						Continue
-					</Button>
-				</div>
-
-				<div className="flex justify-between gap-3 pt-6">
+				<div className="flex justify-between gap-3 pt-6 border-t border-gray-100">
 					<Button
 						variant="light"
 						startContent={<ArrowLeft className="h-4 w-4" />}
 						onPress={() => navigate("/onboarding/plan")}
 						size="lg"
+						className="font-medium text-gray-500 hover:text-gray-900"
 					>
 						Back
 					</Button>
@@ -88,7 +116,7 @@ export default function PaymentStep() {
 						onPress={handleNext}
 						isLoading={isSubmitting}
 						size="lg"
-						className="min-w-[140px]"
+						className="font-bold px-8 shadow-lg shadow-primary/20"
 					>
 						Continue
 					</Button>

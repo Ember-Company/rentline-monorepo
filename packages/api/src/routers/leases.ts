@@ -86,6 +86,11 @@ const leaseInputSchema = z.object({
 	rentOverdueReminderEnabled: z.boolean().default(false),
 	// Renter's insurance
 	requireRentersInsurance: z.boolean().default(false),
+	// Contacts (owners, agents, etc.)
+	contacts: z.array(z.object({
+		contactId: z.string(),
+		role: z.enum(["owner", "agent", "guarantor", "emergency_contact"]),
+	})).optional(),
 });
 
 
@@ -171,6 +176,20 @@ export const leasesRouter = router({
 							},
 						},
 						currency: true,
+						contacts: {
+							include: {
+								contact: {
+									select: {
+										id: true,
+										firstName: true,
+										lastName: true,
+										email: true,
+										phone: true,
+										type: true,
+									},
+								},
+							},
+						},
 						_count: {
 							select: {
 								payments: true,
@@ -272,6 +291,11 @@ export const leasesRouter = router({
 					},
 					documents: {
 						orderBy: { uploadedAt: "desc" },
+					},
+					contacts: {
+						include: {
+							contact: true,
+						},
 					},
 				},
 			});
@@ -442,8 +466,24 @@ export const leasesRouter = router({
 					unit: { select: { id: true, unitNumber: true } },
 					tenantContact: true,
 					currency: true,
+					contacts: {
+						include: {
+							contact: true,
+						},
+					},
 				},
 			});
+
+			// Create lease contacts if provided
+			if (input.contacts && input.contacts.length > 0) {
+				await prisma.leaseContact.createMany({
+					data: input.contacts.map((c) => ({
+						leaseId: lease.id,
+						contactId: c.contactId,
+						role: c.role,
+					})),
+				});
+			}
 
 			// Update unit status if applicable
 			if (input.unitId && input.status === "active") {
@@ -701,9 +741,7 @@ export const leasesRouter = router({
 					depositAmount: existing.depositAmount,
 					currencyId: existing.currencyId,
 					paymentDueDay: existing.paymentDueDay,
-					lateFeeType: existing.lateFeeType,
-					lateFeeAmount: existing.lateFeeAmount,
-					lateFeePercentage: existing.lateFeePercentage,
+					lateFees: existing.lateFees,
 					gracePeriodDays: existing.gracePeriodDays,
 					autoRenew: existing.autoRenew,
 					renewalNoticeDays: existing.renewalNoticeDays,
@@ -768,5 +806,220 @@ export const leasesRouter = router({
 			});
 
 			return { leases };
+		}),
+
+	// Lease Contact Management
+	addContactToLease: protectedProcedure
+		.input(
+			z.object({
+				leaseId: z.string(),
+				contactId: z.string(),
+				role: z.enum(["owner", "agent", "guarantor", "emergency_contact"]),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await getActiveOrganization(ctx);
+
+			// Verify lease belongs to organization
+			const lease = await prisma.lease.findFirst({
+				where: {
+					id: input.leaseId,
+					OR: [
+						{ property: { organizationId: member.organizationId } },
+						{ unit: { property: { organizationId: member.organizationId } } },
+					],
+				},
+			});
+
+			if (!lease) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Lease not found",
+				});
+			}
+
+			// Verify contact belongs to organization
+			const contact = await prisma.contact.findFirst({
+				where: {
+					id: input.contactId,
+					organizationId: member.organizationId,
+				},
+			});
+
+			if (!contact) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Contact not found",
+				});
+			}
+
+			// Create lease contact
+			const leaseContact = await prisma.leaseContact.create({
+				data: {
+					leaseId: input.leaseId,
+					contactId: input.contactId,
+					role: input.role,
+				},
+				include: {
+					contact: true,
+				},
+			});
+
+			return { leaseContact };
+		}),
+
+	removeContactFromLease: protectedProcedure
+		.input(
+			z.object({
+				leaseContactId: z.string(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await getActiveOrganization(ctx);
+
+			// Verify lease contact belongs to organization
+			const leaseContact = await prisma.leaseContact.findFirst({
+				where: {
+					id: input.leaseContactId,
+				},
+				include: {
+					lease: {
+						include: {
+							property: true,
+							unit: {
+								include: {
+									property: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			if (!leaseContact) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Lease contact not found",
+				});
+			}
+
+			// Check organization access
+			const propertyOrgId =
+				leaseContact.lease.property?.organizationId ||
+				leaseContact.lease.unit?.property.organizationId;
+
+			if (propertyOrgId !== member.organizationId) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Access denied",
+				});
+			}
+
+			await prisma.leaseContact.delete({
+				where: { id: input.leaseContactId },
+			});
+
+			return { success: true };
+		}),
+
+	updateLeaseContact: protectedProcedure
+		.input(
+			z.object({
+				leaseContactId: z.string(),
+				role: z.enum(["owner", "agent", "guarantor", "emergency_contact"]),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const member = await getActiveOrganization(ctx);
+
+			// Verify lease contact belongs to organization
+			const existing = await prisma.leaseContact.findFirst({
+				where: {
+					id: input.leaseContactId,
+				},
+				include: {
+					lease: {
+						include: {
+							property: true,
+							unit: {
+								include: {
+									property: true,
+								},
+							},
+						},
+					},
+				},
+			});
+
+			if (!existing) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Lease contact not found",
+				});
+			}
+
+			// Check organization access
+			const propertyOrgId =
+				existing.lease.property?.organizationId ||
+				existing.lease.unit?.property.organizationId;
+
+			if (propertyOrgId !== member.organizationId) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Access denied",
+				});
+			}
+
+			const leaseContact = await prisma.leaseContact.update({
+				where: { id: input.leaseContactId },
+				data: { role: input.role },
+				include: {
+					contact: true,
+				},
+			});
+
+			return { leaseContact };
+		}),
+
+	getLeaseContacts: protectedProcedure
+		.input(
+			z.object({
+				leaseId: z.string(),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const member = await getActiveOrganization(ctx);
+
+			// Verify lease belongs to organization
+			const lease = await prisma.lease.findFirst({
+				where: {
+					id: input.leaseId,
+					OR: [
+						{ property: { organizationId: member.organizationId } },
+						{ unit: { property: { organizationId: member.organizationId } } },
+					],
+				},
+			});
+
+			if (!lease) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Lease not found",
+				});
+			}
+
+			const contacts = await prisma.leaseContact.findMany({
+				where: {
+					leaseId: input.leaseId,
+				},
+				include: {
+					contact: true,
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			});
+
+			return { contacts };
 		}),
 });

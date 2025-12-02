@@ -3,11 +3,12 @@ import { authClient } from "@/lib/auth-client";
 type OrganizationData = {
 	name: string;
 	slug: string;
+	countryCode?: string; // ISO 3166-1 alpha-2 (BR, MZ, ZA)
 	address?: string;
 	city?: string;
 	state?: string;
 	postalCode?: string;
-	country?: string;
+	country?: string; // Deprecated
 	phone?: string;
 	email?: string;
 	website?: string;
@@ -25,6 +26,7 @@ export function useCreateOrganization() {
 		const { data: organization, error } = await authClient.organization.create({
 			name: data.name,
 			slug: data.slug,
+			...(data.countryCode && { countryCode: data.countryCode }),
 			...(data.logo && { logo: data.logo }),
 			...(data.address && { address: data.address }),
 			...(data.city && { city: data.city }),

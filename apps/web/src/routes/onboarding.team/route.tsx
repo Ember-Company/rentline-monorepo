@@ -205,7 +205,7 @@ export default function TeamStep() {
 					<Button
 						variant="light"
 						startContent={<ArrowLeft className="h-4 w-4" />}
-						onPress={() => navigate("/onboarding/branding")}
+						onPress={() => navigate("/onboarding/organization")}
 					>
 						Back
 					</Button>
@@ -223,7 +223,7 @@ export default function TeamStep() {
 					<Button
 						variant="light"
 						startContent={<ArrowLeft className="h-4 w-4" />}
-						onPress={() => navigate("/onboarding/branding")}
+						onPress={() => navigate("/onboarding/organization")}
 						size="lg"
 					>
 						Back

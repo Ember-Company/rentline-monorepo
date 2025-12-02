@@ -21,7 +21,7 @@ import {
 	PropertyHeader,
 	UnitsTab,
 } from "@/components/property/detail";
-import { MultiStepLeaseForm } from "@/components/leases";
+import { FullFeaturedLeaseForm } from "@/components/leases";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatBRL } from "@/lib/constants/brazil";
 import { useDeleteProperty, useProperty, useUnits } from "@/lib/hooks";
@@ -423,11 +423,11 @@ export default function PropertyDetailPage({ params }: Route.ComponentProps) {
 			/>
 
 			{/* Create Lease Modal */}
-			<MultiStepLeaseForm
-				isOpen={isCreateLeaseModalOpen}
-				onClose={() => setIsCreateLeaseModalOpen(false)}
-				propertyId={propertyId}
-			/>
+		<FullFeaturedLeaseForm
+			isOpen={isCreateLeaseModalOpen}
+			onClose={() => setIsCreateLeaseModalOpen(false)}
+			propertyId={propertyId}
+		/>
 		</div>
 	);
 }

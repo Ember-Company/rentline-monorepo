@@ -198,20 +198,36 @@ export function OrganizationGeneral({ organizationId }: OrganizationGeneralProps
 					</form.Field>
 				</div>
 
-				<form.Field name="cnpj">
-					{(field) => (
-						<Input
-							label="CNPJ"
-							placeholder="00.000.000/0000-00"
-							value={field.state.value}
-							onValueChange={(value) => field.handleChange(formatCNPJ(value))}
-							onBlur={field.handleBlur}
-							maxLength={18}
-							labelPlacement="outside"
-							className="max-w-sm"
-						/>
+				<div className="grid gap-4 sm:grid-cols-2">
+					<form.Field name="country">
+						{(field) => (
+							<Input
+								label="País"
+								value={field.state.value || "Brasil"}
+								isReadOnly
+								labelPlacement="outside"
+								description="O país não pode ser alterado"
+								startContent={<Globe className="h-4 w-4 text-default-foreground/50" />}
+							/>
+						)}
+					</form.Field>
+
+					{form.getFieldValue("country") === "Brasil" && (
+						<form.Field name="cnpj">
+							{(field) => (
+								<Input
+									label="CNPJ"
+									placeholder="00.000.000/0000-00"
+									value={field.state.value}
+									onValueChange={(value) => field.handleChange(formatCNPJ(value))}
+									onBlur={field.handleBlur}
+									maxLength={18}
+									labelPlacement="outside"
+								/>
+							)}
+						</form.Field>
 					)}
-				</form.Field>
+				</div>
 			</div>
 
 			<Divider />
@@ -310,19 +326,30 @@ export function OrganizationGeneral({ organizationId }: OrganizationGeneralProps
 
 					<form.Field name="state">
 						{(field) => (
-							<Select
-								label="Estado"
-								placeholder="Selecione"
-								selectedKeys={field.state.value ? [field.state.value] : []}
-								onSelectionChange={(keys) =>
-									field.handleChange(Array.from(keys)[0] as string)
-								}
-								labelPlacement="outside"
-							>
-								{BRAZILIAN_STATES.map((state) => (
-									<SelectItem key={state.value}>{state.label}</SelectItem>
-								))}
-							</Select>
+							form.getFieldValue("country") === "Brasil" ? (
+								<Select
+									label="Estado"
+									placeholder="Selecione"
+									selectedKeys={field.state.value ? [field.state.value] : []}
+									onSelectionChange={(keys) =>
+										field.handleChange(Array.from(keys)[0] as string)
+									}
+									labelPlacement="outside"
+								>
+									{BRAZILIAN_STATES.map((state) => (
+										<SelectItem key={state.value}>{state.label}</SelectItem>
+									))}
+								</Select>
+							) : (
+								<Input
+									label="Estado / Província"
+									placeholder="Ex: California"
+									value={field.state.value}
+									onValueChange={field.handleChange}
+									onBlur={field.handleBlur}
+									labelPlacement="outside"
+								/>
+							)
 						)}
 					</form.Field>
 

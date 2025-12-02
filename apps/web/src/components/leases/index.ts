@@ -1,4 +1,5 @@
 export * from "./create-lease-modal";
+export * from "./full-featured-lease-form";
 export * from "./multi-step-lease-form";
 export * from "./expiring-leases-alert";
 export * from "./invoice-modal";

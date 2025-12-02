@@ -29,6 +29,7 @@ model Contact {
   // Relations
   properties    PropertyContact[]
   leases        Lease[] @relation("LeaseTenantContact")
+  leaseContacts LeaseContact[]
   sales         Sale[]  @relation("SaleBuyerContact")
 
   @@index([organizationId])
